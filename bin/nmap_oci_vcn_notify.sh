@@ -47,7 +47,9 @@ for report_name in ${!reports_diff_cnt[@]}; do
 
     echo -n "Processing $report_name..."
     if [ ${reports_diff_cnt[$report_name]} -gt 0 ]; then
-        if [ -f $report_name.notified ]; then
+
+        diff $report_name $report_name.notified >/dev/null
+        if [ $? -eq 0 ]; then
             echo Already notified.
         else
             echo
@@ -57,7 +59,7 @@ for report_name in ${!reports_diff_cnt[@]}; do
             alert_body="${reports_diff[$report_name]}"
             timeout 30 oci ons message publish --topic-id $topic_id --body "$alert_body" --title "$alert_title"
             if [ $? -eq 0 ]; then
-                touch $report_name.notified
+                cp $report_name $report_name.notified
             fi
         fi 
     else

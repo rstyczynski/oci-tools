@@ -107,7 +107,7 @@ for subnet in $(cat $tmp/subnet_list | head -$scan_only_first_n); do
 
     (
         cd $nmap_root/reports
-        git add *
+        git add *.nmap
         git commit -m "nmap scan  type $scan_type"
         cd - >/dev/null
     )
