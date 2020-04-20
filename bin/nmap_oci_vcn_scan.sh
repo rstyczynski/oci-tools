@@ -65,7 +65,7 @@ for subnet in $(cat $tmp/subnet_list | head -$scan_only_first_n); do
     subnet_report="$(echo $subnet | tr / .)_$scan_type.nmap"
     case $scan_type in
     ssh)
-        docker run -ti -w /root kali/nmap nmap --script nmap-vulners -sV -p22 $subnet |
+        docker run -w /root kali/nmap nmap --script nmap-vulners -sV -p22 $subnet |
             # clean report
             sed "s/[0-9][0-9]*\.[0-9][0-9]*s /NN.NNs /g" |
             sed "s/[0-9][0-9]*\.[0-9][0-9]* latency /NN latency /g" |
@@ -76,7 +76,7 @@ for subnet in $(cat $tmp/subnet_list | head -$scan_only_first_n); do
             cat >$nmap_root/reports/$subnet_report
         ;;
     port)
-        docker run -ti -w /root kali/nmap nmap $subnet |
+        docker run -w /root kali/nmap nmap $subnet |
             # clean report
             sed "s/[0-9][0-9]*\.[0-9][0-9]*s /NN.NNs /g" |
             sed "s/[0-9][0-9]*\.[0-9][0-9]* latency /NN latency /g" |
@@ -88,7 +88,7 @@ for subnet in $(cat $tmp/subnet_list | head -$scan_only_first_n); do
         ;;
 
     full)
-        docker run -ti -w /root kali/nmap nmap --script nmap-vulners,vulscan --script-args vulscandb=scipvuldb.csv -sV $subnet |
+        docker run -w /root kali/nmap nmap --script nmap-vulners,vulscan --script-args vulscandb=scipvuldb.csv -sV $subnet |
             # clean report
             sed "s/[0-9][0-9]*\.[0-9][0-9]*s /NN.NNs /g" |
             sed "s/[0-9][0-9]*\.[0-9][0-9]* latency /NN latency /g" |
