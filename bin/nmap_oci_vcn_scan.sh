@@ -18,6 +18,8 @@ function usage() {
 
 echo "Starting nmap_oci_vcn_scan..."
 
+date
+
 tmp=/tmp/$$
 mkdir -p $tmp
 

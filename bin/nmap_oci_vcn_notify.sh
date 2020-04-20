@@ -12,6 +12,8 @@ function usage() {
 
 echo "Starting nmap_oci_vcn_notify..."
 
+date
+
 # check OCI commiunication
 timeout 30 oci os ns get
 if [ $? -ne 0 ]; then
