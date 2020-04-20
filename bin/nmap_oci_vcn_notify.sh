@@ -45,13 +45,25 @@ done
 
 for report_name in ${!reports_diff_cnt[@]}; do
 
-    echo "Processing $report_name..."
+    echo -n "Processing $report_name..."
     if [ ${reports_diff_cnt[$report_name]} -gt 0 ]; then
-        echo ">> detected change in subnet: $report_name."
+        if [ -f $report_name.notified ]; then
+            echo Already notified.
+        else
+            echo
+            echo ">> detected change in subnet: $report_name."
 
-        alert_title="Detected change in subnet: $report_name."
-        alert_body="${reports_diff[$report_name]}"
-        timeout 30 oci ons message publish --topic-id $topic_id --body "$alert_body" --title "$alert_title"
+            alert_title="Detected change in subnet: $report_name."
+            alert_body="${reports_diff[$report_name]}"
+            timeout 30 oci ons message publish --topic-id $topic_id --body "$alert_body" --title "$alert_title"
+            if [ $0 -eq 0]; then
+                touch $report_name.notified
+            fi
+        fi 
+    else
+        echo "No change."
     fi 
 done
+
+cd - >/dev/null
 
