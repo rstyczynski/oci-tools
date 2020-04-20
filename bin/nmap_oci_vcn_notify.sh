@@ -40,7 +40,7 @@ declare -A reports_diff_cnt
 for report_name in $(ls *.nmap); do
     # 10 lines of change is ok due to DATE change, more means that file was really modified
     reports_diff[$report_name]="$(git diff HEAD^^ HEAD $report_name)"
-    reports_diff_cnt[$report_name]=$(( $(git diff HEAD^^ HEAD $report_name | wc -l) - 10 ))
+    reports_diff_cnt[$report_name]=$(($(git diff HEAD^^ HEAD $report_name | wc -l) - 10))
 done
 
 for report_name in ${!reports_diff_cnt[@]}; do
@@ -48,10 +48,16 @@ for report_name in ${!reports_diff_cnt[@]}; do
     echo -n "Processing $report_name..."
     if [ ${reports_diff_cnt[$report_name]} -gt 0 ]; then
 
-        diff $report_name $report_name.notified >/dev/null
-        if [ $? -eq 0 ]; then
-            echo Already notified.
-        else
+        notify=yes
+        if [ -f $report_name.notified ]; then
+            diff $report_name $report_name.notified >/dev/null
+            if [ $? -eq 0 ]; then
+                echo Already notified.
+                notify=no
+            fi
+        fi
+
+        if [ "$notify" == yes ]; then
             echo
             echo ">> detected change in subnet: $report_name."
 
@@ -61,11 +67,11 @@ for report_name in ${!reports_diff_cnt[@]}; do
             if [ $? -eq 0 ]; then
                 cp $report_name $report_name.notified
             fi
-        fi 
+        fi
+
     else
         echo "No change."
-    fi 
+    fi
 done
 
 cd - >/dev/null
-
