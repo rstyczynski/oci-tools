@@ -56,7 +56,7 @@ for report_name in ${!reports_diff_cnt[@]}; do
             alert_title="Detected change in subnet: $report_name."
             alert_body="${reports_diff[$report_name]}"
             timeout 30 oci ons message publish --topic-id $topic_id --body "$alert_body" --title "$alert_title"
-            if [ $0 -eq 0]; then
+            if [ $0 -eq 0 ]; then
                 touch $report_name.notified
             fi
         fi 
