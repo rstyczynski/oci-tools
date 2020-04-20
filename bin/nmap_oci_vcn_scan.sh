@@ -4,15 +4,17 @@ nmap_root=$1
 compartment_id=$2
 vcn_cidr=$3
 scan_type=$4
+scan_only_first_n=$5
 
 function usage() {
-    echo "Usage: nmap_root compartment_id vcn_cidr ssh|port|full"
+    echo "Usage: nmap_root compartment_id vcn_cidr ssh|port|full [scan_only_first_n]"
 }
 
 [ -z "$nmap_root" ] && echo "Error. $(usage)" && exit 1
 [ -z "$compartment_id" ] && echo "Error. $(usage)" && exit 1
 [ -z "$vcn_cidr" ] && echo "Error. $(usage)" && exit 1
-[ -z "$vcn_cidr" ] && echo "Error. $(usage)" && exit 1
+[ -z "$scan_type" ] && echo "Error. $(usage)" && exit 1
+[ -z "$scan_only_first_n" ] && scan_only_first_n=1000
 
 tmp=/tmp/$$
 mkdir -p $tmp
@@ -53,7 +55,7 @@ oci network subnet list --compartment-id $compartment_id --vcn-id $vcn_id --all 
     tee $tmp/subnet_list
 
 # get reports
-for subnet in $(cat $tmp/subnet_list); do
+for subnet in $(cat $tmp/subnet_list | head -$scan_only_first_n); do
 
     subnet_report="$(echo $subnet | tr / .)_$scan_type.nmap"
     case $scan_type in
