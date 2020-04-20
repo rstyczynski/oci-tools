@@ -7,7 +7,7 @@ scan_type=$4
 scan_only_first_n=$5
 
 function usage() {
-    echo "Usage: nmap_root compartment_id vcn_cidr ssh|port|full [scan_only_first_n]"
+    echo "Usage: nmap_oci_vcn_scan compartment_id vcn_cidr ssh|port|full [scan_only_first_n]"
 }
 
 [ -z "$nmap_root" ] && echo "Error. $(usage)" && exit 1
@@ -15,6 +15,8 @@ function usage() {
 [ -z "$vcn_cidr" ] && echo "Error. $(usage)" && exit 1
 [ -z "$scan_type" ] && echo "Error. $(usage)" && exit 1
 [ -z "$scan_only_first_n" ] && scan_only_first_n=1000
+
+echo "Starting nmap_oci_vcn_scan..."
 
 tmp=/tmp/$$
 mkdir -p $tmp
@@ -24,18 +26,18 @@ if [ ! -d $nmap_root/reports ]; then
     exit 1
 fi
 
-if [ ! -d $nmap_root/reports/.git ]; then
-    echo "Initializing reports directory."
-    $nmap_root/reports
-    git init
-    cd - >/dev/null
-fi
-
 # check OCI commiunication
 timeout 30 oci os ns get
 if [ $? -ne 0 ]; then
     echo "Error! No access to OCI API."
     exit 1
+fi
+
+if [ ! -d $nmap_root/reports/.git ]; then
+    echo "Initializing reports directory."
+    $nmap_root/reports
+    git init
+    cd - >/dev/null
 fi
 
 # get vcn id
@@ -57,6 +59,7 @@ oci network subnet list --compartment-id $compartment_id --vcn-id $vcn_id --all 
 # get reports
 for subnet in $(cat $tmp/subnet_list | head -$scan_only_first_n); do
 
+    echo "Scaning $subnet..."
     subnet_report="$(echo $subnet | tr / .)_$scan_type.nmap"
     case $scan_type in
     ssh)

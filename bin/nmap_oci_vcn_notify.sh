@@ -4,11 +4,13 @@ nmap_root=$1
 topic_id=$2
 
 function usage() {
-    echo "Usage: nmap_root topic_id"
+    echo "Usage: nmap_oci_vcn_notify nmap_root topic_id"
 }
 
 [ -z "$nmap_root" ] && echo "Error. $(usage)" && exit 1
 [ -z "$topic_id" ] && echo "Error. $(usage)" && exit 1
+
+echo "Starting nmap_oci_vcn_notify..."
 
 # check OCI commiunication
 timeout 30 oci os ns get
@@ -42,8 +44,10 @@ for report_name in $(ls *.nmap); do
 done
 
 for report_name in ${!reports_diff_cnt[@]}; do
+
+    echo "Processing $report_name..."
     if [ ${reports_diff_cnt[$report_name]} -gt 0 ]; then
-        echo "Detected change in subnet: $report_name."
+        echo ">> detected change in subnet: $report_name."
 
         alert_title="Detected change in subnet: $report_name."
         alert_body="${reports_diff[$report_name]}"
