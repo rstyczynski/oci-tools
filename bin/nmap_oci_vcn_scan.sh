@@ -99,12 +99,8 @@ for subnet in $(cat $tmp/subnet_list | head -$scan_only_first_n); do
     esac
 
     #TODO check error in pipe's first element
-
-    # delete notification flag
-    if [ -f $nmap_root/reports/$report_name.notified ]; then
-        rm -f $nmap_root/reports/$report_name.notified 
-    fi
-
+    #     in case of -ne 0 report error      
+     
     (
         cd $nmap_root/reports
         git add *.nmap
