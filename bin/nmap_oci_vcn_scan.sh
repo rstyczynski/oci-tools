@@ -94,8 +94,8 @@ for subnet in $(cat $tmp/subnet_list | head -$scan_only_first_n); do
             sed "s/[0-9][0-9]*\.[0-9][0-9]* latency /NN latency /g" |
             sed "s/[0-9][0-9]*\.[0-9][0-9]* seconds/NN seconds/g" |
             sed 's/Stats: [0-9][0-9]*:[0-9][0-9]*:[0-9][0-9]* elapsed; [0-9][0-9]* hosts completed ([0-9][0-9]* up)/Stats: HH:MM:SS elapsed; N hosts completed (0 up)/g' |
-            grep -v "Stats:" |
-            grep -v "Ping Scan Timing:" |
+            grep -v "Stats:" |  
+            grep -v "Ping Scan Timing:" | 
             cat >$nmap_root/reports/$subnet_report
         ;;
     esac
