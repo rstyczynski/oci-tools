@@ -103,12 +103,14 @@ for subnet in $(cat $tmp/subnet_list | head -$scan_only_first_n); do
     #TODO check error in pipe's first element
     #     in case of -ne 0 report error      
      
-    (
-        cd $nmap_root/reports
-        git add *.nmap
-        git commit -m "nmap scan  type $scan_type"
-        cd - >/dev/null
-    )
+    cd $nmap_root/reports
+    git add *.nmap
+    git commit -m "nmap scan  type $scan_type"
+    cd - >/dev/null
 done
 
 rm -rf /tmp/$$
+
+date
+echo Done.
+

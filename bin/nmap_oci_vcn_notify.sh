@@ -77,3 +77,6 @@ for report_name in ${!reports_diff_cnt[@]}; do
 done
 
 cd - >/dev/null
+
+date
+echo Done.
