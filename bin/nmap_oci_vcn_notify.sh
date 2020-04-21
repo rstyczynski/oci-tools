@@ -84,14 +84,18 @@ for report_name in ${!reports_diff_cnt[@]}; do
 
             alert_body="Note: change is presented on top. For actual report scroll to \"Current scan report\" section.
 
------------------
-Chanages detected:
------------------
+==================================
+==================================
+=== Chanages detected:
+==================================
+==================================
 ${reports_diff[$report_name]}
 
--------------------
-Current scan report:
--------------------
+==================================
+==================================
+=== Current scan report:
+==================================
+==================================
 $(cat $report_name)
 "
 
