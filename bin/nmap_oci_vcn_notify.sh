@@ -26,9 +26,12 @@ if [ ! -d $nmap_root/reports ]; then
     exit 1
 fi
 
-cd $nmap_root/reports
+if [ ! -d $nmap_root/notified ]; then
+    echo "Error. Notification content directory does not exist."
+    exit 1
+fi
 
-if [ ! -d .git ]; then
+if [ ! -d $nmap_root/reports/.git ]; then
     echo "Error. Reports directory not initialized."
     exit 1
 fi
@@ -36,9 +39,17 @@ fi
 tmp=/tmp/$$
 mkdir -p $tmp
 
+date_now=$(date -u +"%Y%m%dT%H%M%S")
+
+# share with group
+umask 002
+
+
 declare -A reports_diff
 declare -A reports_diff_cnt
 
+
+cd $nmap_root/reports
 for report_name in $(ls *.nmap); do
     # 10 lines of change is ok due to DATE change, more means that file was really modified
     reports_diff[$report_name]="$(git diff HEAD^ HEAD $report_name)"
@@ -64,7 +75,17 @@ for report_name in ${!reports_diff_cnt[@]}; do
             echo ">> detected change in subnet: $report_name."
 
             alert_title="Detected change in subnet: $report_name."
-            alert_body="${reports_diff[$report_name]}"
+            
+            # copy to notification repository (http exposed)
+            cp $report_name $nmap_root/notified/$date_now
+            chmod r+g $nmap_root/notified/$date_now
+
+            alert_body="Current scan report: http://localhost:6501/rtg/netscan/$date_now/$report_name
+            
+Chanages detected:
+-----------------
+${reports_diff[$report_name]}"
+
             timeout 30 oci ons message publish --topic-id $topic_id --body "$alert_body" --title "$alert_title"
             if [ $? -eq 0 ]; then
                 cp $report_name $report_name.notified
