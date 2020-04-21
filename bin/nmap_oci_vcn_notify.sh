@@ -78,7 +78,7 @@ for report_name in ${!reports_diff_cnt[@]}; do
             
             # copy to notification repository (http exposed)
             cp $report_name $nmap_root/notified/$date_now
-            chmod r+g $nmap_root/notified/$date_now
+            chmod g+r $nmap_root/notified/$date_now
 
             alert_body="Current scan report: http://localhost:6501/rtg/netscan/$date_now/$report_name
             
