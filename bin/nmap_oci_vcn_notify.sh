@@ -41,8 +41,8 @@ declare -A reports_diff_cnt
 
 for report_name in $(ls *.nmap); do
     # 10 lines of change is ok due to DATE change, more means that file was really modified
-    reports_diff[$report_name]="$(git diff HEAD^^ HEAD $report_name)"
-    reports_diff_cnt[$report_name]=$(($(git diff HEAD^^ HEAD $report_name | wc -l) - 10))
+    reports_diff[$report_name]="$(git diff HEAD^^ $report_name)"
+    reports_diff_cnt[$report_name]=$(($(git diff HEAD^^ $report_name | wc -l) - 10))
 done
 
 for report_name in ${!reports_diff_cnt[@]}; do
