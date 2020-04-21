@@ -39,10 +39,10 @@ fi
 tmp=/tmp/$$
 mkdir -p $tmp
 
-date_now=$(date -u +"%Y%m%dT%H%M%S")
+# date_now=$(date -u +"%Y%m%dT%H%M%S")
 
-# share with group
-umask 002
+# # share with group
+# umask 002
 
 
 declare -A reports_diff
@@ -77,16 +77,23 @@ for report_name in ${!reports_diff_cnt[@]}; do
             alert_title="Detected change in subnet: $report_name."
             
             # copy to notification repository (http exposed)
-            mkdir -p $nmap_root/notified/$date_now
-            cp $report_name $nmap_root/notified/$date_now/$report_name
-            chmod g+r $nmap_root/notified/$date_now
-            chmod g+r $nmap_root/notified/$date_now/$report_name
+            # mkdir -p $nmap_root/notified/$date_now
+            # cp $report_name $nmap_root/notified/$date_now/$report_name
+            # chmod g+r $nmap_root/notified/$date_now
+            # chmod g+r $nmap_root/notified/$date_now/$report_name
 
-            alert_body="Current scan report: http://localhost:6501/rtg/netscan/$date_now/$report_name
-            
+            alert_body="Note: change is presented on top. For actual report scroll to \"Current scan report\" section.
+
+-----------------
 Chanages detected:
 -----------------
-${reports_diff[$report_name]}"
+${reports_diff[$report_name]}
+
+-------------------
+Current scan report:
+-------------------
+$(cat $report_name)
+"
 
             timeout 30 oci ons message publish --topic-id $topic_id --body "$alert_body" --title "$alert_title"
             if [ $? -eq 0 ]; then

@@ -23,8 +23,8 @@ date
 tmp=/tmp/$$
 mkdir -p $tmp
 
-# share with group
-umask 002
+# # share with group
+# umask 002
 
 if [ ! -d $nmap_root/reports ]; then
     echo "Error. Reports directory does not exist."
