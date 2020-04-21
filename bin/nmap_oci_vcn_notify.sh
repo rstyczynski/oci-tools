@@ -77,8 +77,10 @@ for report_name in ${!reports_diff_cnt[@]}; do
             alert_title="Detected change in subnet: $report_name."
             
             # copy to notification repository (http exposed)
-            cp $report_name $nmap_root/notified/$date_now
+            mkdir $report_name $nmap_root/notified/$date_now
+            cp $report_name $nmap_root/notified/$date_now/$report_name
             chmod g+r $nmap_root/notified/$date_now
+            chmod g+r $nmap_root/notified/$date_now/$report_name
 
             alert_body="Current scan report: http://localhost:6501/rtg/netscan/$date_now/$report_name
             
