@@ -44,16 +44,14 @@ mkdir -p $tmp
 # # share with group
 # umask 002
 
-
 declare -A reports_diff
 declare -A reports_diff_cnt
-
 
 cd $nmap_root/reports
 for report_name in $(ls *.nmap); do
     # 10 lines of change is ok due to DATE change, more means that file was really modified
     reports_diff[$report_name]="$(git diff HEAD^ HEAD $report_name)"
-    reports_diff_cnt[$report_name]=$(($(git diff HEAD^ HEAD $report_name | wc -l) - 10 ))
+    reports_diff_cnt[$report_name]=$(($(git diff HEAD^ HEAD $report_name | wc -l) - 10))
 done
 
 for report_name in ${!reports_diff_cnt[@]}; do
@@ -75,14 +73,27 @@ for report_name in ${!reports_diff_cnt[@]}; do
             echo ">> detected change in subnet: $report_name."
 
             alert_title="Detected change in subnet: $report_name."
-            
+
             # copy to notification repository (http exposed)
             # mkdir -p $nmap_root/notified/$date_now
             # cp $report_name $nmap_root/notified/$date_now/$report_name
             # chmod g+r $nmap_root/notified/$date_now
             # chmod g+r $nmap_root/notified/$date_now/$report_name
 
-            alert_body="Note: change is presented on top. For actual report scroll to \"Current scan report\" section.
+            # is it first email or following one? For the first, diff is not presented
+
+            if [ ! -f $report_name.notified ]; then
+                alert_body="Note: This is full scan report. I next email you will receive list of difference, and the full report.
+
+==================================
+==================================
+=== Current scan report:
+==================================
+==================================
+$(cat $report_name)
+"
+            else
+                alert_body="Note: change is presented on top. For actual report scroll to \"Current scan report\" section.
 
 ==================================
 ==================================
@@ -98,15 +109,59 @@ ${reports_diff[$report_name]}
 ==================================
 $(cat $report_name)
 "
+            fi
 
-            timeout 30 oci ons message publish --topic-id $topic_id --body "$alert_body" --title "$alert_title"
-            if [ $? -eq 0 ]; then
+            # OCI ONS accepts messages up to 64kB
+            # It's required to check if message is not too big, as uch will be not delivered
+
+            chunk_size=$(echo 63*1024 | bc) # 62KB is a max. message size. 1kb left for msg_warning.
+            chunk_max=2                     # will deliver up to 2 64kB chunks
+
+            mkdir -p $tmp/split
+            echo "$alert_body" >$tmp/split/alert.txt
+
+            split -d -b $chunk_size $tmp/split/alert.txt $tmp/split/alert_chunk
+
+            chunk_cnt=$(find $tmp/split/ -name "alert_chunk*" | wc -l)
+            if [ $chunk_cnt -gt 1 ]; then
+
+                chunk_delivery_cnt=$chunk_cnt
+                if [ $chunk_cnt -gt $chunk_max ]; then
+                    msg_warning="=========
+Attention: the message is too big. Only firsst $chunk_max with 64k part(s) will be delivered. Check the report [$nmap_root/reports/$report_name] using different means.
+========="
+                    chunk_delivery_cnt=$chunk_max
+                fi
+
+                chunk_no=0
+                for msg_chunk_file in $(find $tmp/split/ -name "alert_chunk*" | head -$chunk_delivery_cnt); do
+                    chunk_no=$(($chunk_no + 1))
+
+                    alert_title="$alert_title (${chunk_no}of$chunk_max)"
+                    timeout 30 oci ons message publish --topic-id $topic_id --body "$(echo $msg_warning)$(cat $msg_chunk_file)" --title "$alert_title"
+                    notify_result=$?
+                done
+
+            else
+                timeout 30 oci ons message publish --topic-id $topic_id --body "$alert_body" --title "$alert_title"
+                notify_result=$?
+            fi
+
+            # clean up split files
+            rm -rf $tmp/split
+
+            if [ $notify_result -eq 0 ]; then
                 cp $report_name $report_name.notified
             fi
         fi
 
     else
-        echo "No change."
+        alert_title="No changes at subnet: $report_name."
+        timeout 30 oci ons message publish --topic-id $topic_id --body "No changes." --title "$alert_title"
+        notify_result=$?
+        if [ $notify_result -eq 0 ]; then
+            cp $report_name $report_name.notified
+        fi
     fi
 done
 
