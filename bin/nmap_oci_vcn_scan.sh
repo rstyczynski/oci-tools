@@ -78,8 +78,8 @@ for subnet in $(cat $tmp/subnet_list | head -$scan_only_first_n); do
             grep -v "Stats:" |
             grep -v "Ping Scan Timing:" |
             cat >$nmap_root/reports/$subnet_report
-            if [ -f $subnet_report.reset ]; then
-                rm -f $report_name.reset
+            if [ -f $nmap_root/reports/$subnet_report.reset ]; then
+                rm -f $nmap_root/reports/$subnet_report.reset
             fi
         ;;
     port)
@@ -93,8 +93,8 @@ for subnet in $(cat $tmp/subnet_list | head -$scan_only_first_n); do
             grep -v "Stats:" |
             grep -v "Ping Scan Timing:" |
             cat >$nmap_root/reports/$subnet_report
-            if [ -f $subnet_report.reset ]; then
-                rm -f $report_name.reset
+            if [ -f $nmap_root/reports/$subnet_report.reset ]; then
+                rm -f $nmap_root/reports/$subnet_report.reset
             fi
         ;;
 
@@ -108,8 +108,8 @@ for subnet in $(cat $tmp/subnet_list | head -$scan_only_first_n); do
             grep -v "Stats:" |  
             grep -v "Ping Scan Timing:" | 
             cat >$nmap_root/reports/$subnet_report
-            if [ -f $subnet_report.reset ]; then
-                rm -f $report_name.reset
+            if [ -f $nmap_root/reports/$subnet_report.reset ]; then
+                rm -f $nmap_root/reports/$subnet_report.reset
             fi
         ;;
     esac
