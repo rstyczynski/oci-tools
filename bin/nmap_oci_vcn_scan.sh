@@ -78,6 +78,9 @@ for subnet in $(cat $tmp/subnet_list | head -$scan_only_first_n); do
             grep -v "Stats:" |
             grep -v "Ping Scan Timing:" |
             cat >$nmap_root/reports/$subnet_report
+            if [ -f $subnet_report.reset ]; then
+                rm -f $report_name.reset
+            fi
         ;;
     port)
         docker run -w /root kali/nmap nmap $subnet |
@@ -90,6 +93,9 @@ for subnet in $(cat $tmp/subnet_list | head -$scan_only_first_n); do
             grep -v "Stats:" |
             grep -v "Ping Scan Timing:" |
             cat >$nmap_root/reports/$subnet_report
+            if [ -f $subnet_report.reset ]; then
+                rm -f $report_name.reset
+            fi
         ;;
 
     full)
@@ -102,6 +108,9 @@ for subnet in $(cat $tmp/subnet_list | head -$scan_only_first_n); do
             grep -v "Stats:" |  
             grep -v "Ping Scan Timing:" | 
             cat >$nmap_root/reports/$subnet_report
+            if [ -f $subnet_report.reset ]; then
+                rm -f $report_name.reset
+            fi
         ;;
     esac
 

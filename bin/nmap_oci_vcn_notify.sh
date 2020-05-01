@@ -56,10 +56,11 @@ done
 
 for report_name in ${!reports_diff_cnt[@]}; do
 
-    echo -n "Processing $report_name..."
-    if [ ${reports_diff_cnt[$report_name]} -gt 0 ]; then
-
-        notify=yes
+    notify=yes
+    if [ -f $report_name.reset ]; then
+        echo "Reports after reset. Nothing to send. Invoke scan first."
+        notify=no
+    else
         if [ -f $report_name.notified ]; then
             diff $report_name $report_name.notified >/dev/null
             if [ $? -eq 0 ]; then
@@ -67,8 +68,12 @@ for report_name in ${!reports_diff_cnt[@]}; do
                 notify=no
             fi
         fi
+    fi
 
-        if [ "$notify" == yes ]; then
+    if [ "$notify" == yes ]; then
+
+        echo -n "Processing $report_name..."
+        if [ ${reports_diff_cnt[$report_name]} -gt 0 ]; then
             echo
             echo ">> detected change in subnet: $report_name."
 
@@ -153,21 +158,7 @@ Attention: the message is too big. Only firsst $chunk_max with 64k part(s) will 
             if [ $notify_result -eq 0 ]; then
                 cp $report_name $report_name.notified
             fi
-        fi
-
-    else
-
-        notify=yes
-        if [ -f $report_name.notified ]; then
-            diff $report_name $report_name.notified >/dev/null
-            if [ $? -eq 0 ]; then
-                echo "Already notified."
-                notify=no
-            fi
-        fi
-
-        if [ "$notify" == yes ]; then
-
+        else
             alert_title="No changes at subnet: $report_name."
             timeout 30 oci ons message publish --topic-id $topic_id --body "No changes." --title "$alert_title"
             notify_result=$?

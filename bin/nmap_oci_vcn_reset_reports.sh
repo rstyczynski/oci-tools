@@ -19,9 +19,7 @@ for report_name in $(ls *.nmap); do
     echo "Resetting scan report for $report_name..."  
     echo > $report_name
 
-    if [ -f $report_name.notified ]; then
-        rm -f $report_name.notified
-    fi
+    touch $report_name.reset
 done
 
 git add *.nmap
