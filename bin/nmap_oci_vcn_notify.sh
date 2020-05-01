@@ -51,7 +51,7 @@ cd $nmap_root/reports
 for report_name in $(ls *.nmap); do
     # 10 lines of change is ok due to DATE change, more means that file was really modified
     reports_diff[$report_name]="$(git diff HEAD^ HEAD $report_name)"
-    reports_diff_cnt[$report_name]=$(($(git diff HEAD^ HEAD $report_name | wc -l) - 7))
+    reports_diff_cnt[$report_name]=$(($(git diff HEAD^ HEAD $report_name | wc -l) - 10))
 done
 
 for report_name in ${!reports_diff_cnt[@]}; do
@@ -89,7 +89,7 @@ for report_name in ${!reports_diff_cnt[@]}; do
             if [ ! -f $report_name.notified ]; then
 
                 alert_title="Full scan performed on subnet: $report_name."
-                alert_body="Note: This is a full scan report. Starting from next email you will receive list of difference, and the full report.
+                alert_body="Note: This is a full scan report. Starting from next email you will receive list of differences, and the full report.
 
 ==================================
 ==================================
