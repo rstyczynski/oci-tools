@@ -20,6 +20,7 @@ for report_name in $(ls *.nmap); do
     echo > $report_name
 
     touch $report_name.reset
+    rm -f $report_name.notified
 done
 
 git add *.nmap
