@@ -63,7 +63,7 @@ for report_name in ${!reports_diff_cnt[@]}; do
         if [ -f $report_name.notified ]; then
             diff $report_name $report_name.notified >/dev/null
             if [ $? -eq 0 ]; then
-                echo Already notified.
+                echo "Already notified."
                 notify=no
             fi
         fi
@@ -83,7 +83,7 @@ for report_name in ${!reports_diff_cnt[@]}; do
             # is it first email or following one? For the first, diff is not presented
 
             if [ ! -f $report_name.notified ]; then
-                alert_body="Note: This is full scan report. I next email you will receive list of difference, and the full report.
+                alert_body="Note: This is a full scan report. Starting from next email you will receive list of difference, and the full report.
 
 ==================================
 ==================================
@@ -156,11 +156,24 @@ Attention: the message is too big. Only firsst $chunk_max with 64k part(s) will 
         fi
 
     else
-        alert_title="No changes at subnet: $report_name."
-        timeout 30 oci ons message publish --topic-id $topic_id --body "No changes." --title "$alert_title"
-        notify_result=$?
-        if [ $notify_result -eq 0 ]; then
-            cp $report_name $report_name.notified
+
+        notify=yes
+        if [ -f $report_name.notified ]; then
+            diff $report_name $report_name.notified >/dev/null
+            if [ $? -eq 0 ]; then
+                echo "Already notified."
+                notify=no
+            fi
+        fi
+
+        if [ "$notify" == yes ]; then
+
+            alert_title="No changes at subnet: $report_name."
+            timeout 30 oci ons message publish --topic-id $topic_id --body "No changes." --title "$alert_title"
+            notify_result=$?
+            if [ $notify_result -eq 0 ]; then
+                cp $report_name $report_name.notified
+            fi
         fi
     fi
 done
