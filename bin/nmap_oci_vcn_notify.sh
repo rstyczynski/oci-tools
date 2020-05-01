@@ -78,7 +78,6 @@ for report_name in ${!reports_diff_cnt[@]}; do
             echo ">> detected change in subnet: $report_name."
 
             alert_title="Detected change in subnet: $report_name."
-
             # copy to notification repository (http exposed)
             # mkdir -p $nmap_root/notified/$date_now
             # cp $report_name $nmap_root/notified/$date_now/$report_name
@@ -88,6 +87,8 @@ for report_name in ${!reports_diff_cnt[@]}; do
             # is it first email or following one? For the first, diff is not presented
 
             if [ ! -f $report_name.notified ]; then
+
+                alert_title="Full scan performed on subnet: $report_name."
                 alert_body="Note: This is a full scan report. Starting from next email you will receive list of difference, and the full report.
 
 ==================================
