@@ -137,8 +137,8 @@ Attention: the message is too big. Only firsst $chunk_max with 64k part(s) will 
                 for msg_chunk_file in $(find $tmp/split/ -name "alert_chunk*" | head -$chunk_delivery_cnt); do
                     chunk_no=$(($chunk_no + 1))
 
-                    alert_title="$alert_title (${chunk_no}of$chunk_max)"
-                    timeout 30 oci ons message publish --topic-id $topic_id --body "$(echo $msg_warning)$(cat $msg_chunk_file)" --title "$alert_title"
+                    alert_chunk_title="$alert_title (${chunk_no}of$chunk_max)"
+                    timeout 30 oci ons message publish --topic-id $topic_id --body "$(echo $msg_warning)$(cat $msg_chunk_file)" --title "$alert_chunk_title"
                     notify_result=$?
                 done
 
