@@ -17,8 +17,8 @@ cd $nmap_root/reports
 
 for report_name in $(ls *.nmap); do
     echo "Resetting scan report for $report_name..."  
-    echo > $report_name
-
+    rm -f $report_name
+    touch $report_name
     touch $report_name.reset
     rm -f $report_name.notified
 done
