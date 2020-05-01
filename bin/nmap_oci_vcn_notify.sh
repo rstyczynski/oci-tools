@@ -58,13 +58,13 @@ for report_name in ${!reports_diff_cnt[@]}; do
 
     notify=yes
     if [ -f $report_name.reset ]; then
-        echo "Reports after reset. Nothing to send. Invoke scan first."
+        echo "$report_name. Report after reset. Nothing to send. Invoke scan first."
         notify=no
     else
         if [ -f $report_name.notified ]; then
             diff $report_name $report_name.notified >/dev/null
             if [ $? -eq 0 ]; then
-                echo "Already notified."
+                echo "$report_name. Already notified."
                 notify=no
             fi
         fi
