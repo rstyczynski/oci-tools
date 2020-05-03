@@ -82,6 +82,7 @@ for subnet in $(cat $tmp/subnet_list | head -$scan_only_first_n); do
                 rm -f $nmap_root/reports/$subnet_report.reset
             fi
         ;;
+        
     port)
         docker run -w /root kali/nmap nmap $subnet |
             # clean report
