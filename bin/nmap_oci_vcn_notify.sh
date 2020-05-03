@@ -131,12 +131,15 @@ $(cat $report_name)
             chunk_cnt=$(find $tmp/split/ -name "alert_chunk*" | wc -l)
             if [ $chunk_cnt -gt 1 ]; then
 
+                msg_warning=''
                 chunk_delivery_cnt=$chunk_cnt
                 if [ $chunk_cnt -gt $chunk_max ]; then
                     msg_warning="=========
 Attention: the message is too big. Only firsst $chunk_max with 64k part(s) will be delivered. Check the report [$nmap_root/reports/$report_name] using different means.
-========="
+=========
+"
                     chunk_delivery_cnt=$chunk_max
+
                 fi
 
                 chunk_no=0
