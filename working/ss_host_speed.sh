@@ -30,3 +30,48 @@ function ss_host_speed() {
     fi
     rm -f /tmp/$$.ss.out
 }
+
+
+function checkIfspeed_RH6() {
+    delay=$1
+    ifname=$2
+
+    if [ -z "$delay" ]; then
+        delay=1
+    fi
+
+    start_TX=$(ifconfig $ifname | grep TX | grep bytes | tr -s ' ' | cut -d' ' -f6 )
+    start_RX=$(ifconfig $ifname | grep RX | grep bytes | tr -s ' ' | cut -d' ' -f6 )
+
+    sleep $delay
+
+    stop_TX=$(ifconfig $ifname | grep TX | grep bytes | tr -s ' ' | cut -d' ' -f6)
+    stop_RX=$(ifconfig $ifname | grep RX | grep bytes | tr -s ' ' | cut -d' ' -f6)
+    echo -n "TX speed [kB/s]:"
+    echo -n "$(echo "($stop_TX - $start_TX)/$delay/1024" | bc), "
+    echo -n "RX speed [kB/s]:"
+    echo "$(echo "($stop_RX - $start_RX)/$delay/1024" | bc)"
+}
+
+function checkIfspeed_RH7() {
+    delay=$1
+    ifname=$2
+
+    if [ -z "$delay" ]; then
+        delay=1
+    fi
+
+    start_TX=$(ifconfig $ifname | grep TX | grep bytes | tr -s ' ' | cut -d' ' -f7 | cut -d: -f2)
+    start_RX=$(ifconfig $ifname | grep RX | grep bytes | tr -s ' ' | cut -d' ' -f3 | cut -d: -f2)
+
+    sleep $delay
+
+    stop_TX=$(ifconfig $ifname | grep TX | grep bytes | tr -s ' ' | cut -d' ' -f7 | cut -d: -f2)
+    stop_RX=$(ifconfig $ifname | grep RX | grep bytes | tr -s ' ' | cut -d' ' -f3 | cut -d: -f2)
+    echo -n "TX speed [kB/s]:"
+    echo -n "$(echo "($stop_TX - $start_TX)/$delay/1024" | bc), "
+    echo -n "RX speed [kB/s]:"
+    echo "$(echo "($stop_RX - $start_RX)/$delay/1024" | bc)"
+}
+
+

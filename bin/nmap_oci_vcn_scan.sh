@@ -74,7 +74,7 @@ for subnet in $(cat $tmp/subnet_list | head -$scan_only_first_n); do
             sed "s/[0-9][0-9]*\.[0-9][0-9]* latency /NN latency /g" |
             sed "s/[0-9][0-9]*\.[0-9][0-9]* seconds/NN seconds/g" |
             sed 's/Stats: [0-9][0-9]*:[0-9][0-9]*:[0-9][0-9]* elapsed; [0-9][0-9]* hosts completed ([0-9][0-9]* up)/Stats: HH:MM:SS elapsed; N hosts completed (0 up)/g' |
-            sed 's/\w+,\s\d+\s\w+\s\d+\s\d+:\d+:\d+\s\w+/Weekday, Day Month Year, hh:mm:ss TZ/g' | # Wed, 29 Apr 2020 23:04:41 GMT
+            perl -pe 's/\w+,\s\d+\s\w+\s\d+\s\d+:\d+:\d+\s\w+/Weekday, Day Month Year, hh:mm:ss TZ/g' | # Wed, 29 Apr 2020 23:04:41 GMT
             grep -v "Stats:" |
             grep -v "Ping Scan Timing:" |
             cat >$nmap_root/reports/$subnet_report
@@ -90,7 +90,7 @@ for subnet in $(cat $tmp/subnet_list | head -$scan_only_first_n); do
             sed "s/[0-9][0-9]*\.[0-9][0-9]* latency /NN latency /g" |
             sed "s/[0-9][0-9]*\.[0-9][0-9]* seconds/NN seconds/g" |
             sed 's/Stats: [0-9][0-9]*:[0-9][0-9]*:[0-9][0-9]* elapsed; [0-9][0-9]* hosts completed ([0-9][0-9]* up)/Stats: HH:MM:SS elapsed; N hosts completed (0 up)/g' |
-            sed 's/\w+,\s\d+\s\w+\s\d+\s\d+:\d+:\d+\s\w+/Weekday, Day Month Year, hh:mm:ss TZ/g' | # Wed, 29 Apr 2020 23:04:41 GMT
+            perl -pe 's/\w+,\s\d+\s\w+\s\d+\s\d+:\d+:\d+\s\w+/Weekday, Day Month Year, hh:mm:ss TZ/g' | # Wed, 29 Apr 2020 23:04:41 GMT
             grep -v "Stats:" |
             grep -v "Ping Scan Timing:" |
             cat >$nmap_root/reports/$subnet_report
@@ -106,7 +106,7 @@ for subnet in $(cat $tmp/subnet_list | head -$scan_only_first_n); do
             sed "s/[0-9][0-9]*\.[0-9][0-9]* latency /NN latency /g" |
             sed "s/[0-9][0-9]*\.[0-9][0-9]* seconds/NN seconds/g" |
             sed 's/Stats: [0-9][0-9]*:[0-9][0-9]*:[0-9][0-9]* elapsed; [0-9][0-9]* hosts completed ([0-9][0-9]* up)/Stats: HH:MM:SS elapsed; N hosts completed (0 up)/g' |
-            sed 's/\w+,\s\d+\s\w+\s\d+\s\d+:\d+:\d+\s\w+/Weekday, Day Month Year, hh:mm:ss TZ/g' | # Wed, 29 Apr 2020 23:04:41 GMT
+            perl -pe 's/\w+,\s\d+\s\w+\s\d+\s\d+:\d+:\d+\s\w+/Weekday, Day Month Year, hh:mm:ss TZ/g' | # Wed, 29 Apr 2020 23:04:41 GMT
             grep -v "Stats:" |  
             grep -v "Ping Scan Timing:" | 
             cat >$nmap_root/reports/$subnet_report
