@@ -121,7 +121,7 @@ set timeout 600
 log_file $sftp_test_home/$test_date/$test_file\_$test_name.expect
 
 spawn sftp -oPort=$sftp_port  $sftp_user@$sftp_server
-expect "$sftp_user@$sftp_server's password:"
+expect "password"
 send "$sftp_password\n"
 expect "sftp>"
 send "put $sftp_test_home/$test_file $test_path/$test_file\n"
@@ -155,7 +155,7 @@ set timeout 60
 log_file $sftp_test_home/$test_date/$test_file\_$test_name.expect
 
 spawn sftp -oPort=$sftp_port $sftp_user@$sftp_server
-expect "$sftp_user@$sftp_server's password:"
+expect "password"
 send "$sftp_password\n"
 expect "sftp>"
 send "get $test_path/$test_file /dev/null\n"
@@ -190,7 +190,7 @@ set timeout 60
 log_file $sftp_test_home/$test_date/$test_file\_$test_name.expect
 
 spawn sftp $sftp_tunings -oPort=$sftp_port $sftp_user@$sftp_server
-expect "$sftp_user@$sftp_server's password:"
+expect "password"
 send "$sftp_password\n"
 expect "sftp>"
 send "get $test_path/$test_file /dev/null\n"
@@ -225,7 +225,7 @@ EOF
 set timeout 60
 
 spawn sftp -oPort=$sftp_port $sftp_user@$sftp_server
-expect "$sftp_user@$sftp_server's password:"
+expect "password"
 send "$sftp_password\n"
 expect "sftp>"
 send "get $test_path/$test_file /dev/null\n"
