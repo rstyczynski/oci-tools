@@ -180,6 +180,7 @@ EOF
     # stop tcpdump
     timeout 5 stdbuf -i0 -o0 -e0 ping -c 5 $sftp_server >/dev/null 2>&1
     sudo kill $tcpdump_pid
+    sudo chown $(whoami) $sftp_test_home/$test_date/$test_name.tcpdump
 
     echo
     echo "=== sftp client session "
