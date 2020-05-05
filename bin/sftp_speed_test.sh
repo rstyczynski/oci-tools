@@ -167,8 +167,20 @@ EOF
     echo "=== $test_name "
     echo "========================"
 
+    # start tcpdump
+    ifname=$(ip route get $sftp_server | tr -s ' ' | grep dev | cut -d' ' -f5)
+
+    tcpdump -i $ifname -s 65000 -Nn -w $sftp_test_home/$test_date/$test_name.tcpdump &
+    tcpdump_pid=$!
+    timeout 5 stdbuf -i0 -o0 -e0 ping -c 5 $sftp_server >/dev/null 2>&1
+
+    # start sftp session
     run_with_ifspeed "timeout $network_time_limit expect $sftp_test_home/$test_date/sftp-test-get.exp" 1>&2
 
+    # stop tcpdump
+    timeout 5 stdbuf -i0 -o0 -e0 ping -c 5 $sftp_server >/dev/null 2>&1
+    kill $tcpdump_pid
+    
     echo
     echo "=== sftp client session "
     cat $sftp_test_home/$test_date/$test_file\_$test_name.expect | grep -v $sftp_password | grep ETA | sed 's/\r//g' | tr -s ' ' | sed 's/ETA/ETA\n/g'
@@ -462,6 +474,7 @@ function __main__() {
             echo " >> report: $sftp_test_home/sftp_test_$test_date.report" 1>&2
             echo " >> log: $sftp_test_home/$test_date/sftp_test_$test_date.log" 1>&2
             echo " >> partial results in directory: $sftp_test_home/$test_date." 1>&2
+            echo " >> tcpdump files: $(ls $sftp_test_home/$test_date/*.tcpdump)" 1>&2
 
         else
             echo "Abandoned." 1>&2
