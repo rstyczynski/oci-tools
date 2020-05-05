@@ -170,7 +170,7 @@ EOF
     # start tcpdump
     ifname=$(ip route get $sftp_server | tr -s ' ' | grep dev | cut -d' ' -f5)
 
-    tcpdump -i $ifname -s 65000 -Nn -w $sftp_test_home/$test_date/$test_name.tcpdump &
+    sudo tcpdump -i $ifname -s 65000 -Nn -w $sftp_test_home/$test_date/$test_name.tcpdump &
     tcpdump_pid=$!
     timeout 5 stdbuf -i0 -o0 -e0 ping -c 5 $sftp_server >/dev/null 2>&1
 
@@ -179,8 +179,8 @@ EOF
 
     # stop tcpdump
     timeout 5 stdbuf -i0 -o0 -e0 ping -c 5 $sftp_server >/dev/null 2>&1
-    kill $tcpdump_pid
-    
+    sudo kill $tcpdump_pid
+
     echo
     echo "=== sftp client session "
     cat $sftp_test_home/$test_date/$test_file\_$test_name.expect | grep -v $sftp_password | grep ETA | sed 's/\r//g' | tr -s ' ' | sed 's/ETA/ETA\n/g'
@@ -362,7 +362,7 @@ function __main_header__() {
     echo "========= SFTP test procedure ========="
     echo "======================================="
     echo "== host: $(hostname)"
-    echo "== sftp_user: $(whoami)"
+    echo "== user: $(whoami)"
     echo "== date: $(date)"
     echo "======================================="
 
