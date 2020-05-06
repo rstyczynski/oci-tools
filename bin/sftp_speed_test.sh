@@ -168,8 +168,6 @@ EOF
     echo "========================"
 
     # start tcpdump
-    ifname=$(ip route get $sftp_server | tr -s ' ' | grep dev | cut -d' ' -f5)
-
     sudo tcpdump -i $ifname -s 65000 -Nn -w $sftp_test_home/$test_date/$test_name.tcpdump &
     tcpdump_pid=$!
     timeout 5 stdbuf -i0 -o0 -e0 ping -c 5 $sftp_server >/dev/null 2>&1
@@ -364,7 +362,7 @@ function __main_header__() {
     echo "======================================="
     echo "== host: $(hostname)"
     echo "== user: $(whoami)"
-    echo "== date: $(date)"
+    echo "== date: $test_date / $(date)"
     echo "======================================="
 
 }
