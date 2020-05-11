@@ -7,6 +7,9 @@ function port_forward_set() {
     local dst_host=$(echo $3 | cut -f1 -d:)
     local dst_port=$(echo $3 | cut -f2 -d:)
 
+    # save state before change
+    iptables-save > ~/iptables_$(date +%Y-%m-%d_%T).save
+
     iptables -I FORWARD -j ACCEPT -d $dst_host
 
     iptables -t nat -A PREROUTING -p tcp -d $fwd_host --dport $fwd_port -j DNAT --to-destination $dst_host:$dst_port
@@ -23,6 +26,9 @@ function port_forward_del() {
     local dst_host=$(echo $3 | cut -f1 -d:)
     local dst_port=$(echo $3 | cut -f2 -d:)
 
+    # save state before change
+    iptables-save > ~/iptables_$(date +%Y-%m-%d_%T).save
+
     iptables -D FORWARD -j ACCEPT -d $dst_host
 
     iptables -t nat -D PREROUTING -p tcp -d $fwd_host --dport $fwd_port -j DNAT --to-destination $dst_host:$dst_port
@@ -36,6 +42,9 @@ function port_forward_prepare() {
     sysctl -w net.ipv4.ip_forward=1
     # save to survive reboot
     echo "net.ipv4.ip_forward=1" >/etc/sysctl.d/port_forward.conf
+
+    # save state before change
+    iptables-save > ~/iptables_$(date +%Y-%m-%d_%T).save
 
     # delete default OCI forward drop 
     iptables -D FORWARD -j REJECT --reject-with icmp-host-prohibited
@@ -51,6 +60,9 @@ function port_forward_remove() {
     sysctl -w net.ipv4.ip_forward=0
     rm -f /etc/sysctl.d/port_forward.conf
 
+    # save state before change
+    iptables-save > ~/iptables_$(date +%Y-%m-%d_%T).save
+    
     # delete default OCI forward drop 
     iptables -I FORWARD -j REJECT --reject-with icmp-host-prohibited
 
@@ -67,9 +79,6 @@ function port_forward_monitor() {
     iptables -t nat -L -n -v
 }
 
-
-# paranoid mode. restore with: cat iptables.bak | iptables-restore
-iptables-save > iptables.bak
 
 # only once
 port_forward_prepare
