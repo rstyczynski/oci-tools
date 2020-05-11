@@ -53,6 +53,7 @@ function checkIfspeed() {
 function run_with_ifspeed_start() {
     start_log=$(cat $sftp_test_home/$test_date/ifspeed_$seed.log | tail -1 | cut -f1,2 -d' ')
 }
+
 function run_with_ifspeed_stop() {
     sleep 1
     stop_log=$(cat $sftp_test_home/$test_date/ifspeed_$seed.log | tail -1 | cut -f1,2 -d' ')
@@ -86,6 +87,13 @@ function run_with_ifspeed() {
 #
 
 function run_tests() {
+    perform_internet=$1
+    perform_upload=$2
+    perform_download=$3
+    perform_tuned=$4
+    perform_download_10=$5
+    perform_download_20=$6
+    perform_download_40=$7
 
     #
     test_name=download_internet
@@ -94,29 +102,37 @@ function run_tests() {
     echo "=== $test_name "
     echo "========================"
 
-    if [ -f $sftp_test_home/$test_file ]; then
-        rm -f $sftp_test_home/$test_file
+    if [ $perform_internet == yes ]; then
+        if [ -f $sftp_test_home/$test_file ]; then
+            rm -f $sftp_test_home/$test_file
+        fi
+        cd $sftp_test_home
+        run_with_ifspeed "timeout $network_time_limit wget http://ipv4.download.thinkbroadband.com/$test_file" >$sftp_test_home/$test_date/$test_file\_$test_name.wget 2>&1
+        cd - >/dev/null
+
+        echo
+        echo "=== wget client session "
+        cat $sftp_test_home/$test_date/$test_file\_$test_name.wget
+        echo
+        echo "=== if speed "
+        cat $sftp_test_home/$test_date/$test_file\_$test_name.ifspeed
+        echo
+        echo "=== if speed stats "
+        cat $sftp_test_home/$test_date/$test_file\_$test_name.stats
+
+        sleep 5
+    else
+        echo "Skipped."
     fi
-    cd $sftp_test_home
-    run_with_ifspeed "timeout $network_time_limit wget http://ipv4.download.thinkbroadband.com/$test_file" >$sftp_test_home/$test_date/$test_file\_$test_name.wget 2>&1
-    cd - >/dev/null
-
-    echo
-    echo "=== wget client session "
-    cat $sftp_test_home/$test_date/$test_file\_$test_name.wget
-    echo
-    echo "=== if speed "
-    cat $sftp_test_home/$test_date/$test_file\_$test_name.ifspeed
-    echo
-    echo "=== if speed stats "
-    cat $sftp_test_home/$test_date/$test_file\_$test_name.stats
-
-    sleep 5
 
     #
     test_name=upload
     #
-    cat >$sftp_test_home/$test_date/sftp-test-put.exp <<EOF
+    echo "========================"
+    echo "=== $test_name "
+    echo "========================"
+    if [ $perform_upload == yes ]; then
+        cat >$sftp_test_home/$test_date/sftp-test-put.exp <<EOF
 set timeout 600
 log_file $sftp_test_home/$test_date/$test_file\_$test_name.expect
 
@@ -129,27 +145,32 @@ expect "sftp>"
 send quit
 EOF
 
-    echo "========================"
-    echo "=== $test_name "
-    echo "========================"
-    run_with_ifspeed "timeout $network_time_limit expect $sftp_test_home/$test_date/sftp-test-put.exp" 1>&2
+        run_with_ifspeed "timeout $network_time_limit expect $sftp_test_home/$test_date/sftp-test-put.exp" 1>&2
 
-    echo
-    echo "=== sftp client session "
-    cat $sftp_test_home/$test_date/$test_file\_$test_name.expect | grep -v $sftp_password | grep ETA | sed 's/\r//g' | tr -s ' ' | sed 's/ETA/ETA\n/g'
-    echo
-    echo "=== if speed "
-    cat $sftp_test_home/$test_date/$test_file\_$test_name.ifspeed
-    echo
-    echo "=== if speed stats "
-    cat $sftp_test_home/$test_date/$test_file\_$test_name.stats
+        echo
+        echo "=== sftp client session "
+        cat $sftp_test_home/$test_date/$test_file\_$test_name.expect | grep -v $sftp_password | grep ETA | sed 's/\r//g' | tr -s ' ' | sed 's/ETA/ETA\n/g'
+        echo
+        echo "=== if speed "
+        cat $sftp_test_home/$test_date/$test_file\_$test_name.ifspeed
+        echo
+        echo "=== if speed stats "
+        cat $sftp_test_home/$test_date/$test_file\_$test_name.stats
 
-    echo
+        echo
+    else
+        echo "Skipped."
+    fi
 
     #
     test_name=download
     #
-    cat >$sftp_test_home/$test_date/sftp-test-get.exp <<EOF
+    echo "========================"
+    echo "=== $test_name "
+    echo "========================"
+    if [ $perform_download == yes ]; then
+
+        cat >$sftp_test_home/$test_date/sftp-test-get.exp <<EOF
 #!/usr/bin/expect
 set timeout 60
 log_file $sftp_test_home/$test_date/$test_file\_$test_name.expect
@@ -163,39 +184,44 @@ expect "sftp>"
 send quit
 EOF
 
-    echo "========================"
-    echo "=== $test_name "
-    echo "========================"
+        # start tcpdump
+        sudo tcpdump -i $ifname -s 65000 -Nn -w $sftp_test_home/$test_date/$test_name.tcpdump &
+        tcpdump_pid=$!
+        timeout 5 stdbuf -i0 -o0 -e0 ping -c 5 $sftp_server >/dev/null 2>&1
 
-    # start tcpdump
-    sudo tcpdump -i $ifname -s 65000 -Nn -w $sftp_test_home/$test_date/$test_name.tcpdump &
-    tcpdump_pid=$!
-    timeout 5 stdbuf -i0 -o0 -e0 ping -c 5 $sftp_server >/dev/null 2>&1
+        # start sftp session
+        run_with_ifspeed "timeout $network_time_limit expect $sftp_test_home/$test_date/sftp-test-get.exp" 1>&2
 
-    # start sftp session
-    run_with_ifspeed "timeout $network_time_limit expect $sftp_test_home/$test_date/sftp-test-get.exp" 1>&2
+        # stop tcpdump
+        timeout 5 stdbuf -i0 -o0 -e0 ping -c 5 $sftp_server >/dev/null 2>&1
+        sudo kill $tcpdump_pid
+        sudo chown $(whoami) $sftp_test_home/$test_date/$test_name.tcpdump
 
-    # stop tcpdump
-    timeout 5 stdbuf -i0 -o0 -e0 ping -c 5 $sftp_server >/dev/null 2>&1
-    sudo kill $tcpdump_pid
-    sudo chown $(whoami) $sftp_test_home/$test_date/$test_name.tcpdump
+        echo
+        echo "=== sftp client session "
+        cat $sftp_test_home/$test_date/$test_file\_$test_name.expect | grep -v $sftp_password | grep ETA | sed 's/\r//g' | tr -s ' ' | sed 's/ETA/ETA\n/g'
+        echo
+        echo "=== if speed "
+        cat $sftp_test_home/$test_date/$test_file\_$test_name.ifspeed
+        echo
+        echo "=== if speed stats "
+        cat $sftp_test_home/$test_date/$test_file\_$test_name.stats
 
-    echo
-    echo "=== sftp client session "
-    cat $sftp_test_home/$test_date/$test_file\_$test_name.expect | grep -v $sftp_password | grep ETA | sed 's/\r//g' | tr -s ' ' | sed 's/ETA/ETA\n/g'
-    echo
-    echo "=== if speed "
-    cat $sftp_test_home/$test_date/$test_file\_$test_name.ifspeed
-    echo
-    echo "=== if speed stats "
-    cat $sftp_test_home/$test_date/$test_file\_$test_name.stats
-
-    echo
+        echo
+    else
+        echo "Skipped."
+    fi
 
     #
     test_name=download_tuned
     #
-    cat >$sftp_test_home/$test_date/sftp-test-get-tuned.exp <<EOF
+    echo "========================"
+    echo "=== $test_name "
+    echo "========================"
+
+    if [ $perform_tuned == yes ]; then
+
+        cat >$sftp_test_home/$test_date/sftp-test-get-tuned.exp <<EOF
 #!/usr/bin/expect
 set timeout 60
 log_file $sftp_test_home/$test_date/$test_file\_$test_name.expect
@@ -209,29 +235,34 @@ expect "sftp>"
 send quit
 EOF
 
-    echo "========================"
-    echo "=== $test_name "
-    echo "========================"
+        run_with_ifspeed "timeout $network_time_limit expect $sftp_test_home/$test_date/sftp-test-get-tuned.exp" 1>&2
 
-    run_with_ifspeed "timeout $network_time_limit expect $sftp_test_home/$test_date/sftp-test-get-tuned.exp" 1>&2
+        echo
+        echo "=== sftp client session "
+        cat $sftp_test_home/$test_date/$test_file\_$test_name.expect | grep -v $sftp_password | grep ETA | sed 's/\r//g' | tr -s ' ' | sed 's/ETA/ETA\n/g'
+        echo
+        echo "=== if speed "
+        cat $sftp_test_home/$test_date/$test_file\_$test_name.ifspeed
+        echo
+        echo "=== if speed stats "
+        cat $sftp_test_home/$test_date/$test_file\_$test_name.stats
 
-    echo
-    echo "=== sftp client session "
-    cat $sftp_test_home/$test_date/$test_file\_$test_name.expect | grep -v $sftp_password | grep ETA | sed 's/\r//g' | tr -s ' ' | sed 's/ETA/ETA\n/g'
-    echo
-    echo "=== if speed "
-    cat $sftp_test_home/$test_date/$test_file\_$test_name.ifspeed
-    echo
-    echo "=== if speed stats "
-    cat $sftp_test_home/$test_date/$test_file\_$test_name.stats
-
-    echo
+        echo
+    else
+        echo "Skipped."
+    fi
 
     #
     test_name=download_x10
     #
 
-    cat >$sftp_test_home/$test_date/sftp-test-get_nolog.exp <<EOF
+    echo "========================"
+    echo "=== $test_name "
+    echo "========================"
+
+    if [ $perform_download_10 == yes ]; then
+
+        cat >$sftp_test_home/$test_date/sftp-test-get_nolog.exp <<EOF
 #!/usr/bin/expect
 set timeout 60
 
@@ -244,26 +275,27 @@ expect "sftp>"
 send quit
 EOF
 
-    echo "========================"
-    echo "=== $test_name "
-    echo "========================"
-    run_with_ifspeed_start
-    unset pid_list
-    for cnt in {1..3}; do
-        timeout $network_time_limit expect $sftp_test_home/$test_date/sftp-test-get_nolog.exp 1>&2 &
-        expect_pid=$!
-        pid_list="$pid_list $expect_pid"
-    done
-    wait $pid_list
-    unset pid_list
+        run_with_ifspeed_start
+        unset pid_list
+        for cnt in {1..3}; do
+            timeout $network_time_limit expect $sftp_test_home/$test_date/sftp-test-get_nolog.exp 1>&2 &
+            expect_pid=$!
+            pid_list="$pid_list $expect_pid"
+        done
+        wait $pid_list
+        unset pid_list
 
-    run_with_ifspeed_stop
-    echo
-    echo "=== if speed "
-    cat $sftp_test_home/$test_date/$test_file\_$test_name.ifspeed
-    echo
-    echo "=== if speed stats "
-    cat $sftp_test_home/$test_date/$test_file\_$test_name.stats
+        run_with_ifspeed_stop
+        echo
+        echo "=== if speed "
+        cat $sftp_test_home/$test_date/$test_file\_$test_name.ifspeed
+        echo
+        echo "=== if speed stats "
+        cat $sftp_test_home/$test_date/$test_file\_$test_name.stats
+
+    else
+        echo "Skipped."
+    fi
 
     #
     test_name=download_x20
@@ -272,23 +304,28 @@ EOF
     echo "========================"
     echo "=== $test_name "
     echo "========================"
-    run_with_ifspeed_start
-    unset pid_list
-    for cnt in {1..20}; do
-        timeout $network_time_limit expect $sftp_test_home/$test_date/sftp-test-get_nolog.exp 1>&2 &
-        expect_pid=$!
-        pid_list="$pid_list $expect_pid"
-    done
-    wait $pid_list
-    unset pid_list
+    if [ $perform_download_20 == yes ]; then
+        run_with_ifspeed_start
+        unset pid_list
+        for cnt in {1..20}; do
+            timeout $network_time_limit expect $sftp_test_home/$test_date/sftp-test-get_nolog.exp 1>&2 &
+            expect_pid=$!
+            pid_list="$pid_list $expect_pid"
+        done
+        wait $pid_list
+        unset pid_list
 
-    run_with_ifspeed_stop
-    echo
-    echo "=== if speed "
-    cat $sftp_test_home/$test_date/$test_file\_$test_name.ifspeed
-    echo
-    echo "=== if speed stats "
-    cat $sftp_test_home/$test_date/$test_file\_$test_name.stats
+        run_with_ifspeed_stop
+        echo
+        echo "=== if speed "
+        cat $sftp_test_home/$test_date/$test_file\_$test_name.ifspeed
+        echo
+        echo "=== if speed stats "
+        cat $sftp_test_home/$test_date/$test_file\_$test_name.stats
+
+    else
+        echo "Skipped."
+    fi
 
     #
     test_name=download_x40
@@ -297,23 +334,27 @@ EOF
     echo "========================"
     echo "=== $test_name "
     echo "========================"
-    run_with_ifspeed_start
-    unset pid_list
-    for cnt in {1..40}; do
-        timeout $network_time_limit expect $sftp_test_home/$test_date/sftp-test-get_nolog.exp 1>&2 &
-        expect_pid=$!
-        pid_list="$pid_list $expect_pid"
-    done
-    wait $pid_list
-    unset pid_list
+    if [ $perform_download_20 == yes ]; then
+        run_with_ifspeed_start
+        unset pid_list
+        for cnt in {1..40}; do
+            timeout $network_time_limit expect $sftp_test_home/$test_date/sftp-test-get_nolog.exp 1>&2 &
+            expect_pid=$!
+            pid_list="$pid_list $expect_pid"
+        done
+        wait $pid_list
+        unset pid_list
 
-    run_with_ifspeed_stop
-    echo
-    echo "=== if speed "
-    cat $sftp_test_home/$test_date/$test_file\_$test_name.ifspeed
-    echo
-    echo "=== if speed stats "
-    cat $sftp_test_home/$test_date/$test_file\_$test_name.stats
+        run_with_ifspeed_stop
+        echo
+        echo "=== if speed "
+        cat $sftp_test_home/$test_date/$test_file\_$test_name.ifspeed
+        echo
+        echo "=== if speed stats "
+        cat $sftp_test_home/$test_date/$test_file\_$test_name.stats
+    else
+        echo "Skipped."
+    fi
 
 }
 
@@ -336,24 +377,23 @@ function stop_test_sctivities() {
 
 function build_short_report() {
 
-    __main_header__ > $sftp_test_home/sftp_test_$test_date.report
-    __main_params__ >> $sftp_test_home/sftp_test_$test_date.report
+    __main_header__ >$sftp_test_home/sftp_test_$test_date.report
+    __main_params__ >>$sftp_test_home/sftp_test_$test_date.report
 
-    echo >> $sftp_test_home/sftp_test_$test_date.report
+    echo >>$sftp_test_home/sftp_test_$test_date.report
 
     for stats_path in $(ls -rt $sftp_test_home/$test_date/*.stats); do
         stats_file=$(basename $stats_path)
 
-        echo "=======================================" >> $sftp_test_home/sftp_test_$test_date.report
-        echo "=== $stats_file " >> $sftp_test_home/sftp_test_$test_date.report
-        echo "=======================================" >> $sftp_test_home/sftp_test_$test_date.report
-        cat $stats_path >> $sftp_test_home/sftp_test_$test_date.report
+        echo "=======================================" >>$sftp_test_home/sftp_test_$test_date.report
+        echo "=== $stats_file " >>$sftp_test_home/sftp_test_$test_date.report
+        echo "=======================================" >>$sftp_test_home/sftp_test_$test_date.report
+        cat $stats_path >>$sftp_test_home/sftp_test_$test_date.report
     done
 
-    echo End. >> $sftp_test_home/sftp_test_$test_date.report
+    echo End. >>$sftp_test_home/sftp_test_$test_date.report
 
 }
-
 
 function __main_header__() {
 
@@ -393,6 +433,21 @@ function __main_params__() {
 
 function __main__() {
     donot_ask=$1
+    perform_internet=$2
+    perform_upload=$3
+    perform_download=$4
+    perform_tuned=$5
+    perform_download_10=$6
+    perform_download_20=$7
+    perform_download_40=$8
+
+    : ${perform_internet:=yes}
+    : ${perform_upload:=yes}
+    : ${perform_download:=yes}
+    : ${perform_tuned:=yes}
+    : ${perform_download_10:=yes}
+    : ${perform_download_20:=yes}
+    : ${perform_download_40:=yes}
 
     __main_header__
 
@@ -456,7 +511,7 @@ function __main__() {
             trap stop_test_sctivities INT
 
             # run al tests
-            run_tests
+            run_tests $perform_internet $perform_upload $perform_download $perform_tuned $perform_download_10 $perform_download_20 $perform_download_40
             stop_test_sctivities
 
             #prepre report
