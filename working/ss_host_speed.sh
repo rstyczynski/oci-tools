@@ -32,7 +32,7 @@ function ss_host_speed() {
 }
 
 
-function checkIfspeed_RH6() {
+function checkIfspeed_RH7() {
     delay=$1
     ifname=$2
 
@@ -53,7 +53,7 @@ function checkIfspeed_RH6() {
     echo "$(echo "($stop_RX - $start_RX)/$delay/1024" | bc)"
 }
 
-function checkIfspeed_RH7() {
+function checkIfspeed_RH6() {
     delay=$1
     ifname=$2
 
@@ -73,5 +73,8 @@ function checkIfspeed_RH7() {
     echo -n "RX speed [kB/s]:"
     echo "$(echo "($stop_RX - $start_RX)/$delay/1024" | bc)"
 }
+
+
+while [ 1 ]; do checkIfspeed_RH6 5 eth0; done
 
 
