@@ -145,7 +145,7 @@ expect "sftp>"
 send quit
 EOF
 
-        run_with_ifspeed "timeout $network_time_limit expect $sftp_test_home/$test_date/sftp-test-put.exp" 1>&2
+        run_with_ifspeed "timeout $(echo $network_time_limit*4 | bc) expect $sftp_test_home/$test_date/sftp-test-put.exp" 1>&2
 
         echo
         echo "=== sftp client session "
