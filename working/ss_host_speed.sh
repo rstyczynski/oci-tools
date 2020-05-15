@@ -31,7 +31,7 @@ function ss_host_speed() {
             echo "read buffer:           "; echo "$rmem"
             echo "write buffer:          "; echo "$wmem"
         else
-            echo "$(basename $sslog), $host, $tcp_sessions, $Mbps_total, $Kbps_total, $(echo $mss | tr '\n' ' ')"
+            echo "$(basename $sslog), $host, $tcp_sessions, $Mbps_total, $Kbps_total, $(echo $mss | tr '\n' ' '), $(echo $rtt | tr '\n' ' ', $(echo $rmem | tr '\n' ' ', $(echo $wmem | tr '\n' ' '"
         fi
     fi
     rm -f /tmp/$$.ss.out
