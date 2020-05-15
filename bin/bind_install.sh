@@ -30,7 +30,8 @@ function pre_dns_prepare_config() {
     cat .dns_config >~/.dns/dns.config
     rm -f .dns_config
 
-    #follow ip convention: 251 for first node, 252 for second node
+    # follow ip convention: 251 for first node, 252 for second node
+    # first node name is anything1, second is anything2
     this_vcn_dns_node_no=$(uname -n | rev | cut -d- -f1 | rev)
     case $this_vcn_dns_node_no in
     1)
@@ -273,7 +274,7 @@ function dns_check_this_vcn_setup() {
 function oci_block_dhcp_dns_cfg() {
     sed -i 's/PRESERVE_HOSTINFO=[0-9]/PRESERVE_HOSTINFO=2/g' /etc/oci-hostname.conf
 
-    # below is ok, but necessary. dhcp should do this.
+    # below is ok, but unnecessary. dhcp should do this.
 
     # sed -i "/search /d" /etc/resolv.conf
 
