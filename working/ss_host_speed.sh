@@ -83,4 +83,7 @@ function checkIfspeed_RH6() {
     echo "$(echo "($stop_RX - $start_RX)/$delay/1024" | bc)"
 }
 
-# while [ 1 ]; do checkIfspeed_RH6 5 eth0; done
+while [ 1 ]; do 
+  ss_host_speed 172.16.201.30
+  checkIfspeed_RH6 5 eth0
+done
