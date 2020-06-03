@@ -4,7 +4,7 @@ function ss_host_speed() {
     local sslog=$3
 
     if [ -z "$sslog" ]; then
-        sudo ss -tnoeipm >/tmp/$$.ss.out
+        ss -tnoeipm >/tmp/$$.ss.out
         sslog=/tmp/$$.ss.out
     fi
 
