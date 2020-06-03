@@ -99,6 +99,6 @@ function collect_RH7() {
 
     while [ 1 ]; do 
         ss_host_speed $address
-        checkIfspeed_RH6 5 $ifname
+        checkIfspeed_RH7 5 $ifname
     done
 }
