@@ -26,6 +26,12 @@
 
 function pre_dns_prepare_config() {
 
+    if [ ! -f .dns_config ]; then
+    echo Error. Configuration file does not exist.
+    echo Specify configuration in .dns_config, and repeat.
+    return 1
+    fi
+
     mkdir -p ~/.dns
     cat .dns_config >~/.dns/dns.config
     rm -f .dns_config
@@ -294,16 +300,6 @@ function oci_block_dhcp_dns_cfg() {
 
 
 #
-#
-#
-if [ ! -f .dns_config ]; then
-  echo Error. Configuration file does not exist.
-  echo Specify configuration in .dns_config, and repeat.
-  return 1
-fi
-
-
-#
 # save functions as a script
 #
 
@@ -313,7 +309,7 @@ cat >~/bin/dns_setup.h <<EOF
 #/bin/bash
 declare -A dns_forwards
 EOF
-for fn_name in pre_dns_prepare_config pre_dns_prepare_data ip_cfg_secondary_ip pre_dns_sanity_check pre_dns_install dns_cfg_firewall dns_cfg_bind dns_service_update dns_test_restart dns_check_this_vcn_setup oci_block_dhcp_dns_cfg; do
+for fn_name in pre_dns_prepare_data ip_cfg_secondary_ip pre_dns_sanity_check pre_dns_install dns_cfg_firewall dns_cfg_bind dns_service_update dns_test_restart dns_check_this_vcn_setup oci_block_dhcp_dns_cfg; do
 
     echo "#" >>~/bin/dns_setup.h
     echo "# $fn_name" >>~/bin/dns_setup.h
@@ -346,12 +342,12 @@ fi
 # install & cfg. bind
 #
 
+pre_dns_prepare_config
+
 sudo bash <<EOF
 declare -A dns_forwards
 
 source /home/opc/bin/dns_setup.h
-
-pre_dns_prepare_config
 
 source /home/opc/.dns/dns.config
 
