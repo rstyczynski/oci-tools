@@ -373,9 +373,11 @@ dns_cfg_firewall
 dns_cfg_bind
 dns_service_update
 dns_test_restart
-dns_check_this_vcn_setup
 
 oci_block_dhcp_dns_cfg
+dns_check_this_vcn_setup
+
+
 
 EOF
 
