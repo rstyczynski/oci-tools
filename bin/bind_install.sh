@@ -2,23 +2,23 @@
 # configure
 #
 
-cat >.dns_config <<EOF
-oci_vcn_cidrs="10.106.0.0/16;10.196.0.0/16"
+# cat >.dns_config <<EOF
+# oci_vcn_cidrs="10.106.0.0/16;10.196.0.0/16"
 
-customer_domain_name=alshaya.com
-customer_cidrs="10.0.0.0/8; 172.16.0.0/16;192.0.0.0/16; 192.168.0.0/16"
-customer_dsn_ips="172.16.98.12; 172.16.100.19"
-customer_test_hostnames="aresdevem.alshaya.com aresdevem.alshaya.com aresdevem.alshaya.com aresdevem.alshaya.com hrmsdevdb.alshaya.com hrmsdevdb.alshaya.com hrmsdevdb.alshaya.com indentdb.alshaya.com"
+# customer_domain_name=CUSTOMER.com
+# customer_cidrs="10.0.0.0/8; 172.16.0.0/16;192.0.0.0/16; 192.168.0.0/16"
+# customer_dsn_ips="CUSTOMER_DNS1; CUSTOMER_DNS1"
+# customer_test_hostnames="HOST1.CUSTOMER.com HOST2.CUSTOMER.com"
 
-# uncomment to install inter vcn dns
-#dns_forwards[10.106.6.250]=10.196.3.250:uat-dns-server.netuatdmz.mhauatvcn.oraclevcn.com
-#dns_forwards[10.196.3.250]=10.106.6.250:sit-dns-server.netprojdmzad1.mhaprojectvcn.oraclevcn.com
+# # uncomment to install inter vcn dns
+# #dns_forwards[10.106.6.250]=10.196.3.250:dns-server.subnet.vcn1.oraclevcn.com
+# #dns_forwards[10.196.3.250]=10.106.6.250:dns-server.subnet.vcn2.oraclevcn.com
 
-# this_vcn_dns_ip will be set automatially to *.251 for first node, *.252 for seconds node deducting from node name (suffix *-1 | *-2)
-# if suffix is not in the node name (uname -n) adress of *.250 will be selected.
-this_vcn_dns_mask=255.255.255.0
+# # this_vcn_dns_ip will be set automatially to *.251 for first node, *.252 for seconds node deducting from node name (suffix *-1 | *-2)
+# # if suffix is not in the node name (uname -n) adress of *.250 will be selected.
+# this_vcn_dns_mask=255.255.255.0
 
-EOF
+# EOF
 
 #
 # functions
