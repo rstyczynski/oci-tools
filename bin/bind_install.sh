@@ -50,7 +50,7 @@ function pre_dns_prepare_config() {
         this_vcn_dns_ip=$(hostname -i | cut -d. -f1-3).250
         ;;
     esac
-    echo $this_vcn_dns_ip >>~/.dns/dns.config
+    echo "this_vcn_dns_ip=$this_vcn_dns_ip" >>~/.dns/dns.config
     echo $this_vcn_dns_ip
 }
 
