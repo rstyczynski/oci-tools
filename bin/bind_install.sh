@@ -1,24 +1,4 @@
-#
-# configure
-#
 
-# cat >.dns_config <<EOF
-# oci_vcn_cidrs="10.106.0.0/16;10.196.0.0/16"
-
-# customer_domain_name=CUSTOMER.com
-# customer_cidrs="10.0.0.0/8; 172.16.0.0/16;192.0.0.0/16; 192.168.0.0/16"
-# customer_dsn_ips="CUSTOMER_DNS1; CUSTOMER_DNS1"
-# customer_test_hostnames="HOST1.CUSTOMER.com HOST2.CUSTOMER.com"
-
-# # uncomment to install inter vcn dns
-# #dns_forwards[10.106.6.250]=10.196.3.250:dns-server.subnet.vcn1.oraclevcn.com
-# #dns_forwards[10.196.3.250]=10.106.6.250:dns-server.subnet.vcn2.oraclevcn.com
-
-# # this_vcn_dns_ip will be set automatially to *.251 for first node, *.252 for seconds node deducting from node name (suffix *-1 | *-2)
-# # if suffix is not in the node name (uname -n) adress of *.250 will be selected.
-# this_vcn_dns_mask=255.255.255.0
-
-# EOF
 
 #
 # functions
@@ -27,9 +7,41 @@
 function pre_dns_prepare_config() {
 
     if [ ! -f .dns_config ]; then
-    echo Error. Configuration file does not exist.
-    echo Specify configuration in .dns_config, and repeat.
-    return 1
+        echo "Error. Configuration file does not exist."
+        echo "Specify configuration in .dns_config as presented below, and repeat."
+        echo
+
+cat  <<EOF
+
+cat >.dns_config <<EOF_dns
+
+#
+# define customer side
+#
+
+customer_domain_name=CUSTOMER.com
+customer_cidrs="10.0.0.0/8; 172.16.0.0/16;192.0.0.0/16; 192.168.0.0/16"
+customer_dsn_ips="CUSTOMER_DNS1; CUSTOMER_DNS1"
+customer_test_hostnames="HOST1.CUSTOMER.com HOST2.CUSTOMER.com"
+
+#
+# define OCI side
+#
+
+oci_vcn_cidrs="10.106.0.0/16;10.196.0.0/16"
+this_vcn_dns_mask=255.255.255.0
+
+# DNS servers and test FQD for each OCI region
+dns_forwards[10.106.6.250]=10.196.3.251;10.196.3.252:dns-server.subnet.vcn1.oraclevcn.com
+dns_forwards[10.196.3.250]=10.106.6.251;10.106.6.252:dns-server.subnet.vcn2.oraclevcn.com
+
+# this_vcn_dns_ip will be set automatially to *.251 for first node, *.252 for seconds node deducting from node name (suffix *-1 | *-2)
+# if suffix is not in the node name (uname -n) adress of *.250 will be selected.
+
+EOF_dns
+EOF
+
+        return 1
     fi
 
     mkdir -p ~/.dns
@@ -51,7 +63,7 @@ function pre_dns_prepare_config() {
         ;;
     esac
     echo "this_vcn_dns_ip=$this_vcn_dns_ip" >>~/.dns/dns.config
-    echo $this_vcn_dns_ip
+    echo "DNS configuration written to ~/.dns/dns.config"
 }
 
 #
@@ -60,13 +72,14 @@ function pre_dns_prepare_config() {
 function pre_dns_prepare_data() {
     echo "This VCN IP:           $this_vcn_dns_ip"
 
-    if [ ! -z "${dns_forwards[$this_vcn_dns_ip]}" ]; then
+    region_lookup=$(echo $this_vcn_dns_ip | cut -d. -f1-3).250
+    if [ ! -z "${dns_forwards[$region_lookup]} " ]; then
 
         dns_install_type=two_vcn
 
-        other_vcn_forward_via=$(echo ${dns_forwards[$this_vcn_dns_ip]} | cut -d: -f1)
-        other_vcn_test_hostname=$(echo ${dns_forwards[$this_vcn_dns_ip]} | cut -d: -f2)
-        other_vcn_name=$(echo ${dns_forwards[$this_vcn_dns_ip]} | cut -d: -f2 | rev | cut -f1-3 -d. | rev)
+        other_vcn_forward_via=$(echo ${dns_forwards[$region_lookup]} | cut -d: -f1)
+        other_vcn_test_hostname=$(echo ${dns_forwards[$region_lookup]} | cut -d: -f2)
+        other_vcn_name=$(echo ${dns_forwards[$region_lookup]} | cut -d: -f2 | rev | cut -f1-3 -d. | rev)
 
         echo "Other VCN domain name: $other_vcn_name"
         echo "Other VCN DNS:         $other_vcn_forward_via"
@@ -348,7 +361,6 @@ sudo bash <<EOF
 declare -A dns_forwards
 
 source /home/opc/bin/dns_setup.h
-
 source /home/opc/.dns/dns.config
 
 pre_dns_prepare_data
