@@ -35,8 +35,9 @@ this_vcn_dns_mask=255.255.255.0
 dns_forwards[10.106.6.250]=10.196.3.251;10.196.3.252:dns-server.subnet.vcn1.oraclevcn.com
 dns_forwards[10.196.3.250]=10.106.6.251;10.106.6.252:dns-server.subnet.vcn2.oraclevcn.com
 
-# this_vcn_dns_ip will be set automatially to *.251 for first node, *.252 for seconds node deducting from node name (suffix *-1 | *-2)
-# if suffix is not in the node name (uname -n) adress of *.250 will be selected.
+# this_vcn_dns_ip will be set automatially to *.251 for first node, *.252 for seconds node 
+# deducting from node name (suffix *-1 | *-2). If suffix is not in the node name (uname -n) 
+# adress of *.250 will be selected.
 
 EOF_dns
 EOF
@@ -46,7 +47,6 @@ EOF
 
     mkdir -p ~/.dns
     cat .dns_config >~/.dns/dns.config
-    rm -f .dns_config
 
     # follow ip convention: 251 for first node, 252 for second node
     # first node name is anything1, second is anything2
@@ -378,4 +378,5 @@ dns_check_this_vcn_setup
 oci_block_dhcp_dns_cfg
 
 EOF
+
 # Based on: https://linuxconfig.org/how-to-setup-a-named-dns-service-on-redhat-7-linux-server
