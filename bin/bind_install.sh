@@ -292,9 +292,21 @@ function oci_block_dhcp_dns_cfg() {
     echo "nameserver $this_vcn_dns_ip" >>/etc/resolv.conf
 }
 
+
+#
+#
+#
+if [ ! -f .dns_config ]; then
+  echo Error. Configuration file does not exist.
+  echo Specify configuration in .dns_config, and repeat.
+  retun 1
+fi
+
+
 #
 # save functions as a script
 #
+
 mkdir -p ~/bin
 
 cat >~/bin/dns_setup.h <<EOF
