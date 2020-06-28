@@ -299,7 +299,7 @@ function oci_block_dhcp_dns_cfg() {
 if [ ! -f .dns_config ]; then
   echo Error. Configuration file does not exist.
   echo Specify configuration in .dns_config, and repeat.
-  retun 1
+  return 1
 fi
 
 
