@@ -41,10 +41,6 @@ function schedule_diag_sync() {
     cron_section_stop="# STOP - diagnostics source - $diagname"
 
     echo $cron_section_start >> diag_sync.cron
-    cat >> diag_sync.cron <<EOF
-#
-todayiso8601=$(date -I)
-EOF
 
     for log in $logs; do
         echo "##########################################"
