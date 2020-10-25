@@ -7,13 +7,13 @@ diagnose:
         type:   log
         ttl:    15
         expose:   
-            cycle: 1 * * * *
+            cycle: "* * * * *"
             age:   1
             depth: 1
             dir:   $env_files/diagnose/$env/wls/$domain_home/servers/$wls_server/logs/$todayiso8601
             access: +r
             ttl:   45
         archive: 
-            cycle: 1 * * * *
+            cycle: "1 * * * *"
             dir:   oci_os://$bucket
             ttl:   90
