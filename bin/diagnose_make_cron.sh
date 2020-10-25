@@ -115,7 +115,7 @@ EOF
 EOF
 if [ "$archive_cycle" != none ]; then
     cat >> diag_sync.cron <<EOF
-1 0 * * * find -type f -mtime +$ttl $dir > $backup_dir/$(hostname)/$diagname-$log.archive; tar -czf $backup_dir/$(hostname)/$diagname-$log-$(date -I).tar.gz -T $backup_dir/$(hostname)/$diagname-$log.archive; test $? -eq 0 && xargs rm < $backup_dir/$(hostname)/$diagname-$log.archive
+1 0 * * * find  $dir -type f -mtime +$ttl | egrep '[0-9]$' > $backup_dir/$(hostname)/$diagname-$log.archive; tar -czf $backup_dir/$(hostname)/$diagname-$log-$(date -I).tar.gz -T $backup_dir/$(hostname)/$diagname-$log.archive; test $? -eq 0 && xargs rm < $backup_dir/$(hostname)/$diagname-$log.archive 
 EOF
 else
     cat >> diag_sync.cron <<EOF
