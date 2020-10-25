@@ -6,6 +6,7 @@ diagnose:
         dir:    $domain_home/servers/$wls_server/logs
         type:   log
         ttl:    2
+        ttl_filter: "[0-9][0-9]+$"
         expose:   
             cycle: "* * * * *"
             age:   1

@@ -52,6 +52,8 @@ function schedule_diag_sync() {
         : ${type:=log}
         ttl=$(cat $diag_cfg | y2j | jq -r ".diagnose.$log.ttl" | rn)
         : ${ttl:=15}
+        ttl_filter=$(cat $diag_cfg | y2j | jq -r ".diagnose.$log.ttl_filter" | rn)
+        : ${ttl_filter:='.'}
 
         expose_cycle=$(cat $diag_cfg | y2j | jq -r ".diagnose.$log.expose.cycle" | rn)
         : ${expose_cycle:="* * * * *"}
@@ -111,7 +113,7 @@ EOF
 EOF
 if [ "$archive_cycle" != none ]; then
     cat >> diag_sync.cron <<EOF
-1 0 * * * find  $dir -type f -mtime +$ttl | egrep '[0-9]$' > $backup_dir/$(hostname)/$diagname-$log-\$(date -I).archive; tar -czf $backup_dir/$(hostname)/$diagname-$log-\$(date -I).tar.gz -T $backup_dir/$(hostname)/$diagname-$log-\$(date -I).archive; test $? -eq 0 && xargs rm < $backup_dir/$(hostname)/$diagname-$log-\$(date -I).archive 
+1 0 * * * find  $dir -type f -mtime +$ttl | egrep "$ttl_filter" > $backup_dir/$(hostname)/$diagname-$log-\$(date -I).archive; tar -czf $backup_dir/$(hostname)/$diagname-$log-\$(date -I).tar.gz -T $backup_dir/$(hostname)/$diagname-$log-\$(date -I).archive; test $? -eq 0 && xargs rm < $backup_dir/$(hostname)/$diagname-$log-\$(date -I).archive 
 EOF
 else
     cat >> diag_sync.cron <<EOF
