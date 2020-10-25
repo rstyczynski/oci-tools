@@ -83,10 +83,10 @@ EOF
 
         case $type in
         log)
-            extra_="--append"
+            rsync_extra_args="--append"
             ;;
         *)
-            unset extra_
+            unset rsync_extra_args
             ;;
         esac
 
