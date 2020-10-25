@@ -1,0 +1,34 @@
+---
+backup:
+    dir: $env_files/backup
+diagnose:
+    log:
+        dir:    ~/x-ray/diagnose
+        type:   log
+        ttl:    15
+        expose:   
+            cycle: "* * * * *"
+            age:   1
+            depth: 1
+            dir:   $env_files/x-ray/$env/$hostname/diagnose
+            access: +r
+            ttl:   45
+        archive: 
+            cycle: "1 * * * *"
+            dir:   oci_os://$bucket
+            ttl:   90
+    obd:
+        dir:    ~/x-ray/watch
+        type:   binary
+        ttl:    15
+        expose:   
+            cycle: "* * * * *"
+            age:   1
+            depth: 1
+            dir:   $env_files/x-ray/$env/$hostname/watch
+            access: +r
+            ttl:   45
+        archive: 
+            cycle: "1 * * * *"
+            dir:   oci_os://$bucket
+            ttl:   90
