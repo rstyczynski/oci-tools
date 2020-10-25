@@ -10,7 +10,22 @@ diagnose:
             cycle: "*/5 * * * *"
             age:   1
             depth: 1
-            dir:   $env_files/x-ray/$env_files/x-ray/$env/$hostname/diagnose
+            dir:   $env_files/x-ray/$env/$hostname/diagnose
+            access: +r
+            ttl:   45
+        archive: 
+            cycle: "1 * * * *"
+            dir:   oci_os://$bucket
+            ttl:   90
+    heap:
+        dir:    ~/x-ray/diagnose/heap
+        type:   binary
+        ttl:    2
+        expose:   
+            cycle: "*/5 * * * *"
+            age:   1
+            depth: 1
+            dir:   $env_files/x-ray/$env/$hostname/diagnose
             access: +r
             ttl:   45
         archive: 
