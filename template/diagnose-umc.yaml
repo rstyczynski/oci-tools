@@ -17,6 +17,21 @@ diagnose:
             cycle: "1 * * * *"
             dir:   oci_os://$bucket
             ttl:   90
+    res:
+        dir:    ~/x-ray/diagnose/res
+        type:   log
+        ttl:    2
+        expose:   
+            cycle: "* * * * *"
+            age:   1
+            depth: 1
+            dir:   $env_files/x-ray/$env/$hostname/diagnose/res
+            access: +r
+            ttl:   45
+        archive: 
+            cycle: "1 * * * *"
+            dir:   oci_os://$bucket
+            ttl:   90
     wls:
         dir:    ~/x-ray/diagnose/wls
         type:   log
@@ -35,7 +50,7 @@ diagnose:
     obd:
         dir:    ~/x-ray/watch
         type:   binary
-        ttl:    15
+        ttl:    2
         expose:   
             cycle: "* * * * *"
             age:   1
