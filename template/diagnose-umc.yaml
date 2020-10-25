@@ -5,7 +5,7 @@ diagnose:
     log:
         dir:    ~/x-ray/diagnose
         type:   log
-        ttl:    15
+        ttl:    2
         expose:   
             cycle: "* * * * *"
             age:   1

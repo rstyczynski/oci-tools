@@ -2,15 +2,15 @@
 backup:
     dir: $env_files/backup
 diagnose:
-    logs:
-        dir:    $domain_home/servers/$wls_server/logs
-        type:   log
+    jfr:
+        dir:    ~/x-ray/diagnose/jfr
+        type:   binary
         ttl:    2
         expose:   
-            cycle: "* * * * *"
+            cycle: "*/5 * * * *"
             age:   1
             depth: 1
-            dir:   $env_files/x-ray/$env/wls/$domain_home/servers/$wls_server/logs/$todayiso8601
+            dir:   $env_files/x-ray/$env_files/x-ray/$env/$hostname/diagnose
             access: +r
             ttl:   45
         archive: 
