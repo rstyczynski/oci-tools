@@ -130,7 +130,7 @@ vm.min_free_kbytes=$mem_min_free_kbytes_requested_kB
 vm.dirty_ratio=$vm_dirty_ratio
 vm.dirty_background_ratio=$vm_dirty_background_ratio
 
-# minimise swap activoty
+# minimise swap activity
 vm.swappiness=$vm_swappiness
 EOF
 
