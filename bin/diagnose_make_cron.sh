@@ -94,6 +94,7 @@ EOF
         #oci_os_bucket=$(cat $diag_cfg | y2j | jq -r ".diagnose.$log.archive.dir" | sed 's|oci_os://||')
 
         # keep diagnose.yaml next to archive file to make archive process be aware of config 
+        mkdir -p $backup_dir/$(hostname)
         cat $diag_cfg ? $backup_dir/$(hostname)/$(basename $diag_cfg)
 
         echo "$log, $dir, $type, $expose_dir, $expose_cycle, $expose_ttl"
