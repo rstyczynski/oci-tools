@@ -10,7 +10,7 @@ diagnose:
             cycle: "*/5 * * * *"
             age:   1
             depth: 1
-            dir:   $env_files/x-ray/$env/$hostname/diagnose
+            dir:   $env_files/x-ray/$env/$hostname/diagnose/jfr
             access: +r
             ttl:   45
         archive: 
@@ -25,7 +25,7 @@ diagnose:
             cycle: "*/5 * * * *"
             age:   1
             depth: 1
-            dir:   $env_files/x-ray/$env/$hostname/diagnose
+            dir:   $env_files/x-ray/$env/$hostname/diagnose/heap
             access: +r
             ttl:   45
         archive: 

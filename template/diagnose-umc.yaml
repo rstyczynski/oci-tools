@@ -2,15 +2,30 @@
 backup:
     dir: $env_files/backup
 diagnose:
-    log:
-        dir:    ~/x-ray/diagnose
+    os:
+        dir:    ~/x-ray/diagnose/umc
         type:   log
         ttl:    2
         expose:   
             cycle: "* * * * *"
             age:   1
             depth: 1
-            dir:   $env_files/x-ray/$env/$hostname/diagnose
+            dir:   $env_files/x-ray/$env/$hostname/diagnose/umc
+            access: +r
+            ttl:   45
+        archive: 
+            cycle: "1 * * * *"
+            dir:   oci_os://$bucket
+            ttl:   90
+    wls:
+        dir:    ~/x-ray/diagnose/wls
+        type:   log
+        ttl:    2
+        expose:   
+            cycle: "* * * * *"
+            age:   1
+            depth: 1
+            dir:   $env_files/x-ray/$env/$hostname/diagnose/wls
             access: +r
             ttl:   45
         archive: 
