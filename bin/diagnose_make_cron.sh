@@ -106,7 +106,7 @@ EOF
 ##############
 
 # rsync
-$expose_cycle mkdir -p $expose_dir; rsync -t --recursive $rsync_extra_args $dir $expose_dir; chmod --recursive $expose_access $expose_dir/*
+$expose_cycle mkdir -p $expose_dir; rsync -t --recursive $rsync_extra_args $dir/* $expose_dir; chmod --recursive $expose_access $expose_dir/*
 
 EOF
 

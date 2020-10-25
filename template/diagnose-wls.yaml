@@ -3,7 +3,7 @@ backup:
     dir: $env_files/backup
 diagnose:
     logs:
-        dir:    $domain_home/servers/$wls_server/logs/*
+        dir:    $domain_home/servers/$wls_server/logs
         type:   log
         ttl:    15
         expose:   
