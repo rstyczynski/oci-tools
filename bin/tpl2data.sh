@@ -1,4 +1,4 @@
-#!/usr/bash
+#!/bin/bash
 
 function tpl2data() {
     template=$1
