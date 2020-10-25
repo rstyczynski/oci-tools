@@ -83,10 +83,10 @@ EOF
 
         case $type in
         log)
-            rsync_args="--append"
+            extra_="--append"
             ;;
         *)
-            unset rsync_args
+            unset extra_
             ;;
         esac
 
@@ -106,7 +106,7 @@ EOF
 ##############
 
 # rsync
-$expose_cycle mkdir -p $expose_dir; rsync $rsync_args $dir $expose_dir; chmod -r $expose_access $expose_dir/*
+$expose_cycle mkdir -p $expose_dir; rsync -t $rsync_extra_args $dir $expose_dir; chmod -r $expose_access $expose_dir/*
 
 EOF
 
