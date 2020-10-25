@@ -20,7 +20,6 @@ function schedule_diag_sync() {
         diagname=general
     fi
 
-
     backup_dir=$(cat $diag_cfg | y2j | jq -r ".backup.dir")
 
     logs=$(cat $diag_cfg | y2j | jq -r ".diagnose | keys[]")
@@ -46,7 +45,6 @@ function schedule_diag_sync() {
 #
 todayiso8601=$(date -I)
 EOF
-
 
     for log in $logs; do
         echo "##########################################"
@@ -134,4 +132,4 @@ fi
 }
 
 
-schedule_diag_sync diagnose
+schedule_diag_sync $@
