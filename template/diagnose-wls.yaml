@@ -1,6 +1,6 @@
 ---
 backup:
-    dir: $central_log/backup
+    dir: $shared/backup
 diagnose:
     logs:
         dir:    $domain_home/servers/$wls_server/logs/*
@@ -10,7 +10,7 @@ diagnose:
             cycle: 1 * * * *
             age:   1
             depth: 1
-            dir:   $central_log/diagnose/$env/wls/$domain_home/servers/$wls_server/logs/$(date -I)
+            dir:   $shared/diagnose/$env/wls/$domain_home/servers/$wls_server/logs/$(date -I)
             access: +r
             ttl:   45
         archive: 
