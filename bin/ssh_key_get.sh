@@ -21,8 +21,6 @@ function ssh_key_get() {
     fi
 
     secret_name=$env\_$ssh_account
-    content_payload=$(base64 --wrap 0 $ssh_key)
-    content_name="ssh_key"
 
     # discover
     vsid=$(oci vault secret list --compartment-id $compartment --raw-output --query "data[?\"secret-name\" == '$secret_name'].id" | jq -r .[0])
