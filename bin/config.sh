@@ -9,7 +9,7 @@ function getcfg() {
         return 1
     fi
 
-    value_row=$(cat ~/.$which/config | grep "^$what=")
+    value_row=$(cat ~/.$which/config | grep "^$what=" | tail -1 | grep "^$what=" )
     if [ $? -eq 0 ]; then
         echo $value_row | cut -d= -f2
     fi
@@ -50,7 +50,7 @@ function getsetcfg() {
         return 1
     fi
 
-    value_row=$(cat ~/.$which/config 2>/dev/null | grep "^$what=" | tail -1)
+    value_row=$(cat ~/.$which/config 2>/dev/null | grep "^$what=" | tail -1 | grep "^$what=" )
     if [ $? -eq 0 ]; then
         echo $value_row | cut -d= -f2
     else
