@@ -25,7 +25,7 @@ diagnose:
             cycle: "*/5 * * * *"
             age:   1
             depth: 1
-            dir:   $env_files/x-ray/$env/$hostname/diag/wls/heap
+            dir:   $env_files/x-ray/$env/$component/diag/wls/heap
             access: +r
             ttl:   45
         archive: 
