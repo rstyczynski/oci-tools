@@ -31,10 +31,12 @@ function setcfg() {
     mkdir -p ~/.$which
     if [ -f ~/.$which/config ]; then
         #echo adding config file...
+        echo "# Added by $USER($SUDO_USER) on $(date -I)" >> ~/.$which/config 
         echo "$what=$new_value" >> ~/.$which/config 
     else
         #echo creating config file...
-        echo "$what=$new_value" > ~/.$which/config 
+        echo "# Added by $USER($SUDO_USER) on $(date -I)" > ~/.$which/config 
+        echo "$what=$new_value" >> ~/.$which/config 
     fi
 }
 
@@ -48,7 +50,7 @@ function getsetcfg() {
         return 1
     fi
 
-    value_row=$(cat ~/.$which/config 2>/dev/null | grep "^$what=" )
+    value_row=$(cat ~/.$which/config 2>/dev/null | grep "^$what=" | tail -1)
     if [ $? -eq 0 ]; then
         echo $value_row | cut -d= -f2
     else
