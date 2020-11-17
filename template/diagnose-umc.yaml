@@ -63,7 +63,7 @@ diagnose:
             dir:   oci_os://$bucket
             ttl:   90
     watch_net:
-        dir:    ~/x-ray/watch/os
+        dir:    ~/x-ray/watch/net
         type:   binary
         ttl:    2
         expose:   
