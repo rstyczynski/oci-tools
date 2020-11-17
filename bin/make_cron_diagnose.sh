@@ -12,8 +12,11 @@ function y2j() {
 
 function schedule_diag_sync() {
     diag_cfg=$1
+    cron_action=$2
 
     : ${diag_cfg:=~/.x-ray/diagnose.yaml}
+    : ${cron_action:=create}
+
 
     diagname=$(basename $diag_cfg | cut -f1 -d. | cut -f2-999 -d'-')
     if [ "$diagname" == diagnose ]; then
@@ -30,15 +33,22 @@ function schedule_diag_sync() {
         exit 1
     fi
 
+    cron_section_start="# START - diagnostics source - $diagname"
+    cron_section_stop="# STOP - diagnostics source - $diagname"
+
+    if [ "$cron_action" == remove ]; then
+
+        (crontab -l 2>/dev/null | sed "/$cron_section_start/,/$cron_section_stop/d") | crontab -
+
+        exit 0
+    fi
+
     #
     # prepare cron
     #
     echo "####################################"
     echo "###Preparing cron for $diagname"
     echo "####################################"
-
-    cron_section_start="# START - diagnostics source - $diagname"
-    cron_section_stop="# STOP - diagnostics source - $diagname"
 
     echo $cron_section_start >> diag_sync.cron
 
