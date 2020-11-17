@@ -44,12 +44,12 @@ function setcfg() {
     Y)
         if [ -f /etc/$which.config ]; then
             #echo adding config file...
-            echo "# Added by $USER($SUDO_USER) on $(date -I)" >> /etc/$which.config
-            echo "$what=$new_value" >> /etc/$which.config
+            echo "# Added by $USER($SUDO_USER) on $(date -I)" | sudo tee -a /etc/$which.config
+            echo "$what=$new_value" | sudo tee -a /etc/$which.config
         else
             #echo creating config file...
-            echo "# Added by $USER($SUDO_USER) on $(date -I)" > /etc/$which.config
-            echo "$what=$new_value" >> /etc/$which.config
+            echo "# Added by $USER($SUDO_USER) on $(date -I)" | sudo tee /etc/$which.config
+            echo "$what=$new_value" | sudo tee -a /etc/$which.config
         fi
         ;;
     *)
