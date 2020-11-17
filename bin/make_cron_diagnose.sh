@@ -59,10 +59,14 @@ function schedule_diag_sync() {
         : ${expose_cycle:="* * * * *"}
         expose_dir=$(cat $diag_cfg | y2j | jq -r ".diagnose.$log.expose.dir" | rn)
 
+        # expose only younger than expose_age. Prevents syncing old files.
         expose_age=$(cat $diag_cfg | y2j | jq -r ".diagnose.$log.expose.age" | rn)
         : ${expose_age:=1}
+
+        # exspose only files from expose_depth directory depth. Prevents syncing whoe directory structure
         expose_depth=$(cat $diag_cfg | y2j | jq -r ".diagnose.$log.expose.depth" | rn)
         : ${expose_depth:=1}
+
         expose_ttl=$(cat $diag_cfg | y2j | jq -r ".diagnose.$log.expose.ttl" | rn)
         : ${expose_ttl:=45}
         expose_access=$(cat $diag_cfg | y2j | jq -r ".diagnose.$log.expose.access" | rn)
