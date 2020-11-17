@@ -3,59 +3,89 @@ backup:
     dir: $env_files/backup
 diagnose:
     os:
-        dir:    ~/x-ray/diagnose/umc
+        dir:    ~/x-ray/diag/os/log
         type:   log
         ttl:    2
         expose:   
             cycle: "* * * * *"
             age:   1
             depth: 1
-            dir:   $env_files/x-ray/$env/$hostname/diagnose/umc
+            dir:   $env_files/x-ray/$env/$component/diag/hosts/$hostname/os
             access: +r
             ttl:   45
         archive: 
             cycle: "1 * * * *"
             dir:   oci_os://$bucket
             ttl:   90
-    res:
-        dir:    ~/x-ray/diagnose/res
+    net:
+        dir:    ~/x-ray/diag/net/log
         type:   log
         ttl:    2
         expose:   
             cycle: "* * * * *"
             age:   1
             depth: 1
-            dir:   $env_files/x-ray/$env/$hostname/diagnose/res
+            dir:   $env_files/x-ray/$env/$component/diag/hosts/$hostname/net
             access: +r
             ttl:   45
         archive: 
             cycle: "1 * * * *"
             dir:   oci_os://$bucket
             ttl:   90
-    wls:
-        dir:    ~/x-ray/diagnose/wls
+    dms:
+        dir:    ~/x-ray/diag/wls/dms
         type:   log
         ttl:    2
         expose:   
             cycle: "* * * * *"
             age:   1
             depth: 1
-            dir:   $env_files/x-ray/$env/$hostname/diagnose/wls
+            dir:   $env_files/x-ray/$env/$component/diag/wls/dms
             access: +r
             ttl:   45
         archive: 
             cycle: "1 * * * *"
             dir:   oci_os://$bucket
             ttl:   90
-    obd:
-        dir:    ~/x-ray/watch
+    watch_os:
+        dir:    ~/x-ray/watch/os
         type:   binary
         ttl:    2
         expose:   
             cycle: "* * * * *"
             age:   1
             depth: 1
-            dir:   $env_files/x-ray/$env/$hostname/watch
+            dir:   $env_files/x-ray/$env/$component/watch/hosts/$hostname/os
+            access: +r
+            ttl:   45
+        archive: 
+            cycle: "1 * * * *"
+            dir:   oci_os://$bucket
+            ttl:   90
+    watch_net:
+        dir:    ~/x-ray/watch/os
+        type:   binary
+        ttl:    2
+        expose:   
+            cycle: "* * * * *"
+            age:   1
+            depth: 1
+            dir:   $env_files/x-ray/$env/$component/watch/hosts/$hostname/net
+            access: +r
+            ttl:   45
+        archive: 
+            cycle: "1 * * * *"
+            dir:   oci_os://$bucket
+            ttl:   90
+    watch_wls:
+        dir:    ~/x-ray/watch/wls
+        type:   binary
+        ttl:    2
+        expose:   
+            cycle: "* * * * *"
+            age:   1
+            depth: 1
+            dir:   $env_files/x-ray/$env/$component/watch/wls
             access: +r
             ttl:   45
         archive: 

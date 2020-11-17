@@ -3,14 +3,14 @@ backup:
     dir: $env_files/backup
 diagnose:
     jfr:
-        dir:    ~/x-ray/diagnose/jfr
+        dir:    ~/x-ray/diag/wls/jfr
         type:   binary
         ttl:    2
         expose:   
-            cycle: "*/5 * * * *"
+            cycle: "*/15 * * * *"
             age:   1
             depth: 1
-            dir:   $env_files/x-ray/$env/$hostname/diagnose/jfr
+            dir:   $env_files/x-ray/$env/$component/diag/wls/jfr
             access: +r
             ttl:   45
         archive: 
@@ -18,7 +18,7 @@ diagnose:
             dir:   oci_os://$bucket
             ttl:   90
     heap:
-        dir:    ~/x-ray/diagnose/heap
+        dir:    ~/x-ray/diag/wls/heap
         type:   binary
         ttl:    2
         expose:   

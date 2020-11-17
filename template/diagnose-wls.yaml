@@ -11,7 +11,7 @@ diagnose:
             cycle: "* * * * *"
             age:   1
             depth: 1
-            dir:   $env_files/x-ray/$env/$domain_name/logs/$wls_server/$todayiso8601
+            dir:   $env_files/x-ray/$env/$component/diag/wls/log/$domain_name/$wls_server/$todayiso8601
             access: +r
             ttl:   45
         archive: 
