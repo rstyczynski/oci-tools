@@ -47,6 +47,21 @@ diagnose:
             cycle: "1 * * * *"
             dir:   oci_os://$bucket
             ttl:   90
+    dms_soa:
+        dir:    ~/x-ray/diag/wls/soa/dms
+        type:   log
+        ttl:    2
+        expose:   
+            cycle: "* * * * *"
+            age:   1
+            depth: 1
+            dir:   $env_files/x-ray/$env/$component/diag/wls/soa/dms
+            access: +r
+            ttl:   45
+        archive: 
+            cycle: "1 * * * *"
+            dir:   oci_os://$bucket
+            ttl:   90
     watch_os:
         dir:    ~/x-ray/watch/os
         type:   binary
