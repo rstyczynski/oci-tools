@@ -21,7 +21,7 @@ function make_jfr_cron() {
 
    cat >jfr.cron <<EOF
 $cron_section_start
-*/15 * * * * ~/wls-tools/bin/wls_jfr.sh $wls_server stop; sleep 1; ~/wls-tools/bin/wls_jfr.sh $wls_server start 900 dump_location $jfr_location
+*/15 * * * * ~/wls-tools/bin/wls_jfr.sh $wls_server stop; sleep 1; ~/wls-tools/bin/wls_jfr.sh $wls_server start 900s dump_location $jfr_location
 $cron_section_stop
 EOF
 
