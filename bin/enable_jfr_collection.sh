@@ -1,7 +1,7 @@
 #!/bin/bash
 
 function getmwlogs() {
-    env_files=$(cat /etc/x-ray.config | tail -1 2>/dev/null | grep env_files | cut -f2 -d=)
+    env_files=$(cat /etc/x-ray.config 2>/dev/null | grep env_files | tail -1 | cut -f2 -d=)
     test -z "$env_files" && read -p "Enter location of mwlogs (defaults to /mwlogs):" env_files
     test -z "$env_files" && env_files=/mwlogs
 
