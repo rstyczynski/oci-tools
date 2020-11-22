@@ -36,7 +36,7 @@ function setcfg() {
         read -p "Enter value for $what:" new_value
     fi
 
-    read -p "Set in global /etc/$which.config? [Yn]" global
+    read -t 5 -p "Set in global /etc/$which.config? [Yn]" global
     : ${global:=Y}
     global=$(echo $global | tr [a-z] [A-Z])
 
