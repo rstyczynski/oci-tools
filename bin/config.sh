@@ -26,6 +26,7 @@ function setcfg() {
     which=$1
     what=$2
     new_value=$3
+    force=$4
 
     if [ $# -lt 2 ]; then
         echo Nothing to do....
@@ -36,7 +37,9 @@ function setcfg() {
         read -p "Enter value for $what:" new_value
     fi
 
-    read -t 5 -p "Set in global /etc/$which.config? [Yn]" global
+    if [ $force != force ]; then
+        read -t 5 -p "Set in global /etc/$which.config? [Yn]" global
+    fi
     : ${global:=Y}
     global=$(echo $global | tr [a-z] [A-Z])
 
