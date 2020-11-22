@@ -43,9 +43,14 @@ function setcfg() {
     case $global in
     Y)
         if [ -f /etc/$which.config ]; then
-            #echo adding config file...
-            echo "# Added by $USER($SUDO_USER) on $(date -I)" | sudo tee -a /etc/$which.config
-            echo "$what=$new_value" | sudo tee -a /etc/$which.config
+            grep "$what=$new_value"  /etc/$which.config >/dev/null
+            if [ $? -eq 0 ]; then
+                echo "Entry is already in place."
+            else
+                #echo adding config file...
+                echo "# Added by $USER($SUDO_USER) on $(date -I)" | sudo tee -a /etc/$which.config
+                echo "$what=$new_value" | sudo tee -a /etc/$which.config
+            fi
         else
             #echo creating config file...
             echo "# Added by $USER($SUDO_USER) on $(date -I)" | sudo tee /etc/$which.config
@@ -55,9 +60,14 @@ function setcfg() {
     *)
         mkdir -p ~/.$which
         if [ -f ~/.$which/config ]; then
-            #echo adding config file...
-            echo "# Added by $USER($SUDO_USER) on $(date -I)" >> ~/.$which/config 
-            echo "$what=$new_value" >> ~/.$which/config 
+            grep "$what=$new_value" ~/.$which/config  >/dev/null
+            if [ $? -eq 0 ]; then
+                echo "Entry is already in place."
+            else
+                #echo adding config file...
+                echo "# Added by $USER($SUDO_USER) on $(date -I)" >> ~/.$which/config 
+                echo "$what=$new_value" >> ~/.$which/config 
+            fi
         else
             #echo creating config file...
             echo "# Added by $USER($SUDO_USER) on $(date -I)" > ~/.$which/config 
