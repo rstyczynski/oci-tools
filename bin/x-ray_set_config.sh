@@ -13,5 +13,5 @@ source ~/oci-tools/bin/config.sh
 setcfg x-ray env_files $env_files force
 setcfg x-ray env $env force
 setcfg x-ray component $component force
-setcfg x-ray diagnostics $diagnostics force
+setcfg x-ray bucket $bucket force
 
