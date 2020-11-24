@@ -7,7 +7,7 @@ diagnose:
         type:   binary
         ttl:    2
         expose:   
-            cycle: "*/15 * * * *"
+            cycle: "*/16 * * * *"
             age:   1
             depth: 1
             dir:   $env_files/x-ray/$env/$component/diag/wls/jfr
