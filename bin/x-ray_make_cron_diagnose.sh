@@ -93,15 +93,6 @@ function schedule_diag_sync() {
         archive_ttl=$(cat $diag_cfg | y2j | jq -r ".diagnose.$log.archive.ttl" | rn)
         : ${archive_ttl:=90}
 
-        case $type in
-        log)
-            rsync_extra_args="--append"
-            ;;
-        *)
-            unset rsync_extra_args
-            ;;
-        esac
-
         # not required here
         #oci_os_bucket=$(cat $diag_cfg | y2j | jq -r ".diagnose.$log.archive.dir" | sed 's|oci_os://||')
 
@@ -111,27 +102,61 @@ function schedule_diag_sync() {
 
         #echo "$log, $dir, $type, $expose_dir, $expose_cycle, $expose_ttl"
 
-        cat >> diag_sync.cron <<EOF
+
+        appendonly=no
+        case $type in
+            binary)
+                ;;
+            logrotate)
+                ;;
+            logappend)
+                appendonly=yes
+                ;;
+            *)
+                ;;
+        esac
+
+
+        case $appendonly in
+        no)
+            cat >> diag_sync.cron <<EOF
 
 ##############
-# $log
+# regular rsync: $log
 ##############
 
 # rsync
-$expose_cycle mkdir -p $expose_dir; rsync -t --recursive $rsync_extra_args $dir/* $expose_dir; chmod --recursive $expose_access $expose_dir/*
+$expose_cycle mkdir -p $expose_dir; rsync  -t -h --stats --progress --chmod=Fu=r,Fgo=r,Dgo=rx,Du=rwx --files-from=<(cd ~/$dir; find -maxdepth $expose_depth -mtime -$expose_age -type f) $dir $expose_dir; find $expose_dir/* -type f | xargs sudo chown  --recursive nobody:nobody 
 
 EOF
+            ;;
+
+        yes)
+            cat >> diag_sync.cron <<EOF
+
+##############
+# append only rsync: $log
+##############
+
+# rsync
+$expose_cycle mkdir -p $expose_dir; rsync  -t -h --stats --progress --append --chmod=Fu=rw,Fgo=r,Dgo=rx --files-from=<(cd ~/$dir; find -maxdepth $expose_depth -mtime -$expose_age -type f) $dir $expose_dir; find $expose_dir/* -type f | xargs sudo chgrp  --recursive nobody 
+
+EOF
+            ;;
+        esac
+
 
     cat >> diag_sync.cron <<EOF
 # backup, and delete old files
 EOF
+
 if [ "$archive_cycle" != none ]; then
     cat >> diag_sync.cron <<EOF
 1 0 * * * find  $dir -type f -mtime +$ttl | egrep "$ttl_filter" > $backup_dir/$(hostname)/$diagname-$log-\$(date -I).archive; tar -czf $backup_dir/$(hostname)/$diagname-$log-\$(date -I).tar.gz -T $backup_dir/$(hostname)/$diagname-$log-\$(date -I).archive; test $? -eq 0 && xargs rm < $backup_dir/$(hostname)/$diagname-$log-\$(date -I).archive 
 EOF
 else
     cat >> diag_sync.cron <<EOF
-# blocked by configuration
+# archive skipped by configuration
 
 EOF
 fi

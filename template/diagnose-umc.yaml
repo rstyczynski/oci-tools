@@ -9,7 +9,7 @@ diagnose:
         expose:   
             cycle: "* * * * *"
             age:   1
-            depth: 1
+            depth: 2
             dir:   $env_files/x-ray/$env/$component/diag/hosts/$hostname/os
             access: +r
             ttl:   45
@@ -24,7 +24,7 @@ diagnose:
         expose:   
             cycle: "* * * * *"
             age:   1
-            depth: 1
+            depth: 2
             dir:   $env_files/x-ray/$env/$component/diag/hosts/$hostname/net
             access: +r
             ttl:   45
@@ -39,7 +39,7 @@ diagnose:
         expose:   
             cycle: "* * * * *"
             age:   1
-            depth: 1
+            depth: 3
             dir:   $env_files/x-ray/$env/$component/diag/wls/dms
             access: +r
             ttl:   45
@@ -54,7 +54,7 @@ diagnose:
         expose:   
             cycle: "* * * * *"
             age:   1
-            depth: 1
+            depth: 3
             dir:   $env_files/x-ray/$env/$component/diag/wls/soa/dms
             access: +r
             ttl:   45
@@ -69,7 +69,7 @@ diagnose:
         expose:   
             cycle: "* * * * *"
             age:   1
-            depth: 1
+            depth: 4
             dir:   $env_files/x-ray/$env/$component/watch/hosts/$hostname/os
             access: +r
             ttl:   45
@@ -84,7 +84,7 @@ diagnose:
         expose:   
             cycle: "* * * * *"
             age:   1
-            depth: 1
+            depth: 4
             dir:   $env_files/x-ray/$env/$component/watch/hosts/$hostname/net
             access: +r
             ttl:   45
@@ -99,7 +99,7 @@ diagnose:
         expose:   
             cycle: "* * * * *"
             age:   1
-            depth: 1
+            depth: 6
             dir:   $env_files/x-ray/$env/$component/watch/wls
             access: +r
             ttl:   45

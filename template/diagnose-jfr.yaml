@@ -9,7 +9,7 @@ diagnose:
         expose:   
             cycle: "*/16 * * * *"
             age:   1
-            depth: 1
+            depth: 4
             dir:   $env_files/x-ray/$env/$component/diag/wls/jfr
             access: +r
             ttl:   45
@@ -24,7 +24,7 @@ diagnose:
         expose:   
             cycle: "*/5 * * * *"
             age:   1
-            depth: 1
+            depth: 4
             dir:   $env_files/x-ray/$env/$component/diag/wls/heap
             access: +r
             ttl:   45
