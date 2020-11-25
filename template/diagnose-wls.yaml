@@ -4,7 +4,7 @@ backup:
 diagnose:
     logs:
         dir:    $domain_home/servers/$wls_server/logs
-        type:   log
+        type:   logrotate
         ttl:    2
         ttl_filter: "[0-9][0-9]+$"
         expose:   

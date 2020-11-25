@@ -4,7 +4,7 @@ backup:
 diagnose:
     os:
         dir:    ~/x-ray/diag/os/log
-        type:   log
+        type:   logappend
         ttl:    2
         expose:   
             cycle: "* * * * *"
@@ -19,7 +19,7 @@ diagnose:
             ttl:   90
     net:
         dir:    ~/x-ray/diag/net/log
-        type:   log
+        type:   logappend
         ttl:    2
         expose:   
             cycle: "* * * * *"
@@ -34,7 +34,7 @@ diagnose:
             ttl:   90
     dms:
         dir:    ~/x-ray/diag/wls/dms
-        type:   log
+        type:   logappend
         ttl:    2
         expose:   
             cycle: "* * * * *"
@@ -49,7 +49,7 @@ diagnose:
             ttl:   90
     dms_soa:
         dir:    ~/x-ray/diag/wls/soa/dms
-        type:   log
+        type:   logappend
         ttl:    2
         expose:   
             cycle: "* * * * *"
