@@ -126,7 +126,7 @@ function schedule_diag_sync() {
 ##############
 
 # rsync
-$expose_cycle mkdir -p $expose_dir; rsync  -t -h --stats --progress --chmod=Fu=r,Fgo=r,Dgo=rx,Du=rwx --files-from=<(cd ~/$dir; find -maxdepth $expose_depth -mtime -$expose_age -type f) $dir $expose_dir; find $expose_dir/* -type f | xargs sudo chown  --recursive nobody:nobody 
+$expose_cycle mkdir -p $expose_dir; rsync  -t -h --stats --progress --chmod=Fu=r,Fgo=r,Dgo=rx,Du=rwx --files-from=<(cd $dir; find -maxdepth $expose_depth -mtime -$expose_age -type f) $dir $expose_dir; find $expose_dir/* -type f | xargs sudo chown  --recursive nobody:nobody 
 
 EOF
             ;;
@@ -139,7 +139,7 @@ EOF
 ##############
 
 # rsync
-$expose_cycle mkdir -p $expose_dir; rsync  -t -h --stats --progress --append --chmod=Fu=rw,Fgo=r,Dgo=rx --files-from=<(cd ~/$dir; find -maxdepth $expose_depth -mtime -$expose_age -type f) $dir $expose_dir; find $expose_dir/* -type f | xargs sudo chgrp  --recursive nobody 
+$expose_cycle mkdir -p $expose_dir; rsync  -t -h --stats --progress --append --chmod=Fu=rw,Fgo=r,Dgo=rx --files-from=<(cd $dir; find -maxdepth $expose_depth -mtime -$expose_age -type f) $dir $expose_dir; find $expose_dir/* -type f | xargs sudo chgrp  --recursive nobody 
 
 EOF
             ;;
