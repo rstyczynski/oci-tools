@@ -17,6 +17,7 @@ sudo chmod 777 $env_files/x-ray/$env
 sudo chmod 777 $env_files/backup
 sudo chmod 777 $env_files/x-ray/$env/$component/diag/
 sudo chmod 777 $env_files/x-ray/$env/$component/diag/hosts
+sudo chmod 777 $env_files/x-ray/$env/$component/diag/wls
 sudo chmod 777 $env_files/x-ray/$env/$component/diag/wls/log 
 sudo chmod 777 $env_files/x-ray/$env/$component/watch
 sudo chmod 777 $env_files/x-ray/$env/$component/watch/hosts
