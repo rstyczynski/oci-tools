@@ -70,7 +70,7 @@ ls -l .x-ray/diagnose-*
 
 for diag in $(ls .x-ray/diagnose-*); do
    echo "Preparing: $diag"
-   ~/oci-tools/bin/make_cron_diagnose.sh $diag
+   ~/oci-tools/bin/x-ray_make_cron_diagnose.sh $diag
 done
 
 echo "17. Keep diagnose-*.yaml files at shared dir"
