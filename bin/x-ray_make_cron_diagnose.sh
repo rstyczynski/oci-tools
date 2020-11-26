@@ -125,8 +125,9 @@ function schedule_diag_sync() {
 # regular rsync: $log
 ##############
 
+MAILTO=\"\"
 # rsync
-$expose_cycle mkdir -p $expose_dir; mkdir $HOME/tmp; cd $dir; find -maxdepth $expose_depth -mtime -$expose_age -type f > $HOME/tmp/$diagname-$log.files; rsync  -t -h --stats --progress --chmod=Fu=r,Fgo=r,Dgo=rx,Du=rwx --files-from=$HOME/tmp/$diagname-$log.files $dir $expose_dir; rm  $HOME/tmp/$diagname-$log.files
+$expose_cycle mkdir -p $expose_dir; mkdir $HOME/tmp; cd $dir; find -maxdepth $expose_depth -mtime -$expose_age -type f > $HOME/tmp/$diagname-$log.files; rsync  -t --chmod=Fu=r,Fgo=r,Dgo=rx,Du=rwx --files-from=$HOME/tmp/$diagname-$log.files $dir $expose_dir; rm  $HOME/tmp/$diagname-$log.files
 
 EOF
             ;;
@@ -138,8 +139,9 @@ EOF
 # append only rsync: $log
 ##############
 
+MAILTO=\"\"
 # rsync
-$expose_cycle mkdir -p $expose_dir; mkdir $HOME/tmp; cd $dir; find -maxdepth $expose_depth -mtime -$expose_age -type f > $HOME/tmp/$diagname-$log.files; rsync  -t -h --stats --progress --append --chmod=Fu=rw,Fgo=r,Dgo=rx --files-from=$HOME/tmp/$diagname-$log.files $dir $expose_dir; rm  $HOME/tmp/$diagname-$log.files
+$expose_cycle mkdir -p $expose_dir; mkdir $HOME/tmp; cd $dir; find -maxdepth $expose_depth -mtime -$expose_age -type f > $HOME/tmp/$diagname-$log.files; rsync  -t --append --chmod=Fu=rw,Fgo=r,Dgo=rx --files-from=$HOME/tmp/$diagname-$log.files $dir $expose_dir; rm  $HOME/tmp/$diagname-$log.files
 
 EOF
             ;;
@@ -152,6 +154,7 @@ EOF
 
 if [ "$archive_cycle" != none ]; then
     cat >> diag_sync.cron <<EOF
+MAILTO=\"\"
 1 0 * * * find  $dir -type f -mtime +$ttl | egrep "$ttl_filter" > $backup_dir/$(hostname)/$diagname-$log-\$(date -I).archive; tar -czf $backup_dir/$(hostname)/$diagname-$log-\$(date -I).tar.gz -T $backup_dir/$(hostname)/$diagname-$log-\$(date -I).archive; test $? -eq 0 && xargs rm < $backup_dir/$(hostname)/$diagname-$log-\$(date -I).archive 
 EOF
 else
