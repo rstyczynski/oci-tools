@@ -44,6 +44,16 @@ function setcfg() {
     global=$(echo $global | tr [a-z] [A-Z])
 
     case $global in
+    Y)  
+        touch /etc/$which.config 2>/dev/null
+        if [ $? -ne 0 ]; then
+            echo "Global cfg. not available (root?). Falling back to user level cfg."
+            global=N
+        fi
+        ;;
+    esac
+    
+    case $global in
     Y)
         if [ -f /etc/$which.config ]; then
             grep "$what=$new_value"  /etc/$which.config >/dev/null
