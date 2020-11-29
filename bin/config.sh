@@ -37,7 +37,7 @@ function setcfg() {
         read -p "Enter value for $what:" new_value
     fi
 
-    if [ $force != force ]; then
+    if [ "$force" != force ]; then
         read -t 5 -p "Set in global /etc/$which.config? [Yn]" global
     fi
     : ${global:=Y}
