@@ -1,0 +1,36 @@
+---
+backup:
+    dir: $env_files/backup
+diagnose:
+    logs:
+        dir:    $domain_home/apics/logs
+        type:   logrotate
+        ttl:    2
+        ttl_filter: ".[0-9][0-9]*$"
+        expose:   
+            cycle: "* * * * *"
+            age:   1
+            depth: 1
+            dir:   $env_files/x-ray/$env/$component/diag/apics/$hostname/$domain_name/logs/$todayiso8601
+            access: +r
+            ttl:   45
+        archive: 
+            cycle: "1 * * * *"
+            dir:   oci_os://$bucket
+            ttl:   90
+    analytics:
+        dir:    $domain_home/apics/analytics/logs
+        type:   logappend
+        ttl:    2
+        ttl_filter: ""
+        expose:   
+            cycle: "* * * * *"
+            age:   1
+            depth: 1
+            dir:   $env_files/x-ray/$env/$component/diag/apics/$hostname/$domain_name/analytics/logs/$todayiso8601
+            access: +r
+            ttl:   45
+        archive: 
+            cycle: "1 * * * *"
+            dir:   oci_os://$bucket
+            ttl:   90
