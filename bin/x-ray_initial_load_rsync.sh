@@ -66,6 +66,8 @@ function initial_rsync() {
 
         dst_dir=$(echo "$expose_dir" | sed "s/$todayiso8601/$date/g" | sed "s/\$(hostname)/$(hostname)/g")
 
+        mkdir -p $dst_dir
+        
         #rsync  --dry-run \
         rsync --progress -h \
         -t --chmod=Fu=r,Fgo=r,Dgo=rx,Du=rwx \
