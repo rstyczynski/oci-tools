@@ -65,7 +65,15 @@ echo "14. Deploy log sync configuration files for umc"
 echo "15. Deploy sync configuration files for jfr"
 ~/oci-tools/bin/tpl2data.sh ~/oci-tools/template/diagnose-jfr.yaml > ~/.x-ray/diagnose-jfr.yaml
 
-echo "16.  Deploy log sync crontabs for all sync descriptors"
+echo "17.  Perform initial load for all sync descriptors"
+ls -l .x-ray/diagnose-*
+
+for diag in $(ls .x-ray/diagnose-*); do
+   echo "Inital data sync: $diag"
+   ~/oci-tools/bin/x-ray_initial_load_rsync.sh $diag
+done
+
+echo "17.  Deploy log sync crontabs for all sync descriptors"
 ls -l .x-ray/diagnose-*
 
 for diag in $(ls .x-ray/diagnose-*); do
@@ -73,7 +81,7 @@ for diag in $(ls .x-ray/diagnose-*); do
    ~/oci-tools/bin/x-ray_make_cron_diagnose.sh $diag
 done
 
-echo "17. Keep diagnose-*.yaml files at shared dir"
+echo "18. Keep diagnose-*.yaml files at shared dir"
 
 export backup_dir=$env_files/backup
 
