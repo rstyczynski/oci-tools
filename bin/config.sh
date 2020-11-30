@@ -47,7 +47,7 @@ function setcfg() {
     Y)  
         touch /etc/$which.config 2>/dev/null
         if [ $? -ne 0 ]; then
-            echo "Global cfg. not available (root?). Falling back to user level cfg."
+            #echo "Global cfg. not available (root?). Falling back to user level cfg."
             global=N
         fi
         ;;
