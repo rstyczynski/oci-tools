@@ -21,6 +21,16 @@ discoverWLS
 
 mkdir -p ~/.x-ray
 
+
+echo "9.  Optional: Remove all sync descriptors"
+ls -l .x-ray/diagnose-*
+
+for diag in $(ls ~/.x-ray/diagnose-*); do
+   echo "Preparing: $diag"
+   oci-tools/bin/x-ray_make_cron_diagnose.sh $diag remove
+   rm -rf $diag
+done
+
 echo "10. Deploy log sync configuration files for WebLogic Admin servers"
 
 for srvNo in ${!wls_admin[@]}; do
