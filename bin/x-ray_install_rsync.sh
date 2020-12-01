@@ -59,10 +59,41 @@ else
     done
 fi
 
-echo "14. Deploy log sync configuration files for umc"
+echo "14. Deploy log sync configuration files for APICS"
+
+export domain_home=$(ps aux | grep "bin/startWebLogic.sh" | grep -v grep | tr -s ' ' | tr ' ' '\n' | grep startWebLogic.sh | sort -u | sed 's/\/bin\/startWebLogic.sh//g')
+export domain_name=$(basename $domain_home)
+
+if [ -z "$domain_home" ] || [ -z "$domain_name" ]; then
+    echo "Error. APICS not found."
+
+else
+    # Domain
+    # $domain_home/apics/logs
+    # $domain_home/apics/analytics/logs
+    ~/oci-tools/bin/tpl2data.sh ~/oci-tools/template/diagnose-apics.yaml >~/.x-ray/diagnose-apics-$domain_name.yaml
+
+    # AdminServer
+    for srvNo in ${!wls_admin[@]}; do
+        export wls_server=$(getWLSjvmAttr ${wls_admin[$srvNo]} -Dweblogic.Name)
+
+        echo "Processing: $domain_name/$wls_server at $domain_home"
+        ~/oci-tools/bin/tpl2data.sh ~/oci-tools/template/diagnose-wls.yaml >~/.x-ray/diagnose-apics-$domain_name\_$wls_server.yaml
+    done
+
+    # ManagedServer
+    for srvNo in ${!wls_managed[@]}; do
+        export wls_server=$(getWLSjvmAttr ${wls_managed[$srvNo]} -Dweblogic.Name)
+        echo "Processing: $domain_name/$wls_server at $domain_home"
+        ~/oci-tools/bin/tpl2data.sh ~/oci-tools/template/diagnose-wls.yaml >~/.x-ray/diagnose-apics-$domain_name\_$wls_server.yaml
+    done
+fi
+
+
+echo "15. Deploy log sync configuration files for umc"
 ~/oci-tools/bin/tpl2data.sh ~/oci-tools/template/diagnose-umc.yaml > ~/.x-ray/diagnose-umc.yaml
 
-echo "15. Deploy sync configuration files for jfr"
+echo "16. Deploy sync configuration files for jfr"
 ~/oci-tools/bin/tpl2data.sh ~/oci-tools/template/diagnose-jfr.yaml > ~/.x-ray/diagnose-jfr.yaml
 
 echo "17.  Perform initial load for all sync descriptors"
@@ -73,7 +104,7 @@ for diag in $(ls .x-ray/diagnose-*); do
    ~/oci-tools/bin/x-ray_initial_load_rsync.sh $diag
 done
 
-echo "17.  Deploy log sync crontabs for all sync descriptors"
+echo "18.  Deploy log sync crontabs for all sync descriptors"
 ls -l .x-ray/diagnose-*
 
 for diag in $(ls .x-ray/diagnose-*); do
@@ -81,7 +112,7 @@ for diag in $(ls .x-ray/diagnose-*); do
    ~/oci-tools/bin/x-ray_make_cron_diagnose.sh $diag
 done
 
-echo "18. Keep diagnose-*.yaml files at shared dir"
+echo "19. Keep diagnose-*.yaml files at shared dir"
 
 export backup_dir=$env_files/backup
 
