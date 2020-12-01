@@ -56,7 +56,7 @@ function setcfg() {
     case $global in
     Y)
         if [ -f /etc/$which.config ]; then
-            grep "$what=$new_value"  /etc/$which.config >/dev/null
+            cat /etc/$which.config | grep "^$what=" | tail -1 | grep "^$what=$new_value" >/dev/null
             if [ $? -eq 0 ]; then
                 >&2 echo "Entry is already in place."
             else
@@ -73,7 +73,7 @@ function setcfg() {
     *)
         mkdir -p ~/.$which
         if [ -f ~/.$which/config ]; then
-            grep "$what=$new_value" ~/.$which/config  >/dev/null
+            cat ~/.$which/config | grep "^$what=" | tail -1 | grep "^$what=$new_value" >/dev/null
             if [ $? -eq 0 ]; then
                 >&2 echo "Entry is already in place."
             else
@@ -108,4 +108,3 @@ function getsetcfg() {
         setcfg $@
     fi
 }
-
