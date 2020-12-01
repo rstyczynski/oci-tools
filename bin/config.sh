@@ -5,7 +5,7 @@ function getcfg() {
     what=$2
 
     if [ $# -lt 2 ]; then
-        echo Nothing to do....
+        >&2 echo Nothing to do....
         return 1
     fi
 
@@ -29,7 +29,7 @@ function setcfg() {
     force=$4
 
     if [ $# -lt 2 ]; then
-        echo Nothing to do....
+        >&2 echo Nothing to do....
         return 1
     fi
 
@@ -45,9 +45,9 @@ function setcfg() {
 
     case $global in
     Y)  
-        touch /etc/$which.config 2>/dev/null
+        timeout 1 sudo touch /etc/$which.config 2>/dev/null
         if [ $? -ne 0 ]; then
-            #echo "Global cfg. not available (root?). Falling back to user level cfg."
+            >&2 echo "Global cfg. not available (root?). Falling back to user level cfg."
             global=N
         fi
         ;;
@@ -58,7 +58,7 @@ function setcfg() {
         if [ -f /etc/$which.config ]; then
             grep "$what=$new_value"  /etc/$which.config >/dev/null
             if [ $? -eq 0 ]; then
-                echo "Entry is already in place."
+                >&2 echo "Entry is already in place."
             else
                 #echo adding config file...
                 echo "# Added by $USER($SUDO_USER) on $(date -I)" | sudo tee -a /etc/$which.config
@@ -75,7 +75,7 @@ function setcfg() {
         if [ -f ~/.$which/config ]; then
             grep "$what=$new_value" ~/.$which/config  >/dev/null
             if [ $? -eq 0 ]; then
-                echo "Entry is already in place."
+                >&2 echo "Entry is already in place."
             else
                 #echo adding config file...
                 echo "# Added by $USER($SUDO_USER) on $(date -I)" >> ~/.$which/config 
@@ -97,7 +97,7 @@ function getsetcfg() {
     new_value=$3
 
     if [ $# -lt 2 ]; then
-        echo Nothing to do....
+        >&2 echo Nothing to do....
         return 1
     fi
 
