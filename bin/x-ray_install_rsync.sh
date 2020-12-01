@@ -64,9 +64,8 @@ echo "14. Deploy log sync configuration files for APICS"
 export domain_home=$(ps aux | grep "bin/startWebLogic.sh" | grep -v grep | tr -s ' ' | tr ' ' '\n' | grep startWebLogic.sh | sort -u | sed 's/\/bin\/startWebLogic.sh//g')
 export domain_name=$(basename $domain_home)
 
-if [ -z "$domain_home" ] || [ -z "$domain_name" ]; then
+if [ ! -d "$domain_home/apics/logs" ] || [ ! -d  "$domain_home/apics/analytics/logs" ]; then
     echo "Error. APICS not found."
-
 else
     # Domain
     # $domain_home/apics/logs
