@@ -64,7 +64,7 @@ function initial_rsync() {
     do
         date=$(echo $date_file | cut -f2 -d.)
 
-        dst_dir=$(echo "$expose_dir" | sed "s/$todayiso8601/$date/g" | sed "s/\$(hostname)/$(hostname)/g")
+        dst_dir=$(echo "$expose_dir" | sed "s/\$todayiso8601/$date/g" | sed "s/\$(hostname)/$(hostname)/g")
 
         mkdir -p $dst_dir
         
