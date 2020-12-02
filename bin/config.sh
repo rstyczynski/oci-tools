@@ -106,5 +106,6 @@ function getsetcfg() {
         echo $value
     else
         setcfg $@
+        echo getcfg $1 $2
     fi
 }
