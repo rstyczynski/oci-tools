@@ -109,3 +109,6 @@ function getsetcfg() {
         getcfg $1 $2
     fi
 }
+
+
+

@@ -67,11 +67,17 @@ function initial_rsync() {
         # in fact: replace $(date -I) into current date.
         dst_dir=$(echo "$expose_dir" | sed "s/$todayiso8601/$date/g" | sed "s/\$(hostname)/$(hostname)/g")
 
-        mkdir -p $dst_dir
-        
+        # rsync creates dst dir; skipping this
+        # mkdir -p $dst_dir
+        # chmod g+rx $dst_dir
+        # chmod o+rx $dst_dir
+
+        # chmod does not work properly on some rsync e.g. 3.0.6; added  umask to fix        
+        umask 022    
         #rsync  --dry-run \
         rsync --progress -h \
-        -t --chmod=Fu=r,Fgo=r,Dgo=rx,Du=rwx \
+        -t \
+        --chmod=Fu=r,Fgo=r,Dgo=rx,Du=rwx \
         --files-from=$iload_tmp/$date_file \
         $src_dir $dst_dir
 
