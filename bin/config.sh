@@ -38,14 +38,14 @@ function setcfg() {
     fi
 
     if [ "$force" != force ]; then
-        read -t 5 -p "Set in global /etc/$which.config? [Yn]" global
+        read -t 5 -p "Set in global /etc/$which.config? [yN]" global
     fi
-    : ${global:=Y}
+    : ${global:=N}
     global=$(echo $global | tr [a-z] [A-Z])
 
     case $global in
     Y)  
-        timeout 1 sudo touch /etc/$which.config 2>/dev/null
+        timeout 1 sudo touch /etc/$which.config >/dev/null 2>/dev/null 
         if [ $? -ne 0 ]; then
             >&2 echo "Global cfg. not available (root?). Falling back to user level cfg."
             global=N
