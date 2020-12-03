@@ -43,8 +43,10 @@ function fix_permissions() {
     : ${name:=initial_rsync}
 
     todayiso8601="\$(date -I)"
-    # in fact: replace $(date -I) into current date.
-    dst_dir=$(echo "$expose_dir" | sed "s/$todayiso8601/$date/g" | sed "s/\$(hostname)/$(hostname)/g")
+    date=$(echo $date_file | cut -f2 -d.)
+
+    # in fact: remove $(date -I) into current date.
+    dst_dir=$(echo "$expose_dir" | sed "s/$todayiso8601//g" | sed "s/\$(hostname)/$(hostname)/g")
     
     echo "##########################################"
     echo "Processing fix permissions sync: $expose_dir i.e. $dst_dir"
