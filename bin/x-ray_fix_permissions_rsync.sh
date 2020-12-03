@@ -47,11 +47,11 @@ function fix_permissions() {
     echo "Processing fix permissions sync: $src_dir $expose_dir $name"
     echo "##########################################"
 
-    find $dst_dir -type d | xargs chmod g+rx 
-    find $dst_dir -type d | xargs chmod o+rx 
+    find $expose_dir -type d | xargs chmod g+rx 
+    find $expose_dir -type d | xargs chmod o+rx 
 
-    find $dst_dir -type f | xargs chmod g+r 
-    find $dst_dir -type f | xargs chmod o+r 
+    find $expose_dir -type f | xargs chmod g+r 
+    find $expose_dir -type f | xargs chmod o+r 
 
  }
 
