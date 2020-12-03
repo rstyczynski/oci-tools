@@ -102,6 +102,8 @@ function schedule_diag_sync() {
 
         #echo "$log, $dir, $type, $expose_dir, $expose_cycle, $expose_ttl"
 
+        # chmod does not work properly on some rsync e.g. 3.0.6; added  umask to fix        
+        # umask 022 must be added to each cron
 
         appendonly=no
         case $type in
@@ -127,7 +129,7 @@ function schedule_diag_sync() {
 
 MAILTO=""
 # rsync
-$expose_cycle mkdir -p $expose_dir; mkdir $HOME/tmp; cd $dir; find -maxdepth $expose_depth -mtime -$expose_age -type f > $HOME/tmp/$diagname-$log.files; rsync  -t --chmod=Fu=r,Fgo=r,Dgo=rx,Du=rwx --files-from=$HOME/tmp/$diagname-$log.files $dir $expose_dir; rm  $HOME/tmp/$diagname-$log.files
+$expose_cycle mkdir -p $expose_dir; mkdir $HOME/tmp; cd $dir; find -maxdepth $expose_depth -mtime -$expose_age -type f > $HOME/tmp/$diagname-$log.files; umask 022; rsync  -t --chmod=Fu=r,Fgo=r,Dgo=rx,Du=rwx --files-from=$HOME/tmp/$diagname-$log.files $dir $expose_dir; rm  $HOME/tmp/$diagname-$log.files
 
 EOF
             ;;
@@ -141,7 +143,7 @@ EOF
 
 MAILTO=""
 # rsync
-$expose_cycle mkdir -p $expose_dir; mkdir $HOME/tmp; cd $dir; find -maxdepth $expose_depth -mtime -$expose_age -type f > $HOME/tmp/$diagname-$log.files; rsync  -t --append --chmod=Fu=rw,Fgo=r,Dgo=rx --files-from=$HOME/tmp/$diagname-$log.files $dir $expose_dir; rm  $HOME/tmp/$diagname-$log.files
+$expose_cycle mkdir -p $expose_dir; mkdir $HOME/tmp; cd $dir; find -maxdepth $expose_depth -mtime -$expose_age -type f > $HOME/tmp/$diagname-$log.files; umask 022; rsync  -t --append --chmod=Fu=rw,Fgo=r,Dgo=rx --files-from=$HOME/tmp/$diagname-$log.files $dir $expose_dir; rm  $HOME/tmp/$diagname-$log.files
 
 EOF
             ;;
