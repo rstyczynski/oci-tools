@@ -31,7 +31,7 @@ function fix_permissions_rsync() {
         src_dir=$(cat $diag_cfg | y2j | jq -r ".diagnose.$log.dir" | rn)
         expose_dir=$(cat $diag_cfg | y2j | jq -r ".diagnose.$log.expose.dir" | rn)
 
-        fix_permissions "$src_dir" "$expose_dir" "$diagname\_$log"
+        fix_permissions "$src_dir" "$expose_dir" "{$diagname}_$log"
     done
 }
 
@@ -44,14 +44,22 @@ function fix_permissions() {
 
 
     echo "##########################################"
-    echo "Processing fix permissions sync: $src_dir $expose_dir $name"
+    echo "Processing fix permissions sync: $expose_dir $name"
     echo "##########################################"
+
+    echo "Before (just few first files):"
+    find $expose_dir -type d  | head
+    find $expose_dir -type f  | head
 
     find $expose_dir -type d | xargs chmod g+rx 
     find $expose_dir -type d | xargs chmod o+rx 
 
     find $expose_dir -type f | xargs chmod g+r 
     find $expose_dir -type f | xargs chmod o+r 
+
+    echo "After (just few first files):"
+    find $expose_dir -type d  | head
+    find $expose_dir -type f  | head
 
  }
 
