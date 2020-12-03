@@ -47,9 +47,9 @@ function fix_permissions() {
     echo "Processing fix permissions sync: $expose_dir $name"
     echo "##########################################"
 
-    echo "Before (just few first files):"
-    find $expose_dir -type d  | xargs ls -l | head
-    find $expose_dir -type f  | xargs ls -l | head
+    # echo "Before (just few first files):"
+    # find $expose_dir -type d  | xargs ls -l | head
+    # find $expose_dir -type f  | xargs ls -l | head
 
     find $expose_dir -type d | xargs chmod g+rx 
     find $expose_dir -type d | xargs chmod o+rx 
@@ -57,9 +57,9 @@ function fix_permissions() {
     find $expose_dir -type f | xargs chmod g+r 
     find $expose_dir -type f | xargs chmod o+r 
 
-    echo "After (just few first files):"
-    find $expose_dir -type d  | xargs ls -l | head
-    find $expose_dir -type f  | xargs ls -l | head
+    # echo "After (just few first files):"
+    # find $expose_dir -type d  | xargs ls -l | head
+    # find $expose_dir -type f  | xargs ls -l | head
 
  }
 
