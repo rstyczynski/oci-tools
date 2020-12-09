@@ -77,6 +77,8 @@ function schedule_diag_sync() {
         expose_depth=$(cat $diag_cfg | y2j | jq -r ".diagnose.$log.expose.depth" | rn)
         : ${expose_depth:=1}
 
+        expose_rsync_params=$(cat $diag_cfg | y2j | jq -r ".diagnose.$log.expose.rsync_params" | rn)
+
         expose_ttl=$(cat $diag_cfg | y2j | jq -r ".diagnose.$log.expose.ttl" | rn)
         : ${expose_ttl:=45}
         expose_access=$(cat $diag_cfg | y2j | jq -r ".diagnose.$log.expose.access" | rn)
@@ -118,7 +120,6 @@ function schedule_diag_sync() {
                 ;;
         esac
 
-
         case $appendonly in
         no)
             cat >> diag_sync.cron <<EOF
@@ -129,7 +130,7 @@ function schedule_diag_sync() {
 
 MAILTO=""
 # rsync
-$expose_cycle mkdir -p $expose_dir; mkdir $HOME/tmp; cd $dir; find -maxdepth $expose_depth -mtime -$expose_age -type f > $HOME/tmp/$diagname-$log.files; umask 022; rsync  -t --chmod=Fu=r,Fgo=r,Dgo=rx,Du=rwx --files-from=$HOME/tmp/$diagname-$log.files $dir $expose_dir; rm  $HOME/tmp/$diagname-$log.files
+$expose_cycle mkdir -p $expose_dir; $expose_delete_before_cmd; mkdir $HOME/tmp; cd $dir; find -maxdepth $expose_depth -mtime -$expose_age -type f > $HOME/tmp/$diagname-$log.files; umask 022; rsync  -t --chmod=Fu=r,Fgo=r,Dgo=rx,Du=rwx --files-from=$HOME/tmp/$diagname-$log.files $rsync_params $dir $expose_dir; rm  $HOME/tmp/$diagname-$log.files
 
 EOF
             ;;
@@ -143,7 +144,7 @@ EOF
 
 MAILTO=""
 # rsync
-$expose_cycle mkdir -p $expose_dir; mkdir $HOME/tmp; cd $dir; find -maxdepth $expose_depth -mtime -$expose_age -type f > $HOME/tmp/$diagname-$log.files; umask 022; rsync  -t --append --chmod=Fu=rw,Fgo=r,Dgo=rx --files-from=$HOME/tmp/$diagname-$log.files $dir $expose_dir; rm  $HOME/tmp/$diagname-$log.files
+$expose_cycle mkdir -p $expose_dir; $expose_delete_before_cmd; mkdir $HOME/tmp; cd $dir; find -maxdepth $expose_depth -mtime -$expose_age -type f > $HOME/tmp/$diagname-$log.files; umask 022; rsync  -t --append --chmod=Fu=rw,Fgo=r,Dgo=rx --files-from=$HOME/tmp/$diagname-$log.files $rsync_params $dir $expose_dir; rm  $HOME/tmp/$diagname-$log.files
 
 EOF
             ;;
