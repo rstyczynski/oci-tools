@@ -130,7 +130,7 @@ function schedule_diag_sync() {
 
 MAILTO=""
 # rsync
-$expose_cycle mkdir -p $expose_dir; $expose_delete_before_cmd; mkdir $HOME/tmp; cd $dir; find -maxdepth $expose_depth -mtime -$expose_age -type f > $HOME/tmp/$diagname-$log.files; umask 022; rsync  -t --chmod=Fu=r,Fgo=r,Dgo=rx,Du=rwx --files-from=$HOME/tmp/$diagname-$log.files $rsync_params $dir $expose_dir; rm  $HOME/tmp/$diagname-$log.files
+$expose_cycle mkdir -p $expose_dir; $expose_delete_before_cmd; mkdir $HOME/tmp; cd $dir; find -maxdepth $expose_depth -mtime -$expose_age -type f > $HOME/tmp/$diagname-$log.files; umask 022; rsync  -t --chmod=Fu=r,Fgo=r,Dgo=rx,Du=rwx --files-from=$HOME/tmp/$diagname-$log.files $expose_rsync_params $dir $expose_dir; rm  $HOME/tmp/$diagname-$log.files
 
 EOF
             ;;
@@ -144,7 +144,7 @@ EOF
 
 MAILTO=""
 # rsync
-$expose_cycle mkdir -p $expose_dir; $expose_delete_before_cmd; mkdir $HOME/tmp; cd $dir; find -maxdepth $expose_depth -mtime -$expose_age -type f > $HOME/tmp/$diagname-$log.files; umask 022; rsync  -t --append --chmod=Fu=rw,Fgo=r,Dgo=rx --files-from=$HOME/tmp/$diagname-$log.files $rsync_params $dir $expose_dir; rm  $HOME/tmp/$diagname-$log.files
+$expose_cycle mkdir -p $expose_dir; $expose_delete_before_cmd; mkdir $HOME/tmp; cd $dir; find -maxdepth $expose_depth -mtime -$expose_age -type f > $HOME/tmp/$diagname-$log.files; umask 022; rsync  -t --append --chmod=Fu=rw,Fgo=r,Dgo=rx --files-from=$HOME/tmp/$diagname-$log.files $expose_rsync_params $dir $expose_dir; rm  $HOME/tmp/$diagname-$log.files
 
 EOF
             ;;
