@@ -52,7 +52,7 @@ function initial_rsync() {
     echo "##########################################"
 
     # in fact: replace $(date -I) into current date.
-    src_dir=$(echo "$src_dir" | sed "s/$todayiso8601/$date/g" | sed "s/\$(hostname)/$(hostname)/g")
+    src_dir=$(echo "$src_dir" | sed "s/$todayiso8601/$(date -I)/g" | sed "s/\$(hostname)/$(hostname)/g")
 
     IFS=$'\n'
     for file_meta in $(ls -la --time-style=full-iso $src_dir | grep -v '^d' | tr -s ' ' | tr ' ' ';' | grep -v '^total')
