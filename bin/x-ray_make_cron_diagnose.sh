@@ -1,6 +1,5 @@
 #!/bin/bash
 
-
 function rn() {
     sed 's/null//g'
 }
@@ -9,14 +8,12 @@ function y2j() {
     python -c "import json, sys, yaml ; y=yaml.safe_load(sys.stdin.read()) ; print(json.dumps(y))"
 }
 
-
 function schedule_diag_sync() {
     diag_cfg=$1
     cron_action=$2
 
     : ${diag_cfg:=~/.x-ray/diagnose.yaml}
     : ${cron_action:=create}
-
 
     diagname=$(basename $diag_cfg | cut -f1 -d. | cut -f2-999 -d'-')
     if [ "$diagname" == diagnose ]; then
@@ -50,7 +47,7 @@ function schedule_diag_sync() {
     echo "###Preparing cron for $diagname"
     echo "####################################"
 
-    echo $cron_section_start >> diag_sync.cron
+    echo $cron_section_start >>diag_sync.cron
 
     for log in $logs; do
         echo "##########################################"
@@ -79,7 +76,9 @@ function schedule_diag_sync() {
 
         expose_delete_before=$(cat $diag_cfg | y2j | jq -r ".diagnose.$log.expose.delete_before" | rn)
         if [ ! -z "$expose_delete_before" ]; then
-            expose_delete_before_cmd="rm -f $expose_dir/$expose_delete_before"
+            expose_delete_before_cmd="rm -f $expose_dir/$expose_delete_before;"
+        else
+            unset expose_delete_before_cmd
         fi
 
         expose_ttl=$(cat $diag_cfg | y2j | jq -r ".diagnose.$log.expose.ttl" | rn)
@@ -101,31 +100,31 @@ function schedule_diag_sync() {
         # not required here
         #oci_os_bucket=$(cat $diag_cfg | y2j | jq -r ".diagnose.$log.archive.dir" | sed 's|oci_os://||')
 
-        # keep diagnose.yaml next to archive file to make archive process be aware of config 
+        # keep diagnose.yaml next to archive file to make archive process be aware of config
         mkdir -p $backup_dir/$(hostname)
-        cat $diag_cfg > $backup_dir/$(hostname)/$(basename $diag_cfg)
+        cat $diag_cfg >$backup_dir/$(hostname)/$(basename $diag_cfg)
 
         #echo "$log, $dir, $type, $expose_dir, $expose_cycle, $expose_ttl"
 
-        # chmod does not work properly on some rsync e.g. 3.0.6; added  umask to fix        
+        # chmod does not work properly on some rsync e.g. 3.0.6; added  umask to fix
         # umask 022 must be added to each cron
 
         appendonly=no
         case $type in
-            binary)
-                ;;
-            logrotate)
-                ;;
-            logappend)
-                appendonly=yes
-                ;;
-            *)
-                ;;
+        binary) ;;
+
+        logrotate) ;;
+
+        logappend)
+            appendonly=yes
+            ;;
+        *) ;;
+
         esac
 
         case $appendonly in
         no)
-            cat >> diag_sync.cron <<EOF
+            cat >>diag_sync.cron <<EOF
 
 ##############
 # regular rsync: $log
@@ -133,13 +132,13 @@ function schedule_diag_sync() {
 
 MAILTO=""
 # rsync
-$expose_cycle mkdir -p $expose_dir; $expose_delete_before_cmd; mkdir $HOME/tmp; cd $dir; find -maxdepth $expose_depth -mtime -$expose_age -type f > $HOME/tmp/$diagname-$log.files; umask 022; rsync  -t --chmod=Fu=r,Fgo=r,Dgo=rx,Du=rwx --files-from=$HOME/tmp/$diagname-$log.files $dir $expose_dir; rm  $HOME/tmp/$diagname-$log.files
+$expose_cycle mkdir -p $expose_dir; $expose_delete_before_cmd mkdir -p $HOME/tmp; cd $dir; find -maxdepth $expose_depth -mtime -$expose_age -type f > $HOME/tmp/$diagname-$log.files; umask 022; rsync  -t --chmod=Fu=r,Fgo=r,Dgo=rx,Du=rwx --files-from=$HOME/tmp/$diagname-$log.files $dir $expose_dir; rm  $HOME/tmp/$diagname-$log.files
 
 EOF
             ;;
 
         yes)
-            cat >> diag_sync.cron <<EOF
+            cat >>diag_sync.cron <<EOF
 
 ##############
 # append only rsync: $log
@@ -147,36 +146,37 @@ EOF
 
 MAILTO=""
 # rsync
-$expose_cycle mkdir -p $expose_dir; $expose_delete_before_cmd; mkdir $HOME/tmp; cd $dir; find -maxdepth $expose_depth -mtime -$expose_age -type f > $HOME/tmp/$diagname-$log.files; umask 022; rsync  -t --append --chmod=Fu=rw,Fgo=r,Dgo=rx --files-from=$HOME/tmp/$diagname-$log.files $dir $expose_dir; rm  $HOME/tmp/$diagname-$log.files
+$expose_cycle mkdir -p $expose_dir; $expose_delete_before_cmd mkdir -p $HOME/tmp; cd $dir; find -maxdepth $expose_depth -mtime -$expose_age -type f > $HOME/tmp/$diagname-$log.files; umask 022; rsync  -t --append --chmod=Fu=rw,Fgo=r,Dgo=rx --files-from=$HOME/tmp/$diagname-$log.files $dir $expose_dir; rm  $HOME/tmp/$diagname-$log.files
 
 EOF
             ;;
         esac
 
-
-    cat >> diag_sync.cron <<EOF
+        cat >>diag_sync.cron <<EOF
 # backup, and delete old files
 EOF
 
-if [ "$archive_cycle" != none ]; then
-    cat >> diag_sync.cron <<EOF
+        if [ "$archive_cycle" != none ]; then
+            cat >>diag_sync.cron <<EOF
 MAILTO=""
 1 0 * * * find  $dir -type f -mtime +$ttl | egrep "$ttl_filter" > $backup_dir/$(hostname)/$diagname-$log-\$(date -I).archive; tar -czf $backup_dir/$(hostname)/$diagname-$log-\$(date -I).tar.gz -T $backup_dir/$(hostname)/$diagname-$log-\$(date -I).archive; test \$? -eq 0 && xargs rm < $backup_dir/$(hostname)/$diagname-$log-\$(date -I).archive 
 EOF
-else
-    cat >> diag_sync.cron <<EOF
+        else
+            cat >>diag_sync.cron <<EOF
 # archive skipped by configuration
 
 EOF
-fi
+        fi
     done
 
-    echo "#" >> diag_sync.cron
-    echo "$cron_section_stop" >> diag_sync.cron
+    echo "#" >>diag_sync.cron
+    echo "$cron_section_stop" >>diag_sync.cron
 
-    (crontab -l 2>/dev/null | sed "/$cron_section_start/,/$cron_section_stop/d"; cat diag_sync.cron) | crontab -
+    (
+        crontab -l 2>/dev/null | sed "/$cron_section_start/,/$cron_section_stop/d"
+        cat diag_sync.cron
+    ) | crontab -
 
 }
-
 
 schedule_diag_sync $@
