@@ -30,3 +30,6 @@ sudo chmod 777 $env_files/x-ray/$env/$component/diag/wls/dms
 sudo chmod 777 $env_files/x-ray/$env/$component/diag/wls/heap
 sudo chmod 777 $env_files/x-ray/$env/$component/watch/hosts
 
+component=soa
+sudo mkdir -p $env_files/x-ray/$env/$component/diag/wls/alert
+sudo chmod 777 $env_files/x-ray/$env/$component/diag/wls/alert
