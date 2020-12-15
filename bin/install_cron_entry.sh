@@ -6,6 +6,11 @@ function install_cron() {
     MODULE_DESC="$3"
     MODULE_CRON="$4"
 
+    echo "$1"
+    echo "$2"
+    echo "$3"
+    echo "$4"
+
     cron_section_start="# START - $MODULE_DESC"
     cron_section_stop="# STOP - $MODULE_DESC"
 
@@ -20,7 +25,7 @@ $cron_section_stop
 EOF
 
     cat $MODULE_NAME.cron 
-    
+
     (crontab -l 2>/dev/null | 
     sed "/$cron_section_start/,/$cron_section_stop/d"
     cat $MODULE_NAME.cron) | crontab -
@@ -37,4 +42,4 @@ esac
 # crontab -l
 }
 
-install_cron $@
+install_cron "$1" "$2" "$3" "$4"
