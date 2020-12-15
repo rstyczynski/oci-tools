@@ -2,9 +2,9 @@
 
 function install_cron() {
     cmd=$1
-    MODULE_NAME=$2
-    MODULE_DESC=$3
-    MODULE_CRON=$4
+    MODULE_NAME="$2"
+    MODULE_DESC="$3"
+    MODULE_CRON="$4"
 
     cron_section_start="# START - $MODULE_DESC"
     cron_section_stop="# STOP - $MODULE_DESC"
@@ -12,9 +12,11 @@ function install_cron() {
 case $cmd in
 add)
     cat >$MODULE_NAME.cron <<EOF
-    $cron_section_start
-    $MODULE_CRON
-    $cron_section_stop
+
+$cron_section_start
+# added by $USER on $(date -I)
+$MODULE_CRON
+$cron_section_stop
 EOF
 
     (crontab -l 2>/dev/null | 
@@ -30,7 +32,7 @@ remove)
     ;;
 esac
 
-crontab -l
+# crontab -l
 }
 
 install_cron $@
