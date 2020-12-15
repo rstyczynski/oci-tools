@@ -2,7 +2,7 @@ backup:
     dir: $env_files/backup
 diagnose:
     logs:
-        dir:    $HOME/x-ray/diag/wls/alert/$domain_home/$wls_server/$todayiso8601
+        dir:    $HOME/x-ray/diag/wls/alert/$domain_name/$wls_server/$todayiso8601
         type:   logappend
         ttl:    35
         ttl_filter: ""
