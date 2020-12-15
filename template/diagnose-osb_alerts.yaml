@@ -1,0 +1,19 @@
+backup:
+    dir: $backup_dir
+diagnose:
+    logs:
+        dir:    $HOME/x-ray/diag/wls/alert/$domain_home/$wls_server/$todayiso8601
+        type:   logappend
+        ttl:    35
+        ttl_filter: ""
+        expose:   
+            cycle: "* * * * *"
+            age:   1
+            depth: 1
+            dir:   $env_files/x-ray/$env/$component/diag/wls/alert/$domain_name/$wls_server/$todayiso8601
+            access: +r
+            ttl:   45
+        archive: 
+            cycle: "1 * * * *"
+            dir:   oci_os://$bucket
+            ttl:   90

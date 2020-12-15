@@ -6,11 +6,6 @@ function install_cron() {
     MODULE_DESC="$3"
     MODULE_CRON="$4"
 
-    echo "$1"
-    echo "$2"
-    echo "$3"
-    echo "$4"
-
     cron_section_start="# START - $MODULE_DESC"
     cron_section_stop="# STOP - $MODULE_DESC"
 
