@@ -2,9 +2,9 @@
 
 function install_cron() {
     cmd=$1
-    MODULE_NAME=$1
-    MODULE_DESC=$2
-    MODULE_CRON=$3
+    MODULE_NAME=$2
+    MODULE_DESC=$3
+    MODULE_CRON=$4
 
     cron_section_start="# START - $MODULE_DESC"
     cron_section_stop="# STOP - $MODULE_DESC"
@@ -22,7 +22,7 @@ EOF
     cat $MODULE_NAME.cron) | crontab -
     rm $MODULE_NAME.cron
     ;;
-    
+
 remove)
     (crontab -l 2>/dev/null | 
     sed "/$cron_section_start/,/$cron_section_stop/d"
