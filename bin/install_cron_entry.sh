@@ -19,6 +19,8 @@ $MODULE_CRON
 $cron_section_stop
 EOF
 
+    cat $MODULE_NAME.cron 
+    
     (crontab -l 2>/dev/null | 
     sed "/$cron_section_start/,/$cron_section_stop/d"
     cat $MODULE_NAME.cron) | crontab -
