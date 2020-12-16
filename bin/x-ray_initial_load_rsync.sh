@@ -133,7 +133,7 @@ function initial_rsync_date2date() {
     -t \
     --chmod=Fu=r,Fgo=r,Dgo=rx,Du=rwx \
     --files-from=$iload_tmp/sync_files \
-    $src_dir $dst_dir
+    / $dst_dir
 
     rm -rf $iload_tmp
  }
