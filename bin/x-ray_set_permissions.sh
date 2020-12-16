@@ -1,11 +1,18 @@
 #!/bin/bash
 
+env_files=$1
+env=$2
+component=$3
+
 source ~/oci-tools/bin/config.sh
+: ${env_files:=$(getcfg x-ray env_files)}
+: ${env:=$(getcfg x-ray env)}
+: ${component:=$(getcfg x-ray component)}
 
-
-export env_files=$(getcfg x-ray env_files | tr [A-Z] [a-z])
-export env=$(getcfg x-ray env | tr [A-Z] [a-z])
-export component=$(getcfg x-ray component | tr [A-Z] [a-z])
+if [ -z "$env_files" ] || [ -z "$env" ] || [ -z "$component" ]; then
+    echo "Error. Not defined: env_files, env, component. Provide as script parameters or via x-ray.config"
+    exit 1
+fi
 
 sudo mkdir -p $env_files/backup
 
