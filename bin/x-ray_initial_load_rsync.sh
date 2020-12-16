@@ -124,12 +124,15 @@ function initial_rsync_date2date() {
     src_dir=$(echo "$src_dir" | sed "s/$todayiso8601$//g" | sed "s/\$(hostname)/$(hostname)/g")
     dst_dir=$(echo "$expose_dir" | sed "s/$todayiso8601$//g" | sed "s/\$(hostname)/$(hostname)/g")
 
+    find $src_dir -type f > $iload_tmp/$sync_files
+
     # chmod does not work properly on some rsync e.g. 3.0.6; added  umask to fix        
     umask 022
     #rsync  --dry-run \
     rsync --progress -h \
     -t \
     --chmod=Fu=r,Fgo=r,Dgo=rx,Du=rwx \
+    --files-from=$iload_tmp/$sync_files \
     $src_dir $dst_dir
 
     rm -rf $iload_tmp
