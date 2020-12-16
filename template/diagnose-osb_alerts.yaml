@@ -6,6 +6,7 @@ diagnose:
         type:   logappend
         ttl:    35
         ttl_filter: ""
+        mode:   date2date
         expose:   
             cycle: "* * * * *"
             age:   1
