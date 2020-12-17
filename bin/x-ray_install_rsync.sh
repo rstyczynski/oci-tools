@@ -37,7 +37,13 @@ discoverWLS
 mkdir -p ~/.x-ray
 
 
-step "10. Deploy log sync configuration files for WebLogic Admin servers"
+step "10. Deploy log sync configuration files for umc"
+~/oci-tools/bin/tpl2data.sh ~/oci-tools/template/diagnose-umc.yaml > ~/.x-ray/diagnose-umc.yaml
+
+step "11. Deploy sync configuration files for jfr"
+~/oci-tools/bin/tpl2data.sh ~/oci-tools/template/diagnose-jfr.yaml > ~/.x-ray/diagnose-jfr.yaml
+
+step "20. Deploy log sync configuration files for WebLogic Admin servers"
 
 for srvNo in ${!wls_admin[@]}; do
   export wls_server=$(getWLSjvmAttr ${wls_admin[$srvNo]} -Dweblogic.Name)
@@ -49,7 +55,7 @@ for srvNo in ${!wls_admin[@]}; do
   ~/oci-tools/bin/tpl2data.sh ~/oci-tools/template/diagnose-wls.yaml > ~/.x-ray/diagnose-$domain_name\_$wls_server.yaml
 done
 
-step "11. Deploy log sync configuration files for WebLogic Managed servers"
+step "21. Deploy log sync configuration files for WebLogic Managed servers"
 
 for srvNo in ${!wls_managed[@]}; do
   export wls_server=$(getWLSjvmAttr ${wls_managed[$srvNo]} -Dweblogic.Name)
@@ -61,7 +67,7 @@ for srvNo in ${!wls_managed[@]}; do
   ~/oci-tools/bin/tpl2data.sh ~/oci-tools/template/diagnose-wls.yaml > ~/.x-ray/diagnose-$domain_name\_$wls_server.yaml
 done
 
-step "12. Deploy log sync configuration files for OHS"
+step "30. Deploy log sync configuration files for OHS"
 
 ohs_instances=$(ps aux | grep httpd | sed 's/-d /cfg=/g' | tr ' ' '\n' | grep cfg= | cut -f2 -d= | sort -u)
 if [ -z "$ohs_instances" ]; then
@@ -77,8 +83,9 @@ else
     done
 fi
 
-step "13. Deploy log sync configuration files for APICS"
+step "40. Deploy log sync configuration files for APICS"
 
+# APICS has strange / non regular parameters. Need to perfrom below to locate domain....
 export domain_home=$(ps aux | grep "bin/startWebLogic.sh" | grep -v grep | tr -s ' ' | tr ' ' '\n' | grep startWebLogic.sh | sort -u | sed 's/\/bin\/startWebLogic.sh//g')
 export domain_name=$(basename $domain_home)
 
@@ -106,18 +113,27 @@ else
     done
 fi
 
-
-step "14. Deploy log sync configuration files for umc"
-~/oci-tools/bin/tpl2data.sh ~/oci-tools/template/diagnose-umc.yaml > ~/.x-ray/diagnose-umc.yaml
-
-step "15. Deploy sync configuration files for jfr"
-~/oci-tools/bin/tpl2data.sh ~/oci-tools/template/diagnose-jfr.yaml > ~/.x-ray/diagnose-jfr.yaml
-
-step '16. Deploy sync configuration files for OSB Alerts'
+step '50. Deploy sync configuration files for OSB Alerts'
 
 ~/wls-tools/bin/osb_alerts_export.sh install_x-ray_sync
 
-step "17.  Perform initial load for all sync descriptors"
+step '60. Deploy sync configuration files for ODI logs'
+
+for srvNo in ${!wls_managed[@]}; do
+    export wls_server=$(getWLSjvmAttr ${wls_managed[$srvNo]} -Dweblogic.Name)
+    export domain_home=$(getWLSjvmAttr ${wls_managed[$srvNo]} -Ddomain.home)
+    export domain_name=$(basename $domain_home)
+
+    if [ -d $domain_home/servers/$wls_server/logs/oracledi ]; then
+        echo "ODI detected. Processing: $domain_name/$wls_server at $domain_home"
+
+        ~/oci-tools/bin/tpl2data.sh ~/oci-tools/template/diagnose-odi.yaml > ~/.x-ray/diagnose-odi-$domain_name\_$wls_server.yaml
+    else
+        echo "ODI not detected at $wls_server." 
+    fi
+done
+
+step "500.  Perform initial load for all sync descriptors"
 ls -l .x-ray/diagnose-*
 
 for diag in $(ls .x-ray/diagnose-*); do
@@ -125,7 +141,7 @@ for diag in $(ls .x-ray/diagnose-*); do
    ~/oci-tools/bin/x-ray_initial_load_rsync.sh $diag
 done
 
-step "18.  Deploy log sync crontabs for all sync descriptors"
+step "501.  Deploy log sync crontabs for all sync descriptors"
 ls -l .x-ray/diagnose-*
 
 for diag in $(ls .x-ray/diagnose-*); do
@@ -133,7 +149,7 @@ for diag in $(ls .x-ray/diagnose-*); do
    ~/oci-tools/bin/x-ray_make_cron_diagnose.sh $diag
 done
 
-step "19. Keep diagnose-*.yaml files at shared dir"
+step "502. Keep diagnose-*.yaml files at shared dir"
 
 export backup_dir=$env_files/backup
 
