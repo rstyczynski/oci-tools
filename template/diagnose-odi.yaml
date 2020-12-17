@@ -1,0 +1,21 @@
+---
+backup:
+    dir: $env_files/backup
+diagnose:
+    logs:
+        dir:    $domain_home/servers/$wls_server/logs/oracledi
+        type:   logappend
+        ttl:    2
+        ttl_filter: "[0-9][0-9]+$"
+        expose:   
+            cycle: "* * * * *"
+            age:   1
+            depth: 1
+            dir:   $env_files/x-ray/$env/$component/diag/odi/log/$domain_name/$wls_server/$todayiso8601
+            access: +r
+            ttl:   45
+        archive: 
+            cycle: "1 * * * *"
+            dir:   oci_os://$bucket
+            ttl:   90
+
