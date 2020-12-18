@@ -130,6 +130,17 @@ function initial_rsync_date2date() {
 
     # chmod does not work properly on some rsync e.g. 3.0.6; added  umask to fix        
     umask 022
+
+    # rsync does not create dst_dir? 
+    # building file list ... 
+    # 101 files to consider
+    # rsync: mkdir "/mwlogs/x-ray/preprod/soa/diag/wls/alert/soa_domain/osb_server1" failed: No such file or directory (2)
+    # rsync error: error in file IO (code 11) at main.c(657) [Receiver=3.1.2]
+    # rsync creates dst dir, but create to have right permissions
+    mkdir -p $dst_dir
+    chmod g+rx $dst_dir
+    chmod o+rx $dst_dir
+
     #rsync  --dry-run \
     rsync --progress -h \
     -t \
