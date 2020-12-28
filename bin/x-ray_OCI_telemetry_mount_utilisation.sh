@@ -104,7 +104,7 @@ function send_data() {
     oci monitoring metric-data post --metric-data file://$tmp/data.json \
     --endpoint $telemetry_endpoint > $tmp/response.json
     if [ $? -eq 0 ];then
-        logger -t $script_name -s "Data sent."
+        logger -t $script_name -s "Data sent. Data: $(cat $tmp/response.json)"
     else
         logger -t $script_name -s "Error sending data. Data: $(cat $tmp/response.json)"
     fi    
@@ -175,7 +175,7 @@ for state in $states; do
     # send when number of records is equal to max allowed for one payload
     [ $SCRIPT_DEBUG -eq 1 ] && echo $batch_size of $batch_max 
     if [ $batch_size -eq $batch_max ]; then
-        # close batch and send data
+        # close current batch and send data
         send_data
 
         # initialize next batch payload to be sent to oci metric
@@ -186,7 +186,9 @@ for state in $states; do
     fi
 done
 
-# close batch and send data
-send_data
+# close final batch and send data
+if [ $batch_size -gt 0 ]; then
+    send_data
+fi
 
 quit
