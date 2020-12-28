@@ -102,11 +102,11 @@ function send_data() {
 
     # send
     oci monitoring metric-data post --metric-data file://$tmp/data.json \
-    --endpoint $telemetry_endpoint
+    --endpoint $telemetry_endpoint > $tmp/response.json
     if [ $? -eq 0 ];then
         logger -t $script_name -s "Data sent."
     else
-        logger -t $script_name -s "Error sending data. Data: $(cat $tmp/data.json)"
+        logger -t $script_name -s "Error sending data. Data: $(cat $tmp/response.json)"
     fi    
 }
 
