@@ -123,6 +123,8 @@ script_pathname=$0
 script_dir=$(dirname $script_pathname)
 script_name=$(basename $script_pathname)
 
+: ${SCRIPT_DEBUG:=0}
+
 tmp=~/tmp/$$
 mkdir -p $tmp
 
