@@ -145,7 +145,7 @@ if [ -z "$env_files" ]; then
 fi
 
 # set maximum number of records in oci telementry payload
-batch_max=20
+batch_max=45
 
 # initialize first batch payload to be sent to oci metric
 batch_size=0
