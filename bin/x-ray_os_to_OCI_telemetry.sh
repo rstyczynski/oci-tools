@@ -194,8 +194,8 @@ oci_metric start_array
 #
 # metric namespace
 #
-metric_namespace:=x-ray_OS
-metric_namespace:=tmp_test__OS
+metric_namespace=x-ray_OS
+metric_namespace=tmp_test__OS
 
 #
 # disk space
