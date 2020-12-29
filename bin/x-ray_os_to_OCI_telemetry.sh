@@ -48,8 +48,6 @@ function oci_metric() {
         return
     fi
 
-    : ${metric_namespace:=tmp_test}
-
     dimension_name=$(echo $metric_dimension | cut -f1 -d:)
     dimension_value=$(echo $metric_dimension | cut -f2 -d:)
 
@@ -194,6 +192,12 @@ oci_metric set_file $tmp/data.json
 oci_metric start_array
 
 #
+# metric namespace
+#
+metric_namespace:=x-ray_OS
+metric_namespace:=tmp_test__OS
+
+#
 # disk space
 #
 states=$(ls $env_files/x-ray/*/*/watch/hosts/*/os/obd/disk-space-mount1/state)
@@ -206,7 +210,7 @@ for state in $states; do
     ### CUSTOM OS code - START
     used=$(cat $state | grep capacity | cut -f2 -d=)  
     mounted_on=$(cat $state | grep mounted_on | cut -f2 -d=) 
-    [ $SCRIPT_DEBUG -eq 1 ] && echoo ", $mounted_on, $used"
+    [ $SCRIPT_DEBUG -eq 1 ] && echo ", $mounted_on, $used"
     ### CUSTOM OS code - STOP
 
     # add server data to the payload
@@ -228,11 +232,11 @@ for state in $states; do
     ### CUSTOM OS code - START
     cpu_idle=$(cat $state | grep CPUidle | cut -f2 -d=)
     cpu_used=$(( 100 - $cpu_idle ))
-    [ $SCRIPT_DEBUG -eq 1 ] && echoo ", $cpu_used"
+    [ $SCRIPT_DEBUG -eq 1 ] && echo ", $cpu_used"
     ### CUSTOM OS code - STOP
 
     # add server data to the payload
-    oci_metric $datetime $env $component $hostname cpu used $cpu_used level expect_more
+    oci_metric $datetime $env $component $hostname used cpu $cpu_used level expect_more
 
     send_data
 done
