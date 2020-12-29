@@ -96,7 +96,7 @@ EOF
     fi
 }
 
-function send_data() {
+function forward_data_to_OCI() {
     # some data may be in the payload here. use this host just to close the payload
     oci_metric $(utc::now) $env $component $(hostname) filesystem:/ diskspace $(df --output=pcent / | tail -1 | tr -d ' %') level no_more
 
@@ -109,6 +109,46 @@ function send_data() {
         logger -t $script_name -s "Error sending data. Data: $(cat $tmp/response.json)"
     fi    
 }
+
+function send_data_final() {
+    if [ $batch_size -gt 0 ]; then
+        forward_data_to_OCI
+    fi
+}
+
+function send_data() {
+    batch_size=$(( $batch_size + 1 ))
+    # send when number of records is equal to max allowed for one payload
+    [ $SCRIPT_DEBUG -eq 1 ] && echo $batch_size of $batch_max 
+    if [ $batch_size -eq $batch_max ]; then
+        # close current batch and send data
+        forward_data_to_OCI
+
+        # initialize next batch payload to be sent to oci metric
+        batch_size=0
+        rm -rf $tmp/data.json
+        oci_metric set_file $tmp/data.json
+        oci_metric start_array
+    fi
+}
+
+# get data
+function extract_data_form_path_os(){
+    # get data about the server from PATH
+    env=$(echo $state | perl -pe's/\/mwlogs\/x-ray\/(\w+)\/(\w+)\/watch\/hosts\/([\w\d-_\.]+)\/os\/obd\/([\w\d-_\.]+)\/state/$1/')
+    component=$(echo $state | perl -pe's/\/mwlogs\/x-ray\/(\w+)\/(\w+)\/watch\/hosts\/([\w\d-_\.]+)\/os\/obd\/([\w\d-_\.]+)\/state/$2/')
+    hostname=$(echo $state | perl -pe's/\/mwlogs\/x-ray\/(\w+)\/(\w+)\/watch\/hosts\/([\w\d-_\.]+)\/os\/obd\/([\w\d-_\.]+)\/state/$3/')
+    probe=$(echo $state | perl -pe's/\/mwlogs\/x-ray\/(\w+)\/(\w+)\/watch\/hosts\/([\w\d-_\.]+)\/os\/obd\/([\w\d-_\.]+)\/state/$4/')    
+}
+
+function extract_timestamp(){
+    timestamp=$(cat $state| grep timestamp | cut -f2 -d=)
+    datetime=$(date -d @$timestamp +"%Y-%m-%dT%H:%M:%S.000Z")    
+}
+
+#
+#
+#
 
 function quit() {
     rm -rf ~/tmp/$$
@@ -153,42 +193,51 @@ rm -rf $tmp/data.json
 oci_metric set_file $tmp/data.json
 oci_metric start_array
 
+#
+# disk space
+#
 states=$(ls $env_files/x-ray/*/*/watch/hosts/*/os/obd/disk-space-mount1/state)
 for state in $states; do
+    extract_data_form_path_os
+    # get details from state file
+    extract_timestamp
+    [ $SCRIPT_DEBUG -eq 1 ] && echo  -n "$datetime, $env, $component, $hostname, $probe"
 
-    # get data about the server from PATH
-    env=$(echo $state | perl -pe's/\/mwlogs\/x-ray\/(\w+)\/(\w+)\/watch\/hosts\/([\w\d-_\.]+)\/os\/obd\/([\w\d-_\.]+)\/state/$1/')
-    component=$(echo $state | perl -pe's/\/mwlogs\/x-ray\/(\w+)\/(\w+)\/watch\/hosts\/([\w\d-_\.]+)\/os\/obd\/([\w\d-_\.]+)\/state/$2/')
-    hostname=$(echo $state | perl -pe's/\/mwlogs\/x-ray\/(\w+)\/(\w+)\/watch\/hosts\/([\w\d-_\.]+)\/os\/obd\/([\w\d-_\.]+)\/state/$3/')
-
-    # get details from stte file
-    timestamp=$(cat $state| grep timestamp | cut -f2 -d=)
-    datetime=$(date -d @$timestamp +"%Y-%m-%dT%H:%M:%S.000Z")
+    ### CUSTOM OS code - START
     used=$(cat $state | grep capacity | cut -f2 -d=)  
     mounted_on=$(cat $state | grep mounted_on | cut -f2 -d=) 
-    [ $SCRIPT_DEBUG -eq 1 ] && echo  $datetime, $env, $component, $hostname, $mounted_on, $used
+    [ $SCRIPT_DEBUG -eq 1 ] && echoo ", $mounted_on, $used"
+    ### CUSTOM OS code - STOP
 
     # add server data to the payload
     oci_metric $datetime $env $component $hostname filesystem:$mounted_on diskspace $used level expect_more
-    batch_size=$(( $batch_size + 1 ))
-    
-    # send when number of records is equal to max allowed for one payload
-    [ $SCRIPT_DEBUG -eq 1 ] && echo $batch_size of $batch_max 
-    if [ $batch_size -eq $batch_max ]; then
-        # close current batch and send data
-        send_data
 
-        # initialize next batch payload to be sent to oci metric
-        batch_size=0
-        rm -rf $tmp/data.json
-        oci_metric set_file $tmp/data.json
-        oci_metric start_array
-    fi
+    send_data
+done
+
+#
+#  CPU utlization
+#
+states=$(ls $env_files/x-ray/*/*/watch/hosts/*/os/obd/system-vmstat/state)
+for state in $states; do
+    extract_data_form_path_os
+    # get details from state file
+    extract_timestamp
+    [ $SCRIPT_DEBUG -eq 1 ] && echo  -n "$datetime, $env, $component, $hostname, $probe"
+
+    ### CUSTOM OS code - START
+    cpu_idle=$(cat $state | grep CPUidle | cut -f2 -d=)
+    cpu_used=$(( 100 - $cpu_idle ))
+    [ $SCRIPT_DEBUG -eq 1 ] && echoo ", $cpu_used"
+    ### CUSTOM OS code - STOP
+
+    # add server data to the payload
+    oci_metric $datetime $env $component $hostname cpu used $cpu_used level expect_more
+
+    send_data
 done
 
 # close final batch and send data
-if [ $batch_size -gt 0 ]; then
-    send_data
-fi
+send_data_final
 
 quit
