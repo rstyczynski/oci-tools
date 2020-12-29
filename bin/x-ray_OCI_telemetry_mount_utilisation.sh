@@ -48,8 +48,6 @@ function oci_metric() {
         return
     fi
 
-    : ${metric_namespace:=tmp_test}
-
     dimension_name=$(echo $metric_dimension | cut -f1 -d:)
     dimension_value=$(echo $metric_dimension | cut -f2 -d:)
 
@@ -192,6 +190,12 @@ batch_size=0
 rm -rf $tmp/data.json
 oci_metric set_file $tmp/data.json
 oci_metric start_array
+
+#
+# metric namespace
+#
+metric_namespace:=x-ray_OS
+metric_namespace:=tmp_test__OS
 
 #
 # disk space
