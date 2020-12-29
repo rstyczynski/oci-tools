@@ -118,11 +118,9 @@ function forward_data_to_OCI() {
     fi    
 }
 
-function send_data_final() {
-    if [ $batch_size -gt 0 ]; then
-        forward_data_to_OCI
-    fi
-}
+#
+# send data to OCI
+#
 
 function send_data() {
     batch_size=$(( $batch_size + 1 ))
@@ -140,7 +138,15 @@ function send_data() {
     fi
 }
 
-# get data
+function send_data_final() {
+    if [ $batch_size -gt 0 ]; then
+        forward_data_to_OCI
+    fi
+}
+
+#
+# get data from state file/path
+#
 function extract_data_form_path_os(){
     # get data about the server from PATH
     env=$(echo $state | perl -pe's/\/mwlogs\/x-ray\/(\w+)\/(\w+)\/watch\/hosts\/([\w\d-_\.]+)\/os\/obd\/([\w\d-_\.]+)\/state/$1/')
@@ -204,8 +210,8 @@ oci_metric start_array
 #
 # metric namespace
 #
-metric_namespace=x-ray_os
-metric_namespace=tmp_os
+#metric_namespace=tmp_os
+metric_namespace=xray_os
 
 #
 # disk space
