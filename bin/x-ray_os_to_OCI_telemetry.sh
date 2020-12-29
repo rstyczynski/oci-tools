@@ -63,7 +63,8 @@ function oci_metric() {
                 "name": "$metric_name",
 EOF
 
-           cat >>$oci_json_file <<EOF
+if [ ! -z "$dimension_name" ]; then
+    cat >>$oci_json_file <<EOF
                 "dimensions": { 
                     "environment": "$metric_env",
                     "component": "$metric_comp",
@@ -71,6 +72,15 @@ EOF
                     "$dimension_name": "$dimension_value"
                     },
 EOF
+else
+    cat >>$oci_json_file <<EOF
+                "dimensions": { 
+                    "environment": "$metric_env",
+                    "component": "$metric_comp",
+                    "hostname": "$metric_host"
+                    },
+EOF
+fi
 
 
     cat >>$oci_json_file <<EOF
@@ -236,7 +246,7 @@ for state in $states; do
     ### CUSTOM OS code - STOP
 
     # add server data to the payload
-    oci_metric $datetime $env $component $hostname used cpu $cpu_used level expect_more
+    oci_metric $datetime $env $component $hostname : cpu $cpu_used level expect_more
 
     send_data
 done
