@@ -10,6 +10,7 @@ function oci_compute_discovery() {
 
     mkdir -p $oci_index/$date/compute
 
+    $oci_index/latest
     ln -s $oci_index/$date $oci_index/latest
 
     #
@@ -108,6 +109,7 @@ function oci_db_discovery() {
 
     mkdir -p $oci_index/$date/db
 
+    rm -rf $oci_index/latest
     ln -s $oci_index/$date $oci_index/latest
 
     # set region name for file location purposes
