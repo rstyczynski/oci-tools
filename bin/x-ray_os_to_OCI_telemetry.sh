@@ -223,6 +223,7 @@ for state in $states; do
     extract_timestamp
     [ $SCRIPT_DEBUG -eq 1 ] && echo  -n "$datetime, $env, $component, $hostname, $probe"
 
+
     ### CUSTOM OS code - START
     used=$(cat $state | grep capacity | cut -f2 -d=)  
     mounted_on=$(cat $state | grep mounted_on | cut -f2 -d=) 
