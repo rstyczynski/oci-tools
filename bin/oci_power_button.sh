@@ -241,3 +241,23 @@ function startup_environment() {
         done
     done
 }
+
+#
+# run
+#
+
+inventory=$1
+env=$2
+action=$3
+
+case $action in
+    start)
+        startup_environment $inventory $env
+        ;;
+    stop)
+        shutdown_environment $inventory $env
+        ;;
+    *)
+        echo "Usage: oci_power_button.sh inventory env action"
+        ;;
+esac
