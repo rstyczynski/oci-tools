@@ -246,6 +246,9 @@ function startup_environment() {
 # run
 #
 
+SCRIPTPATH="$( cd "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
+source $SCRIPTPATH/oci_discover.sh
+
 inventory=$1
 env=$2
 action=$3
