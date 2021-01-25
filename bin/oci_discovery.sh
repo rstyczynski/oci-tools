@@ -10,7 +10,7 @@ function oci_compute_discovery() {
 
     mkdir -p $oci_index/$date/compute
 
-    ln -s $oci_index/$date/compute $oci_index/latest
+    ln -s $oci_index/$date $oci_index/latest
 
     #
     # Unload OCI information to directory structure
@@ -104,9 +104,9 @@ function oci_compute_discovery() {
 function oci_db_discovery() {
     date=$(date -I)
 
-    rm -rf $oci_index/$date
+    rm -rf $oci_index/$date/db
 
-    mkdir -p $oci_index/$date
+    mkdir -p $oci_index/$date/db
 
     ln -s $oci_index/$date $oci_index/latest
 
