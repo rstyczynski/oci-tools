@@ -165,12 +165,24 @@ function shutdown_environment() {
             instance_id=$(get_compute_info $private_ip instance_id)
             instance_state=$(oci compute instance get --instance-id $instance_id | jq '.' | grep "lifecycle-state" | cut -f2 -d: | tr -d '," ')
             
+            wait_time=0
+            max_wait_time=300
+            wait_secs=5
             while [ $instance_state != STOPPED ]; do
-                sleep 5
+                sleep $wait_secs
                 echo -n .
                 instance_state=$(oci compute instance get --instance-id $instance_id | jq '.' | grep "lifecycle-state" | cut -f2 -d: | tr -d '," ')
+
+                wait_time=$(( $wait_time + $wait_secs ))
+                if [ $wait_time -gt $max_wait_time ]; then
+                    break
+                fi
             done
-            echo OK
+            if [ $wait_time -gt $max_wait_time ]; then
+                echo Timeout
+            else
+                echo OK
+            fi
         done
 
         for private_ip in $(get_hosts_ip $inventory $env $product db); do
@@ -205,12 +217,25 @@ function startup_environment() {
 
             db_node_id=$(get_db_info $private_ip db_node_id)
             db_node_state=$(oci db node get --db-node-id $db_node_id | jq '.' | grep "lifecycle-state" | cut -f2 -d: | tr -d '," ')
+
+            wait_time=0
+            max_wait_time=300
+            wait_secs=5
             while [ $db_node_state != AVAILABLE ]; do
-                sleep 5
+                sleep $wait_secs
                 echo -n .
                 db_node_state=$(oci db node get --db-node-id $db_node_id | jq '.' | grep "lifecycle-state" | cut -f2 -d: | tr -d '," ')
+
+                wait_time=$(( $wait_time + $wait_secs ))
+                if [ $wait_time -gt $max_wait_time ]; then
+                    break
+                fi
             done
-            echo OK
+            if [ $wait_time -gt $max_wait_time ]; then
+                echo Timeout
+            else
+                echo OK
+            fi
         done
 
         for private_ip in $(get_hosts_ip $inventory $env $product wls); do
@@ -227,12 +252,24 @@ function startup_environment() {
             instance_id=$(get_compute_info $private_ip instance_id)
             instance_state=$(oci compute instance get --instance-id $instance_id | jq '.' | grep "lifecycle-state" | cut -f2 -d: | tr -d '," ')
             
+            wait_time=0
+            max_wait_time=300
+            wait_secs=5
             while [ $instance_state != RUNNING ]; do
-                sleep 5
+                sleep $wait_secs
                 echo -n .
                 instance_state=$(oci compute instance get --instance-id $instance_id | jq '.' | grep "lifecycle-state" | cut -f2 -d: | tr -d '," ')
+
+                wait_time=$(( $wait_time + $wait_secs ))
+                if [ $wait_time -gt $max_wait_time ]; then
+                    break
+                fi
             done
-            echo OK
+            if [ $wait_time -gt $max_wait_time ]; then
+                echo Timeout
+            else
+                echo OK
+            fi
         done
 
         for private_ip in $(get_hosts_ip $inventory $env $product ohs); do
