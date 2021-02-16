@@ -55,6 +55,18 @@ function schedule_diag_sync() {
         echo "##########################################"
 
         dir=$(cat $diag_cfg | y2j | jq -r ".diagnose.$log.dir" | rn)
+
+        src_dir_mode=$(cat $diag_cfg | y2j | jq -r ".diagnose.$log.mode" | rn)
+        : ${src_dir_mode:=default}
+        case $src_dir_mode in
+        date2date)
+            purge_src_dir=$dir/..
+            ;;
+        *)
+            purge_src_dir=$dir
+            ;;
+        esac
+
         type=$(cat $diag_cfg | y2j | jq -r ".diagnose.$log.type" | rn)
         : ${type:=log}
         ttl=$(cat $diag_cfg | y2j | jq -r ".diagnose.$log.ttl" | rn)
@@ -159,7 +171,7 @@ EOF
         if [ "$archive_cycle" != none ]; then
             cat >>diag_sync.cron <<EOF
 MAILTO=""
-1 0 * * * find  $dir -type f -mtime +$ttl | egrep "$ttl_filter" > $backup_dir/$(hostname)/$diagname-$log-\$(date -I).archive; tar -czf $backup_dir/$(hostname)/$diagname-$log-\$(date -I).tar.gz -T $backup_dir/$(hostname)/$diagname-$log-\$(date -I).archive; test \$? -eq 0 && xargs rm < $backup_dir/$(hostname)/$diagname-$log-\$(date -I).archive 
+1 0 * * * find  $purge_src_dir -type f -mtime +$ttl | egrep "$ttl_filter" > $backup_dir/$(hostname)/$diagname-$log-\$(date -I).archive; tar -czf $backup_dir/$(hostname)/$diagname-$log-\$(date -I).tar.gz -T $backup_dir/$(hostname)/$diagname-$log-\$(date -I).archive; test \$? -eq 0 && xargs rm < $backup_dir/$(hostname)/$diagname-$log-\$(date -I).archive 
 EOF
         else
             cat >>diag_sync.cron <<EOF
