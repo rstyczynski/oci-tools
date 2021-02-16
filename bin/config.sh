@@ -36,11 +36,11 @@ function setcfg() {
     if [ -z "$new_value" ]; then
         read -p "Enter value for $what:" new_value
     fi
-
+    
     if [ "$force" != force ]; then
-        read -t 5 -p "Set in global /etc/$which.config? [yN]" global
+        read -t 5 -p "Set in global /etc/$which.config? [Yn]" global
     fi
-    : ${global:=N}
+    : ${global:=Y}
     global=$(echo $global | tr [a-z] [A-Z])
 
     case $global in

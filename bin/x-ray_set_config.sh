@@ -9,6 +9,9 @@ if [ -z "$env_files" ] || [ -z "$env" ] || [ -z "$component" ] || [ -z "$bucket"
     exit 1
 fi
 
+rm -f ~/.x-ray/config
+sudo -f rm /etc/x-ray.config
+
 source ~/oci-tools/bin/config.sh
 setcfg x-ray env_files $env_files force
 setcfg x-ray env $env force
