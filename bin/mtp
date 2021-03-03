@@ -1,19 +1,21 @@
 #!/bin/bash
 
-_mtp_VERSION=0.1
+_mtp_VERSION=0.2
+
+# history
+# 0.1 initial with telnet
+# 0.2 replaced telnet with python
 
 target_ip=$1
 target_port=$2
 interval=$3
 count=$4
-target_expect=$5
-tests_in_row=$6
+target_banner=$5
 
 #
 # default values
 #
 : ${interval:=5}
-: ${target_expect:=Connected}
 : ${tests_in_row:=60}
 : ${count:=$(($tests_in_row * 5))}
 
@@ -24,7 +26,33 @@ function banner() {
   echo "My tcp ping version $_mtp_VERSION. Utility to test accessbilty of tcp services."
 }
 function usage(){
-  echo "Usage: mtp ip port [interval] [count] [expect] [tests_in_row]"
+  cat << EOF
+Usage: mtp ip port [interval] [count] [expect]
+
+Hack: set tests_in_row to control test batch size.
+
+Use cases:
+
+1. connect to service w/o banner
+mtp dns.google.com 53
+
+2. connect to ssh service
+mtp github.com 22
+
+3. connect to ssh service and check banner
+mtp github.com 22 5 720 SSH
+
+4. connect to ftp service
+mtp 193.46.186.29 21
+
+5. connect to ftp service and check banner
+mtp 193.46.186.29 21 5 720 FTP
+
+6. connect to service w/o banner. Keep 5 tests in row
+export tests_in_row=5
+mtp dns.google.com 53
+
+EOF
 }
 
 if [ -z "$target_ip" ] || [ -z "$target_port" ]; then
@@ -43,7 +71,7 @@ function required() {
 }
 
 function cleanup() {
-  test -f ~/tmp/mtp_telnet.out && rm -f ~/tmp/mtp_telnet.out
+  test -f ~/tmp/mtp_socket.out && rm -f ~/tmp/mtp_socket.out
   test -f ~/tmp/required.lst   && rm -f ~/tmp/required.lst
 }
 
@@ -123,8 +151,18 @@ function sayatcell() {
 banner
 echo
 
+if [ ! -z "$target_banner" ]; then
+  echo "Test case: connecting $count times with interval $interval seconds to $target_ip:$target_port with expected banner: $target_banner"
+  echo
+  target_expect=$target_banner
+else
+  echo "Test case: connecting $count times with interval $interval seconds to $target_ip:$target_port to just estabish a tcp socket."
+  echo
+  target_expect=Connected
+fi
+
 cleanup
-required telnet 
+required python2 
 
 if [ -f ~/tmp/required.lst ]; then
   echo "Error. Cannot run w/o required tools: $(cat ~/tmp/required.lst)"
@@ -153,21 +191,26 @@ while [ $cnt -lt $count ]; do
   fi
   cnt=$(($cnt + 1))
 
-  # invoke pure TCP or server avare test
-  if [ ! -z "$target_expect" ]; then
-    # do not send anything to tcp service. wait for banner.
-    timeout $interval telnet $target_ip $target_port > ~/tmp/mtp_telnet.out 2>&1
-  else
-    # do not wait for banner. just expect telnet cnfirmation about connection.
-    timeout $interval telnet $target_ip $target_port > ~/tmp/mtp_telnet.out 2>&1
-  fi
+
+  timeout $interval python2 > ~/tmp/mtp_socket.out  2>&1 << EOF
+import socket  
+import sys  
+
+s=socket.socket()  
+# timoeut tested at os level - to make script easier
+#s.settimeout($interval)
+s.connect(("$target_ip",$target_port))
+print "Connected to $target_ip"
+banner = s.recv(1024)  
+print banner  
+EOF
   if [ $? -eq 124 ]; then
     sleep_time=0
   else
     sleep_time=$interval
   fi
 
-  grep "$target_expect" ~/tmp/mtp_telnet.out >/dev/null
+  grep "$target_expect" ~/tmp/mtp_socket.out >/dev/null
   if [ $? -eq 0 ]; then
     echo -n '+'
   else
