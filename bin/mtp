@@ -180,7 +180,7 @@ sayatcell -n -f "target" 25
 sayatcell -n -f "interval" 10
 sayatcell -n -f "test no." 10
 if [ $tests_in_row -gt 25 ]; then
-  sayatcell -f "connection state" $tests_in_row
+  sayatcell -f "state" $tests_in_row
 else
   sayatcell -f "connection state" 25
 fi
