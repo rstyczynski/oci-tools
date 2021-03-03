@@ -24,7 +24,7 @@ function banner() {
   echo "My tcp ping version $_mtp_VERSION. Utility to test accessbilty of tcp services."
 }
 function usage(){
-  echo "Usage: mtp ip port [timeout] [expect] [tests_in_row]"
+  echo "Usage: mtp ip port [interval] [count] [expect] [tests_in_row]"
 }
 
 if [ -z "$target_ip" ] || [ -z "$target_port" ]; then
