@@ -181,4 +181,5 @@ echo '|'
 
 cleanup
 
+echo
 echo "Test completed."
