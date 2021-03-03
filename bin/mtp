@@ -1,5 +1,7 @@
 #!/bin/bash
 
+_mtp_VERSION=0.1
+
 target_ip=$1
 target_port=$2
 interval=$3
@@ -19,7 +21,7 @@ tests_in_row=$6
 # mtp functions
 #
 function banner() {
-  echo "My tcp ping. Utility to test accessbilty of tcp services."
+  echo "My tcp ping version $_mtp_VERSION. Utility to test accessbilty of tcp services."
 }
 function usage(){
   echo "Usage: mtp ip port [timeout] [expect] [tests_in_row]"
