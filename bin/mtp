@@ -36,13 +36,14 @@ fi
 
 function required() {
   if [ -z "$(which $1)" ]; then
-    echo "Error: mtp cannot proceed w/o: $1"
+    echo "Error: mtp cannot proceed w/o: $1" >~/tmp/required.lst
   fi
 }
 
 
 function cleanup() {
   test -f ~/tmp/mtp_telnet.out && rm -f ~/tmp/mtp_telnet.out
+  test -f ~/tmp/required.lst   && rm -f ~/tmp/required.lst
 }
 
 function forced_quit() {
@@ -120,7 +121,14 @@ function sayatcell() {
 banner
 echo
 
+cleanup
 required telnet 
+
+if [ -f ~/tmp/required.lst ]; then
+  echo "Error. Cannot run w/o required tools:"
+  cat ~/tmp/required.lst
+  exit 8
+fi
 
 mkdir -p ~/tmp
 
