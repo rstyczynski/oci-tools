@@ -1,0 +1,160 @@
+#!/bin/bash
+
+target_ip=$1
+target_port=$2
+interval=$3
+count=$4
+target_expect=$5
+tests_in_row=$6
+
+#
+# default values
+#
+: ${timeout:=5}
+: ${target_expect:=Connected}
+: ${tests_in_row:=60}
+: ${count:=$(($tests_in_row * 5))}
+
+#
+# mtp functions
+#
+function banner() {
+  echo "My tcp ping. Utility to test accessbilty of tcp services."
+}
+function usage(){
+  echo "Usage: mtp ip port [timeout] [expect] [tests_in_row]"
+}
+
+if [ -z "$target_ip" ] || [ -z "$target_port" ]; then
+  banner
+  echo
+  echo "Error: ip and port must be provided. Cannot continue."
+  echo
+  usage
+  exit 9
+fi
+
+function cleanup() {
+  test -f ~/tmp/mtp_telnet.out && rm -f ~/tmp/mtp_telnet.out
+}
+
+function forced_quit() {
+  cleanup
+  exit 130
+}
+
+trap forced_quit SIGINT
+trap forced_quit SIGTERM
+
+#
+# standard library
+#
+function sayatcell() {
+
+    nl=yes
+    if [ $1 == '-n' ]; then
+        nl=no
+        shift
+    fi
+
+    fr=no
+    if [ $1 == '-f' ]; then
+        fr=yes
+        shift
+    fi
+
+    what=$1
+    shift
+    size=$1
+    shift
+
+    back='____________________________________________________________________________________________________________'
+    back='                                                                                                            '
+    dots='............................................................................................................'
+
+    what_lth=$(echo -n $what | wc -c)
+
+    if [ $what_lth -lt $size ]; then
+        pre=$(echo "($size - $what_lth)/2" | bc)
+        post=$(echo "$size - $what_lth - $pre" | bc)
+
+        if [ $pre -gt 0 ]; then
+            echo -n "$back" | cut -b1-$pre | tr -d '\n'
+        fi
+
+        echo -n "$what"
+
+        if [ $post -gt 0 ]; then
+            echo -n "$back" | cut -b1-$post | tr -d '\n'
+        fi
+
+    elif [ $what_lth -gt $size ]; then
+        echo -n "$what" | cut -b1-$(($size - 2)) | tr -d '\n'
+        echo -n "$dots" | cut -b1-2 | tr -d '\n'
+    elif [ $what_lth -eq $size ]; then
+        echo -n "$what"
+    fi
+
+    if [ $nl == yes ]; then
+        if [ $fr == yes ]; then
+            echo '|'
+        else
+            echo
+        fi
+    elif [ $fr == yes ]; then
+        echo -n '|'
+    fi
+}
+
+#
+# main logic
+#
+
+banner
+echo
+
+mkdir -p ~/tmp
+
+sayatcell -n -f " time" 40
+sayatcell -n -f "socket" 40
+sayatcell -n -f "interval" 15
+sayatcell -n -f "test no." 15
+sayatcell -f "connection state" $tests_in_row
+
+cnt=0
+while [ $cnt -le $count ]; do
+
+  if [ $(($cnt % $tests_in_row)) -eq 0 ]; then
+    test $cnt -gt 0 && echo
+    sayatcell -n -f "$(date)" 40
+    sayatcell -n -f "$(hostname) >> $target_ip:$target_port" 40
+    sayatcell -n -f "$interval" 15
+    sayatcell -n -f "$cnt" 15
+  fi
+  cnt=$(($cnt + 1))
+
+  # invoke pure TCP or server avare test
+  if [ ! -z "$target_expect" ]; then
+    # do not send anything to tcp service. wait for banner.
+    timeout $interval telnet $target_ip $target_port > ~/tmp/mtp_telnet.out 2>&1
+  else
+    # do not wait for banner. just expect telnet cnfirmation about connection.
+    timeout $interval telnet $target_ip $target_port > ~/tmp/mtp_telnet.out 2>&1
+  fi
+  if [ $? -eq 124 ]; then
+    sleep_time=0
+  else
+    sleep_time=$interval
+  fi
+
+  grep "$target_expect" ~/tmp/mtp_telnet.out >/dev/null
+  if [ $? -eq 0 ]; then
+    echo -n '+'
+  else
+    echo -n '!'
+  fi
+
+  sleep $sleep_time
+done
+
+cleanup
