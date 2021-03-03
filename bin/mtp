@@ -42,7 +42,6 @@ function required() {
   fi
 }
 
-
 function cleanup() {
   test -f ~/tmp/mtp_telnet.out && rm -f ~/tmp/mtp_telnet.out
   test -f ~/tmp/required.lst   && rm -f ~/tmp/required.lst
@@ -50,6 +49,7 @@ function cleanup() {
 
 function forced_quit() {
   cleanup
+  echo "Test halted."
   exit 130
 }
 
@@ -177,4 +177,8 @@ while [ $cnt -lt $count ]; do
   sleep $sleep_time
 done
 
+echo '|'
+
 cleanup
+
+echo "Test completed."
