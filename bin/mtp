@@ -34,6 +34,13 @@ if [ -z "$target_ip" ] || [ -z "$target_port" ]; then
   exit 9
 fi
 
+function required() {
+  if [ -z "$(wchich $1)" ]; then
+    echo "Error: mtp cannot proceed w/o: $1"
+  fi
+}
+
+
 function cleanup() {
   test -f ~/tmp/mtp_telnet.out && rm -f ~/tmp/mtp_telnet.out
 }
@@ -113,6 +120,8 @@ function sayatcell() {
 banner
 echo
 
+required telnet 
+
 mkdir -p ~/tmp
 
 sayatcell -n -f " time" 40
@@ -129,7 +138,7 @@ while [ $cnt -le $count ]; do
     sayatcell -n -f "$(date)" 40
     sayatcell -n -f "$(hostname) >> $target_ip:$target_port" 40
     sayatcell -n -f "$interval" 15
-    sayatcell -n -f "$cnt" 15
+    sayatcell -n -f "$(($cnt + 1))" 15
   fi
   cnt=$(($cnt + 1))
 
