@@ -10,7 +10,7 @@ tests_in_row=$6
 #
 # default values
 #
-: ${timeout:=5}
+: ${interval:=5}
 : ${target_expect:=Connected}
 : ${tests_in_row:=60}
 : ${count:=$(($tests_in_row * 5))}
