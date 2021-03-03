@@ -16,8 +16,9 @@ target_banner=$5
 # default values
 #
 : ${interval:=5}
-: ${tests_in_row:=60}
-: ${count:=$(($tests_in_row * 5))}
+: ${tests_in_row:=$((60 / $interval))}}
+test $tests_in_row -eq 0 && tests_in_row=1
+: ${count:=$((900 / $interval))}
 
 #
 # mtp functions
@@ -29,10 +30,12 @@ function usage(){
   cat << EOF
 Usage: mtp ip port [interval] [count] [expect]
 
+By default test runs for 15 minutes with 5 second delays.
+
 Hack: set tests_in_row to control test batch size.
 
-Use cases:
-
+Use cases
+=========
 1. connect to service w/o banner
 mtp dns.google.com 53
 
@@ -176,7 +179,11 @@ sayatcell -n -f "source" 25
 sayatcell -n -f "target" 25
 sayatcell -n -f "interval" 10
 sayatcell -n -f "test no." 10
-sayatcell -f "connection state" $tests_in_row
+if [ $tests_in_row -gt 25 ]; then
+  sayatcell -f "connection state" $tests_in_row
+else
+  sayatcell -f "connection state" 25
+fi
 
 cnt=0
 while [ $cnt -lt $count ]; do
