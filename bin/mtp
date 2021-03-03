@@ -141,7 +141,7 @@ sayatcell -n -f "test no." 10
 sayatcell -f "connection state" $tests_in_row
 
 cnt=0
-while [ $cnt -le $count ]; do
+while [ $cnt -lt $count ]; do
 
   if [ $(($cnt % $tests_in_row)) -eq 0 ]; then
     test $cnt -gt 0 && echo '|'
