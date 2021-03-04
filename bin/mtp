@@ -78,8 +78,8 @@ function required() {
 
 function cleanup() {
   :
-  #test -f ~/tmp/mtp_socket.$$ && rm -f ~/tmp/mtp_socket.$$
-  #test -f ~/tmp/mtp_required.$$   && rm -f ~/tmp/mtp_required.$$
+  test -f ~/tmp/mtp_socket.$$ && rm -f ~/tmp/mtp_socket.$$
+  test -f ~/tmp/mtp_required.$$   && rm -f ~/tmp/mtp_required.$$
 }
 
 function forced_quit() {
