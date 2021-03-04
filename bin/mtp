@@ -1,10 +1,11 @@
 #!/bin/bash
 
-_mtp_VERSION=0.2
+_mtp_VERSION=0.3
 
 # history
 # 0.1 initial with telnet
 # 0.2 replaced telnet with python
+# 0.3 added conectivity log  
 
 target_ip=$1
 target_port=$2
@@ -30,7 +31,9 @@ function usage(){
   cat << EOF
 Usage: mtp ip port [interval] [count] [expect]
 
-By default test runs for 15 minutes with 5 second delays.
+Notes:
+1. By default test runs for 15 minutes with 5 second delays.
+2. Each interactio nwith socket is logged in mtp_target_ipPtarget_port.log
 
 Hack: set tests_in_row to control test batch size.
 
@@ -69,13 +72,14 @@ fi
 
 function required() {
   if [ -z "$(which $1 2>/dev/null)" ]; then
-    echo "$1" >~/tmp/required.lst
+    echo "$1" >~/tmp/mtp_required.$$
   fi
 }
 
 function cleanup() {
-  test -f ~/tmp/mtp_socket.out && rm -f ~/tmp/mtp_socket.out
-  test -f ~/tmp/required.lst   && rm -f ~/tmp/required.lst
+  :
+  #test -f ~/tmp/mtp_socket.$$ && rm -f ~/tmp/mtp_socket.$$
+  #test -f ~/tmp/mtp_required.$$   && rm -f ~/tmp/mtp_required.$$
 }
 
 function forced_quit() {
@@ -161,14 +165,17 @@ if [ ! -z "$target_banner" ]; then
 else
   echo "Test case: connecting $count times with interval $interval seconds to $target_ip:$target_port to just estabish a tcp socket."
   echo
-  target_expect=Connected
+  target_expect="Connected"
 fi
+
+echo "Connection log is written to mtp_${target_ip}P${target_port}.log"
+echo 
 
 cleanup
 required python2 
 
-if [ -f ~/tmp/required.lst ]; then
-  echo "Error. Cannot run w/o required tools: $(cat ~/tmp/required.lst)"
+if [ -f ~/tmp/mtp_required.$$ ]; then
+  echo "Error. Cannot run w/o required tools: $(cat ~/tmp/mtp_required.$$)"
   exit 8
 fi
 
@@ -199,17 +206,25 @@ while [ $cnt -lt $count ]; do
   cnt=$(($cnt + 1))
 
 
-  timeout $interval python2 > ~/tmp/mtp_socket.out  2>&1 << EOF
+  timeout $interval python2 > ~/tmp/mtp_socket.$$  2>&1 << EOF
 import socket  
 import sys  
 
+print "Creating socket"
+sys.stdout.flush()
 s=socket.socket()  
 # timoeut tested at os level - to make script easier
 #s.settimeout($interval)
+
+print "Connecting to $target_ip"
+sys.stdout.flush()
 s.connect(("$target_ip",$target_port))
 print "Connected to $target_ip"
+sys.stdout.flush()
+
 banner = s.recv(1024)  
-print banner  
+print banner
+sys.stdout.flush()
 EOF
   if [ $? -eq 124 ]; then
     sleep_time=0
@@ -217,11 +232,16 @@ EOF
     sleep_time=$interval
   fi
 
-  grep "$target_expect" ~/tmp/mtp_socket.out >/dev/null
+  # save to log
+  echo -n "$(date),$(hostname),$target_ip:$target_port,$interval,$cnt,[$(cat ~/tmp/mtp_socket.$$ | tr '\n\r' '|')]," >> mtp_${target_ip}P${target_port}.log
+
+  grep "$target_expect" ~/tmp/mtp_socket.$$ >/dev/null
   if [ $? -eq 0 ]; then
     echo -n '+'
+    echo OK >> mtp_${target_ip}P${target_port}.log
   else
     echo -n '!'
+    echo ERROR >> mtp_${target_ip}P${target_port}.log
   fi
 
   sleep $sleep_time
