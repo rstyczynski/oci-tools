@@ -225,6 +225,9 @@ sys.stdout.flush()
 banner = s.recv(1024)  
 print banner
 sys.stdout.flush()
+
+print "Closing socket"
+s.close()
 EOF
   if [ $? -eq 124 ]; then
     sleep_time=0
