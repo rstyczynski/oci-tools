@@ -238,6 +238,7 @@ EOF
   # save to log
   echo -n "$(date),$(hostname),$target_ip:$target_port,$interval,$cnt,[$(cat ~/tmp/mtp_socket.$$ | tr '\n\r' '|')]," >> mtp_${target_ip}P${target_port}.log
 
+  # validate success
   grep "$target_expect" ~/tmp/mtp_socket.$$ >/dev/null
   if [ $? -eq 0 ]; then
     echo -n '+'
