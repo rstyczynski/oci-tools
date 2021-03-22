@@ -6,6 +6,10 @@ function install_cron() {
     MODULE_DESC="$3"
     MODULE_CRON="$4"
 
+
+    mkdir -p ~/backup/cron
+    crontab -l > ~/backup/cron/"cron.$(date -I)T$(date +%H%M%S)"
+
     cron_section_start="# START - $MODULE_DESC"
     cron_section_stop="# STOP - $MODULE_DESC"
 
