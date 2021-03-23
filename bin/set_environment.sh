@@ -6,25 +6,25 @@ if [ -z "$env_files" ]; then
 fi
 
 source $env_files/tools/oci-tools/bin/config.sh
-export os_user=$(getcfg x-ray mw_owner)
+export mw_owner=$(getcfg x-ray mw_owner)
 
 # ohs only? take data from node manager.
-if [ -z "$os_user" ]; then
-  os_user:=$(ps aux | grep weblogic.nodemanager | grep -v grep | cut -f1 -d' ' | sort -u)
-  setcfg x-ray mw_owner ${os_user:=undefined} force
+if [ -z "$mw_owner" ]; then
+  mw_owner:=$(ps aux | grep weblogic.nodemanager | grep -v grep | cut -f1 -d' ' | sort -u)
+  setcfg x-ray mw_owner ${mw_owner:=undefined} force
 fi
 
-if [ -z "$os_user" ]; then
+if [ -z "$mw_owner" ]; then
   source $env_files/tools/wls-tools/bin/discover_processes.sh
   discoverWLS
-  os_user=$(getWLSjvmAttr ${wls_managed[0]} os_user)
+  mw_owner=$(getWLSjvmAttr ${wls_managed[0]} mw_owner)
   # admin only?
-  : ${os_user:=$(getWLSjvmAttr ${wls_admin[0]} os_user)}
+  : ${mw_owner:=$(getWLSjvmAttr ${wls_admin[0]} mw_owner)}
 
-  setcfg x-ray mw_owner ${os_user:=undefined} force
+  setcfg x-ray mw_owner ${mw_owner:=undefined} force
 fi
 
-if [ -z "$os_user" ]; then
+if [ -z "$mw_owner" ]; then
   echo 'Error. MW owner user not found'
   return 1
 fi
@@ -43,7 +43,7 @@ cat <<EOF
 Environment configuration:
 env:        $env
 component:  $component
-mw onwer:   $os_user
+mw onwer:   $mw_owner
 
 env_files:  $env_files
 EOF
