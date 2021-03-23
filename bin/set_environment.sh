@@ -1,9 +1,11 @@
 #!/bin/bash
 
-env_files=$(cat /etc/x-ray.config 2>/dev/null | grep env_files | tail -1 | cut -d= -f2)
 if [ -z "$env_files" ]; then
-  echo "Error. Environment shared root dir not configured. Exiting."
-  return 1
+  env_files=$(cat /etc/x-ray.config 2>/dev/null | grep env_files | tail -1 | cut -d= -f2)
+  if [ -z "$env_files" ]; then
+    echo "Error. Environment shared root dir not configured. Exiting."
+    return 1
+  fi
 fi
 
 source $env_files/tools/oci-tools/bin/config.sh
