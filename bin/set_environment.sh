@@ -1,6 +1,5 @@
 #!/bin/bash
 
-env_files=$(cat /etc/x-ray.config 2>/dev/null | grep env_files | tail -1 | cut -d= -f2)
 if [ -z "$env_files" ]; then
   echo "Error. Environment shared root dir not configured. Exiting."
   exit 1
@@ -37,3 +36,12 @@ if [ -z "$env" ] || [ -z "$component" ]; then
   echo "Error. Environment not configured. Exiting."
   exit 1
 fi
+
+cat <<EOF
+Environment configuration:
+env:        $env
+component:  $component
+mw onwer:   $os_user
+
+env_files:  $env_files
+EOF
