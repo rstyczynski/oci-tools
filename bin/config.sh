@@ -37,6 +37,7 @@ function setcfg() {
         read -p "Enter value for $what:" new_value
     fi
     
+    unset global
     if [ "$force" != force ]; then
         read -t 5 -p "Set in global /etc/$which.config? [Yn]" global
     fi
@@ -48,7 +49,7 @@ function setcfg() {
         timeout 1 sudo touch /etc/$which.config >/dev/null 2>/dev/null 
         if [ $? -ne 0 ]; then
             >&2 echo "Global cfg. not available (root?). Falling back to user level cfg."
-            global=N
+            unset global
         fi
         ;;
     esac
