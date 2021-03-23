@@ -23,6 +23,18 @@ if [ -z "$mw_owner" ]; then
 
   setcfg x-ray mw_owner ${mw_owner:=undefined} force
 fi
+mw_owner=$(getcfg x-ray mw_owner)
+
+export domain_home=$(getcfg x-ray domain_home)
+if [ -z "$domain_home" ]; then
+  source $env_files/tools/wls-tools/bin/discover_processes.sh
+  discoverWLS
+  domain_home=$(getWLSjvmAttr ${wls_managed[0]} domain_home)
+  : ${domain_home:=getWLSjvmAttr ${wls_admin[0]} domain_home}
+
+  setcfg x-ray domain_home ${domain_home:=undefined} force
+fi
+domain_home=$(getcfg x-ray domain_home)
 
 if [ -z "$mw_owner" ]; then
   echo 'Error. MW owner user not found'
@@ -41,9 +53,10 @@ fi
 
 cat <<EOF
 Environment configuration:
-env:        $env
-component:  $component
-mw onwer:   $mw_owner
+env:         $env
+component:   $component
+mw onwer:    $mw_owner
+domain_home: $domain_home
 
 env_files:  $env_files
 EOF
