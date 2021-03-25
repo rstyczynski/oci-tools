@@ -59,12 +59,12 @@ function tcpdump_host() {
     dump)
         tcp_file=$(ls -t ${dump_dir}/${hostname}/${tcp_file_pfx}_* | head -1)
         echo "Dump of $tcp_file:"
-        tcpdump -A -r  $tcp_file
+        tcpdump -A -nn -r  $tcp_file
         ;;
     tail)
         tcp_file=$(ls -t ${dump_dir}/${hostname}/${tcp_file_pfx}_* | head -1)
         echo "Tail of $tcp_file:"
-        tcpdump -A -r $tcp_file | tail 
+        tcpdump -A -nn -r $tcp_file | tail 
         ;;
     '')
         echo "Usage: tcpdump_ftp ifname ftp_ip start|stop|dump|tail"
