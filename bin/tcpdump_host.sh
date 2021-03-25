@@ -1,7 +1,7 @@
 #!/bin/bash
 
 function tcpdump_host() {
-    host_addr=$1
+    pcap_filter=$1
     cmd=$2
     hostname=$3  
     dump_root=$4
@@ -13,6 +13,9 @@ function tcpdump_host() {
     : ${dump_root:="/mwlogs"}
 
     dump_dir=$dump_root/analysis/network
+
+    tcp_file_pfx="tcpdump_host_${hostname}_filter_$(echo ${pcap_filter} | tr ' ' 's')"
+
     case $cmd in
     start)
 
@@ -20,46 +23,46 @@ function tcpdump_host() {
         sudo chmod 777 $dump_root/analysis
         sudo mkdir -p $dump_root/analysis/network
         sudo chmod 777 $dump_root/analysis/network
-        sudo mkdir -p $dump_dir/${hostname}
-        sudo chmod 777 $dump_dir/${hostname}
+        sudo mkdir -p ${dump_dir}/${hostname}
+        sudo chmod 777 ${dump_dir}/${hostname}
 
-        echo "Starting capture at $netif of traffic to ${host_addr}..."
-        if [ $(ps aux | grep tcpdump | grep $dump_dir/${hostname}/tcpdump_host_${hostname}_${host_addr} | grep -v grep | wc -l) -eq 0 ]; then
+        echo "Starting capture at $netif of traffic to ${pcap_filter}..."
 
-            tcp_file="tcpdump_host_${hostname}_${host_addr}\_$(date -u +"%Y-%m-%dT%H:%M").pcap"
-            echo "Command: tcpdump -i $netif -U -w $dump_dir/${hostname}/$tcp_file host ${host_addr} "
-            sudo -- bash -c "umask o+r; nohup tcpdump -i $netif -U -w $dump_dir/${hostname}/$tcp_file host ${host_addr}" &
+        if [ $(ps aux | grep tcpdump | grep ${tcp_file_pfx} | grep -v grep | wc -l) -eq 0 ]; then
+
+            echo "Invoking command: tcpdump -i $netif -U -w ${dump_dir}/${hostname}/${tcp_file_pfx}_%Y%m%dT%H%M%S.pcap -G 3600 host ${pcap_filter} "
+            sudo -- bash -c "umask o+r; nohup tcpdump -i $netif -U -w ${dump_dir}/${hostname}/${tcp_file_pfx}_%Y%m%dT%H%M%S.pcap -G 3600 host ${pcap_filter}" &
             echo "Started. Use dump|tail to check traffic. Use stop to finish capture."
         else
             echo "Already running"
-            ps aux | grep tcpdump | grep $dump_dir/${hostname}/tcpdump_host_${hostname}_${host_addr}
+            ps aux | grep tcpdump | grep ${dump_dir}/${hostname}/tcpdump_host_${hostname}_${pcap_filter}
         fi
         ;;
     stop)
-        if [ $(ps aux | grep tcpdump | grep $dump_dir/${hostname}/tcpdump_host_${hostname}_${host_addr} | grep -v grep | wc -l) -eq 0 ]; then
+        if [ $(ps aux | grep tcpdump | grep ${dump_dir}/${hostname}/tcpdump_host_${hostname}_${pcap_filter} | grep -v grep | wc -l) -eq 0 ]; then
             echo "Capture not running."
         else
-            echo -n "Stopping tdpdump at $netif of traffic to ${host_addr}..."
-            sudo kill $(ps aux | grep tcpdump | grep $dump_dir/${hostname}/tcpdump_host_${hostname}_${host_addr} | grep -v grep | tr -s ' ' | cut -d' ' -f2)
-            tcp_file=$(ls -t $dump_dir/${hostname}/tcpdump_host_${hostname}_${host_addr}\_* | head -1)
+            echo -n "Stopping tdpdump at $netif of traffic to ${pcap_filter}..."
+            sudo kill $(ps aux | grep tcpdump | grep ${dump_dir}/${hostname}/tcpdump_host_${hostname}_${pcap_filter} | grep -v grep | tr -s ' ' | cut -d' ' -f2)
+            tcp_file=$(ls -t ${dump_dir}/${hostname}/tcpdump_host_${hostname}_${pcap_filter}\_* | head -1)
             echo "Done. Capture file: $tcp_file"
         fi
         ;;
     status)
-        if [ $(ps aux | grep tcpdump | grep $dump_dir/${hostname}/tcpdump_host_${hostname}_${host_addr} | grep -v grep | wc -l) -eq 0 ]; then
+        if [ $(ps aux | grep tcpdump | grep ${tcp_file_pfx} | grep -v grep | wc -l) -eq 0 ]; then
             echo "Capture not running."
         else
             echo "Capture running"
-            ps aux | grep tcpdump | grep $dump_dir/${hostname}/tcpdump_host_${hostname}_${host_addr} | grep -v grep
+            ps aux | grep tcpdump | grep ${dump_dir}/${hostname}/tcpdump_host_${hostname}_${pcap_filter} | grep -v grep
         fi
         ;;
     dump)
-        tcp_file=$(ls -t $dump_dir/${hostname}/tcpdump_host_${hostname}_${host_addr}\_* | head -1)
+        tcp_file=$(ls -t ${dump_dir}/${hostname}/${tcp_file_pfx}_* | head -1)
         echo "Dump of $tcp_file:"
         tcpdump -A -r  $tcp_file
         ;;
     tail)
-        tcp_file=$(ls -t $dump_dir/${hostname}/tcpdump_host_${hostname}_${host_addr}\_* | head -1)
+        tcp_file=$(ls -t ${dump_dir}/${hostname}/${tcp_file_pfx}_* | head -1)
         echo "Tail of $tcp_file:"
         tcpdump -A -r $tcp_file | tail 
         ;;
