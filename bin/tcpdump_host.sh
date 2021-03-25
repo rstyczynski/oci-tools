@@ -31,7 +31,7 @@ function tcpdump_host() {
         if [ $(ps aux | grep tcpdump | grep ${tcp_file_pfx} | grep -v grep | wc -l) -eq 0 ]; then
 
             echo "Invoking command: tcpdump -i $netif -U -w ${dump_dir}/${hostname}/${tcp_file_pfx}_%Y%m%dT%H%M%S.pcap -G 3600 host ${pcap_filter} "
-            sudo -- bash -c "umask o+r; nohup tcpdump -i $netif -U -w ${dump_dir}/${hostname}/${tcp_file_pfx}_%Y%m%dT%H%M%S.pcap -G 3600 host ${pcap_filter}" &
+            sudo -- bash -c "umask o+r; nohup tcpdump -i $netif -U -w ${dump_dir}/${hostname}/${tcp_file_pfx}_%Y%m%dT%H%M%S.pcap -G 3600 host ${pcap_filter} > ${dump_dir}/${hostname}/${tcp_file_pfx}.out" &
             echo "Started. Use dump|tail to check traffic. Use stop to finish capture."
         else
             echo "Already running"
@@ -39,12 +39,12 @@ function tcpdump_host() {
         fi
         ;;
     stop)
-        if [ $(ps aux | grep tcpdump | grep ${dump_dir}/${hostname}/tcpdump_host_${hostname}_${pcap_filter} | grep -v grep | wc -l) -eq 0 ]; then
+        if [ $(ps aux | grep tcpdump | grep ${dump_dir}/${hostname}/${tcp_file_pfx} | grep -v grep | wc -l) -eq 0 ]; then
             echo "Capture not running."
         else
             echo -n "Stopping tdpdump at $netif of traffic to ${pcap_filter}..."
-            sudo kill $(ps aux | grep tcpdump | grep ${dump_dir}/${hostname}/tcpdump_host_${hostname}_${pcap_filter} | grep -v grep | tr -s ' ' | cut -d' ' -f2)
-            tcp_file=$(ls -t ${dump_dir}/${hostname}/tcpdump_host_${hostname}_${pcap_filter}\_* | head -1)
+            sudo kill $(ps aux | grep tcpdump | grep ${dump_dir}/${hostname}/${tcp_file_pfx} | grep -v grep | tr -s ' ' | cut -d' ' -f2)
+            tcp_file=$(ls -t ${dump_dir}/${hostname}/${tcp_file_pfx}_* | head -1)
             echo "Done. Capture file: $tcp_file"
         fi
         ;;
