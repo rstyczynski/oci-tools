@@ -171,7 +171,8 @@ EOF
         if [ "$archive_cycle" != none ]; then
             cat >>diag_sync.cron <<EOF
 MAILTO=""
-1 0 * * * find $purge_src_dir -type f -mtime +$ttl | egrep "$ttl_filter" > $backup_dir/$(hostname)/$diagname-$log-\$(date -I).archive; tar -czf $backup_dir/$(hostname)/$diagname-$log-\$(date -I).tar.gz -T $backup_dir/$(hostname)/$diagname-$log-\$(date -I).archive; test \$? -eq 0 && xargs rm < $backup_dir/$(hostname)/$diagname-$log-\$(date -I).archive; find $purge_src_dir -type d -empty -delete 
+# 05.05.2021 rstyczynski mkdir -p \$purge_src_dir added as it may not exist in the moment on archive, what blocks find from locating old files
+1 0 * * * mkdir -p $purge_src_dir; find $purge_src_dir -type f -mtime +$ttl | egrep "$ttl_filter" > $backup_dir/$(hostname)/$diagname-$log-\$(date -I).archive; tar -czf $backup_dir/$(hostname)/$diagname-$log-\$(date -I).tar.gz -T $backup_dir/$(hostname)/$diagname-$log-\$(date -I).archive; test \$? -eq 0 && xargs rm < $backup_dir/$(hostname)/$diagname-$log-\$(date -I).archive; find $purge_src_dir -type d -empty -delete 
 EOF
         else
             cat >>diag_sync.cron <<EOF
