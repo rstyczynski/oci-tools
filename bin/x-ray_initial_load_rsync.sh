@@ -126,7 +126,7 @@ function initial_rsync_date2date() {
 
     cd $src_dir
     find . -type f > $iload_tmp/sync_files
-    cd - >/dev/null
+    cd - > /dev/null
 
     # chmod does not work properly on some rsync e.g. 3.0.6; added  umask to fix        
     umask 022
