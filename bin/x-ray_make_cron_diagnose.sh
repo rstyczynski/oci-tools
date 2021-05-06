@@ -54,16 +54,16 @@ function schedule_diag_sync() {
         echo "Processing diagnostics source: $diagname/$log"
         echo "##########################################"
 
-        dir=$(cat $diag_cfg | y2j | jq -r ".diagnose.$log.dir" | rn)
+        src_dir=$(cat $diag_cfg | y2j | jq -r ".diagnose.$log.dir" | rn)
 
         src_dir_mode=$(cat $diag_cfg | y2j | jq -r ".diagnose.$log.mode" | rn)
         : ${src_dir_mode:=default}
         case $src_dir_mode in
         date2date)
-            purge_src_dir=$dir/..
+            purge_src_dir=$src_dir/..
             ;;
         *)
-            purge_src_dir=$dir
+            purge_src_dir=$src_dir
             ;;
         esac
 
@@ -116,27 +116,37 @@ function schedule_diag_sync() {
         mkdir -p $backup_dir/$(hostname)
         cat $diag_cfg >$backup_dir/$(hostname)/$(basename $diag_cfg)
 
-        #echo "$log, $dir, $type, $expose_dir, $expose_cycle, $expose_ttl"
+        #echo "$log, $src_dir, $type, $expose_dir, $expose_cycle, $expose_ttl"
+
+#
+# rsync files to central location
+#
+        perform_rsync=yes
+        if [ $src_dir == $expose_dir ]; then
+            perform_rsync=no
+        fi
 
         # chmod does not work properly on some rsync e.g. 3.0.6; added  umask to fix
         # umask 022 must be added to each cron
 
-        appendonly=no
-        case $type in
-        binary) ;;
+        if [ $perform_rsync == yes ]; then
+            
+            appendonly=no
+            case $type in
+            binary) ;;
 
-        logrotate) ;;
+            logrotate) ;;
 
-        logappend)
-            appendonly=yes
-            ;;
-        *) ;;
+            logappend)
+                appendonly=yes
+                ;;
+            *) ;;
 
-        esac
+            esac
 
-        case $appendonly in
-        no)
-            cat >>diag_sync.cron <<EOF
+            case $appendonly in
+            no)
+                cat >>diag_sync.cron <<EOF
 
 ##############
 # regular rsync: $log
@@ -144,13 +154,13 @@ function schedule_diag_sync() {
 
 MAILTO=""
 # rsync
-$expose_cycle mkdir -p $expose_dir; $expose_delete_before_cmd mkdir -p $HOME/tmp; cd $dir; find -maxdepth $expose_depth -mtime -$expose_age -type f > $HOME/tmp/$diagname-$log.files; umask 022; rsync  -t --chmod=Fu=r,Fgo=r,Dgo=rx,Du=rwx --files-from=$HOME/tmp/$diagname-$log.files $dir $expose_dir; rm  $HOME/tmp/$diagname-$log.files
+$expose_cycle mkdir -p $expose_dir; $expose_delete_before_cmd mkdir -p $HOME/tmp; cd $src_dir; find -maxdepth $expose_depth -mtime -$expose_age -type f > $HOME/tmp/$diagname-$log.files; umask 022; rsync  -t --chmod=Fu=r,Fgo=r,Dgo=rx,Du=rwx --files-from=$HOME/tmp/$diagname-$log.files $src_dir $expose_dir; rm  $HOME/tmp/$diagname-$log.files
 
 EOF
-            ;;
+                ;;
 
-        yes)
-            cat >>diag_sync.cron <<EOF
+            yes)
+                cat >>diag_sync.cron <<EOF
 
 ##############
 # append only rsync: $log
@@ -158,28 +168,55 @@ EOF
 
 MAILTO=""
 # rsync
-$expose_cycle mkdir -p $expose_dir; $expose_delete_before_cmd mkdir -p $HOME/tmp; cd $dir; find -maxdepth $expose_depth -mtime -$expose_age -type f > $HOME/tmp/$diagname-$log.files; umask 022; rsync  -t --append --chmod=Fu=rw,Fgo=r,Dgo=rx --files-from=$HOME/tmp/$diagname-$log.files $dir $expose_dir; rm  $HOME/tmp/$diagname-$log.files
+$expose_cycle mkdir -p $expose_dir; $expose_delete_before_cmd mkdir -p $HOME/tmp; cd $src_dir; find -maxdepth $expose_depth -mtime -$expose_age -type f > $HOME/tmp/$diagname-$log.files; umask 022; rsync  -t --append --chmod=Fu=rw,Fgo=r,Dgo=rx --files-from=$HOME/tmp/$diagname-$log.files $src_dir $expose_dir; rm  $HOME/tmp/$diagname-$log.files
 
 EOF
-            ;;
-        esac
+                ;;
+            esac
 
-        cat >>diag_sync.cron <<EOF
+            else
+
+                    cat >>diag_sync.cron <<EOF
+
+##############
+# rsync not necessary as src dir is the same as expose dir. Taking care of chmod only.
+##############
+
+MAILTO=""
+# chmod to give access to group and others
+$expose_cycle chmod go+x${expose_access} $expose_dir; chmod go+${expose_access} $expose_dir/*; 
+
+EOF        
+
+            fi
+#
+# backup, and delete old files
+#
+        if [ $perform_rsync == yes ]; then
+
+            cat >>diag_sync.cron <<EOF
 # backup, and delete old files
 EOF
 
-        if [ "$archive_cycle" != none ]; then
-            cat >>diag_sync.cron <<EOF
+            if [ "$archive_cycle" != none ]; then
+                cat >>diag_sync.cron <<EOF
 MAILTO=""
 # 05.05.2021 rstyczynski mkdir -p \$purge_src_dir added as it may not exist in the moment on archive, what blocks find from locating old files
 1 0 * * * mkdir -p $purge_src_dir; find $purge_src_dir -type f -mtime +$ttl | egrep "$ttl_filter" > $backup_dir/$(hostname)/$diagname-$log-\$(date -I).archive; tar -czf $backup_dir/$(hostname)/$diagname-$log-\$(date -I).tar.gz -T $backup_dir/$(hostname)/$diagname-$log-\$(date -I).archive; test \$? -eq 0 && xargs rm < $backup_dir/$(hostname)/$diagname-$log-\$(date -I).archive; find $purge_src_dir -type d -empty -delete 
 EOF
+            else
+                cat >>diag_sync.cron <<EOF
+# archive skipped by configuration. archive_cycle is none.
+
+EOF
+            fi
         else
             cat >>diag_sync.cron <<EOF
-# archive skipped by configuration
+# archive skipped by configuration. files are stored in expose dir.
 
 EOF
         fi
+
     done
 
     echo "#" >>diag_sync.cron
