@@ -60,7 +60,8 @@ function schedule_diag_sync() {
         : ${src_dir_mode:=default}
         case $src_dir_mode in
         date2date)
-            purge_src_dir=$src_dir/..
+            # remove data from src directory. all purge operations are performed one step above date directory
+            purge_src_dir=$(dirname $src_dir)
             ;;
         *)
             purge_src_dir=$src_dir

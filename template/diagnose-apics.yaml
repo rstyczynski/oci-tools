@@ -2,6 +2,39 @@
 backup:
     dir: $env_files/backup
 diagnose:
+    wls_logs:
+        dir:    $domain_home/servers/$wls_server/logs
+        type:   logrotate
+        ttl:    2
+        ttl_filter: "[0-9][0-9]+$"
+        expose:   
+            cycle: "* * * * *"
+            age:   1
+            depth: 1
+            dir:   $env_files/x-ray/$env/$component/diag/apics/$hostname/$domain_name/$wls_server/wls/logs/$todayiso8601
+            access: +r
+            ttl:   45
+        archive: 
+            cycle: "1 * * * *"
+            dir:   oci_os://$bucket
+            ttl:   90
+    wls_trace:
+        dir:    $domain_home/servers/$wls_server/trace
+        type:   logrotate
+        ttl:    2
+        ttl_filter: "[0-9][0-9]+$"
+        expose:   
+            cycle: "* * * * *"
+            age:   1
+            depth: 1
+            dir:   $env_files/x-ray/$env/$component/diag/apics/$hostname/$domain_name/$wls_server/wls/trace/$todayiso8601
+            access: +r
+            ttl:   45
+        archive: 
+            cycle: "1 * * * *"
+            dir:   oci_os://$bucket
+            ttl:   90
+
     logs:
         dir:    $domain_home/apics/logs
         type:   logrotate
@@ -11,7 +44,7 @@ diagnose:
             cycle: "* * * * *"
             age:   1
             depth: 1
-            dir:   $env_files/x-ray/$env/$component/diag/apics/$hostname/$domain_name/logs/$todayiso8601
+            dir:   $env_files/x-ray/$env/$component/diag/apics/$hostname/$domain_name/$wls_server/logs/$todayiso8601
             access: +r
             ttl:   45
         archive: 
@@ -20,17 +53,38 @@ diagnose:
             ttl:   90
     analytics:
         dir:    $domain_home/apics/analytics/logs
-        type:   logappend
+        type:   logrotate
         ttl:    2
         ttl_filter: ""
         expose:   
             cycle: "* * * * *"
             age:   1
             depth: 1
-            dir:   $env_files/x-ray/$env/$component/diag/apics/$hostname/$domain_name/analytics/logs/$todayiso8601
+            dir:   $env_files/x-ray/$env/$component/diag/apics/$hostname/$domain_name/$wls_server/analytics/$todayiso8601
             access: +r
             ttl:   45
         archive: 
             cycle: "1 * * * *"
             dir:   oci_os://$bucket
             ttl:   90
+    custom:
+        dir:    $domain_home/apics/customlogs/
+        type:   logrotate 
+        ttl:    2
+        ttl_filter: ""
+        expose:   
+            cycle: "* * * * *"
+            age:   1
+            depth: 1
+            dir:   $env_files/x-ray/$env/$component/diag/apics/$hostname/$domain_name/$wls_server/custom/$todayiso8601
+            access: +r
+            ttl:   45
+        archive: 
+            cycle: "1 * * * *"
+            dir:   oci_os://$bucket
+            ttl:   90
+
+
+
+
+

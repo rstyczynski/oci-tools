@@ -95,21 +95,21 @@ else
     # Domain
     # $domain_home/apics/logs
     # $domain_home/apics/analytics/logs
-    ~/oci-tools/bin/tpl2data.sh ~/oci-tools/template/diagnose-apics.yaml >~/.x-ray/diagnose-apics-$domain_name.yaml
+    #~/oci-tools/bin/tpl2data.sh ~/oci-tools/template/diagnose-apics.yaml >~/.x-ray/diagnose-apics-$domain_name.yaml
 
     # AdminServer
     for srvNo in ${!wls_admin[@]}; do
         export wls_server=$(getWLSjvmAttr ${wls_admin[$srvNo]} -Dweblogic.Name)
 
         echo "Processing: $domain_name/$wls_server at $domain_home"
-        ~/oci-tools/bin/tpl2data.sh ~/oci-tools/template/diagnose-wls.yaml >~/.x-ray/diagnose-apics-$domain_name\_$wls_server.yaml
+        ~/oci-tools/bin/tpl2data.sh ~/oci-tools/template/diagnose-apics.yaml >~/.x-ray/diagnose-apics-$domain_name\_$wls_server.yaml
     done
 
     # ManagedServer
     for srvNo in ${!wls_managed[@]}; do
         export wls_server=$(getWLSjvmAttr ${wls_managed[$srvNo]} -Dweblogic.Name)
         echo "Processing: $domain_name/$wls_server at $domain_home"
-        ~/oci-tools/bin/tpl2data.sh ~/oci-tools/template/diagnose-wls.yaml >~/.x-ray/diagnose-apics-$domain_name\_$wls_server.yaml
+        ~/oci-tools/bin/tpl2data.sh ~/oci-tools/template/diagnose-apics.yaml >~/.x-ray/diagnose-apics-$domain_name\_$wls_server.yaml
     done
 fi
 
