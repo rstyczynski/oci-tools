@@ -193,7 +193,7 @@ EOF
 #
 # backup, and delete old files
 #
-        if [ $perform_rsync == yes ]; then
+        if [ "$perform_rsync" == yes ]; then
 
             cat >>diag_sync.cron <<EOF
 # backup, and delete old files
