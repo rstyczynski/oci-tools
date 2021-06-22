@@ -187,7 +187,7 @@ MAILTO=""
 # chmod to give access to group and others
 $expose_cycle chmod go+x${expose_access} $expose_dir; chmod go+${expose_access} $expose_dir/*; 
 
-EOF3   
+EOF3
         fi
 
 #
