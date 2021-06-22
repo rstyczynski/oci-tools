@@ -83,7 +83,22 @@ diagnose:
             cycle: "1 * * * *"
             dir:   oci_os://$bucket
             ttl:   90
-
+    custom_tmp:
+        dir:    $domain_home/apics/customlogs/tmp
+        type:   logrotate 
+        ttl:    2
+        ttl_filter: ""
+        expose:   
+            cycle: "* * * * *"
+            age:   1
+            depth: 1
+            dir:   $env_files/x-ray/$env/$component/diag/apics/$hostname/$domain_name/$wls_server/custom/tmp/$todayiso8601
+            access: +r
+            ttl:   45
+        archive: 
+            cycle: "1 * * * *"
+            dir:   oci_os://$bucket
+            ttl:   90
 
 
 
