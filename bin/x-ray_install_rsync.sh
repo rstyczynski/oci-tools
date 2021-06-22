@@ -43,8 +43,41 @@ step "10. Deploy log sync configuration files for umc"
 step "11. Deploy sync configuration files for jfr"
 ~/oci-tools/bin/tpl2data.sh ~/oci-tools/template/diagnose-jfr.yaml > ~/.x-ray/diagnose-jfr.yaml
 
-step "20. Deploy log sync configuration files for WebLogic Admin servers"
 
+step "20. Deploy log sync configuration files for APICS"
+
+# APICS has strange / non regular parameters. Need to perfrom below to locate domain....
+export domain_home=$(ps aux | grep "bin/startWebLogic.sh" | grep -v grep | tr -s ' ' | tr ' ' '\n' | grep startWebLogic.sh | sort -u | sed 's/\/bin\/startWebLogic.sh//g')
+export domain_name=$(basename $domain_home)
+
+if [ ! -d "$domain_home/apics/logs" ] || [ ! -d  "$domain_home/apics/analytics/logs" ]; then
+    apics=no
+    echo "Error. APICS not found."
+else
+    apics=yes
+    # Domain
+    # $domain_home/apics/logs
+    # $domain_home/apics/analytics/logs
+    #~/oci-tools/bin/tpl2data.sh ~/oci-tools/template/diagnose-apics.yaml >~/.x-ray/diagnose-apics-$domain_name.yaml
+
+    # AdminServer
+    for srvNo in ${!wls_admin[@]}; do
+        export wls_server=$(getWLSjvmAttr ${wls_admin[$srvNo]} -Dweblogic.Name)
+
+        echo "Processing: $domain_name/$wls_server at $domain_home"
+        ~/oci-tools/bin/tpl2data.sh ~/oci-tools/template/diagnose-apics.yaml >~/.x-ray/diagnose-apics-$domain_name\_$wls_server.yaml
+    done
+
+    # ManagedServer
+    for srvNo in ${!wls_managed[@]}; do
+        export wls_server=$(getWLSjvmAttr ${wls_managed[$srvNo]} -Dweblogic.Name)
+        echo "Processing: $domain_name/$wls_server at $domain_home"
+        ~/oci-tools/bin/tpl2data.sh ~/oci-tools/template/diagnose-apics.yaml >~/.x-ray/diagnose-apics-$domain_name\_$wls_server.yaml
+    done
+fi
+
+if [ $apics == no ]; then
+step "20. Deploy log sync configuration files for WebLogic Admin servers"
 for srvNo in ${!wls_admin[@]}; do
   export wls_server=$(getWLSjvmAttr ${wls_admin[$srvNo]} -Dweblogic.Name)
   export domain_home=$(getWLSjvmAttr ${wls_admin[$srvNo]} -Ddomain.home)
@@ -66,6 +99,10 @@ for srvNo in ${!wls_managed[@]}; do
 
   ~/oci-tools/bin/tpl2data.sh ~/oci-tools/template/diagnose-wls.yaml > ~/.x-ray/diagnose-$domain_name\_$wls_server.yaml
 done
+else
+	step "20. Skip deploy log sync configuration files for WebLogic Admin servers as it's APICS node."
+
+fi
 
 step "30. Deploy log sync configuration files for OHS"
 
@@ -83,35 +120,6 @@ else
     done
 fi
 
-step "40. Deploy log sync configuration files for APICS"
-
-# APICS has strange / non regular parameters. Need to perfrom below to locate domain....
-export domain_home=$(ps aux | grep "bin/startWebLogic.sh" | grep -v grep | tr -s ' ' | tr ' ' '\n' | grep startWebLogic.sh | sort -u | sed 's/\/bin\/startWebLogic.sh//g')
-export domain_name=$(basename $domain_home)
-
-if [ ! -d "$domain_home/apics/logs" ] || [ ! -d  "$domain_home/apics/analytics/logs" ]; then
-    echo "Error. APICS not found."
-else
-    # Domain
-    # $domain_home/apics/logs
-    # $domain_home/apics/analytics/logs
-    #~/oci-tools/bin/tpl2data.sh ~/oci-tools/template/diagnose-apics.yaml >~/.x-ray/diagnose-apics-$domain_name.yaml
-
-    # AdminServer
-    for srvNo in ${!wls_admin[@]}; do
-        export wls_server=$(getWLSjvmAttr ${wls_admin[$srvNo]} -Dweblogic.Name)
-
-        echo "Processing: $domain_name/$wls_server at $domain_home"
-        ~/oci-tools/bin/tpl2data.sh ~/oci-tools/template/diagnose-apics.yaml >~/.x-ray/diagnose-apics-$domain_name\_$wls_server.yaml
-    done
-
-    # ManagedServer
-    for srvNo in ${!wls_managed[@]}; do
-        export wls_server=$(getWLSjvmAttr ${wls_managed[$srvNo]} -Dweblogic.Name)
-        echo "Processing: $domain_name/$wls_server at $domain_home"
-        ~/oci-tools/bin/tpl2data.sh ~/oci-tools/template/diagnose-apics.yaml >~/.x-ray/diagnose-apics-$domain_name\_$wls_server.yaml
-    done
-fi
 
 step '50. Deploy sync configuration files for OSB Alerts'
 
