@@ -123,7 +123,9 @@ function schedule_diag_sync() {
         # rsync files to central location
         #
         perform_rsync=yes
-        if [ $src_dir == $expose_dir ]; then
+        echo "Source dir: $src_dir"
+        echo "Expose dir: $expose_dir"
+        if [ "$src_dir" == "$expose_dir" ]; then
             perform_rsync=no
         fi
 
