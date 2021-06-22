@@ -147,7 +147,7 @@ function schedule_diag_sync() {
 
             case $appendonly in
             no)
-                cat >>diag_sync.cron <<EOF
+                cat >>diag_sync.cron <<EOF1
 
 ##############
 # regular rsync: $log
@@ -157,11 +157,11 @@ MAILTO=""
 # rsync
 $expose_cycle mkdir -p $expose_dir; $expose_delete_before_cmd mkdir -p $HOME/tmp; cd $src_dir; find -maxdepth $expose_depth -mtime -$expose_age -type f > $HOME/tmp/$diagname-$log.files; umask 022; rsync  -t --chmod=Fu=r,Fgo=r,Dgo=rx,Du=rwx --files-from=$HOME/tmp/$diagname-$log.files $src_dir $expose_dir; rm  $HOME/tmp/$diagname-$log.files
 
-EOF
+EOF1
                 ;;
 
             yes)
-                cat >>diag_sync.cron <<EOF
+                cat >>diag_sync.cron <<EOF2
 
 ##############
 # append only rsync: $log
@@ -171,13 +171,13 @@ MAILTO=""
 # rsync
 $expose_cycle mkdir -p $expose_dir; $expose_delete_before_cmd mkdir -p $HOME/tmp; cd $src_dir; find -maxdepth $expose_depth -mtime -$expose_age -type f > $HOME/tmp/$diagname-$log.files; umask 022; rsync  -t --append --chmod=Fu=rw,Fgo=r,Dgo=rx --files-from=$HOME/tmp/$diagname-$log.files $src_dir $expose_dir; rm  $HOME/tmp/$diagname-$log.files
 
-EOF
+EOF2
                 ;;
             esac
 
         else
 
-            cat >>diag_sync.cron <<EOF
+            cat >>diag_sync.cron <<EOF3
 
 ##############
 # rsync not necessary as src dir is the same as expose dir. Taking care of chmod only.
@@ -187,36 +187,36 @@ MAILTO=""
 # chmod to give access to group and others
 $expose_cycle chmod go+x${expose_access} $expose_dir; chmod go+${expose_access} $expose_dir/*; 
 
-EOF        
+EOF3   
         fi
 
-# #
-# # backup, and delete old files
-# #
-#         if [ "$perform_rsync" == yes ]; then
+#
+# backup, and delete old files
+#
+        if [ "$perform_rsync" == yes ]; then
 
-#             cat >>diag_sync.cron <<EOF
-# # backup, and delete old files
-# EOF
+            cat >>diag_sync.cron <<EOF4
+# backup, and delete old files
+EOF4
 
-#             if [ "$archive_cycle" != none ]; then
-#                 cat >>diag_sync.cron <<EOF
-# MAILTO=""
-# # 05.05.2021 rstyczynski mkdir -p \$purge_src_dir added as it may not exist in the moment on archive, what blocks find from locating old files
-# 1 0 * * * mkdir -p $purge_src_dir; find $purge_src_dir -type f -mtime +$ttl | egrep "$ttl_filter" > $backup_dir/$(hostname)/$diagname-$log-\$(date -I).archive; tar -czf $backup_dir/$(hostname)/$diagname-$log-\$(date -I).tar.gz -T $backup_dir/$(hostname)/$diagname-$log-\$(date -I).archive; test \$? -eq 0 && xargs rm < $backup_dir/$(hostname)/$diagname-$log-\$(date -I).archive; find $purge_src_dir -type d -empty -delete 
-# EOF
-#             else
-#                 cat >>diag_sync.cron <<EOF
-# # archive skipped by configuration. archive_cycle is none.
+            if [ "$archive_cycle" != none ]; then
+                cat >>diag_sync.cron <<EOF5
+MAILTO=""
+# 05.05.2021 rstyczynski mkdir -p \$purge_src_dir added as it may not exist in the moment on archive, what blocks find from locating old files
+1 0 * * * mkdir -p $purge_src_dir; find $purge_src_dir -type f -mtime +$ttl | egrep "$ttl_filter" > $backup_dir/$(hostname)/$diagname-$log-\$(date -I).archive; tar -czf $backup_dir/$(hostname)/$diagname-$log-\$(date -I).tar.gz -T $backup_dir/$(hostname)/$diagname-$log-\$(date -I).archive; test \$? -eq 0 && xargs rm < $backup_dir/$(hostname)/$diagname-$log-\$(date -I).archive; find $purge_src_dir -type d -empty -delete 
+EOF5
+            else
+                cat >>diag_sync.cron <<EOF6
+# archive skipped by configuration. archive_cycle is none.
 
-# EOF
-#             fi
-#             else
-#             cat >>diag_sync.cron <<EOF
-# # archive skipped by configuration. files are stored in expose dir.
+EOF6
+            fi
+            else
+            cat >>diag_sync.cron <<EOF7
+# archive skipped by configuration. files are stored in expose dir.
 
-# EOF
-#         fi
+EOF7
+        fi
 
     done
 
