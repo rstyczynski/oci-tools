@@ -99,7 +99,3 @@ diagnose:
             cycle: "1 * * * *"
             dir:   oci_os://$bucket
             ttl:   90
-
-
-
-
