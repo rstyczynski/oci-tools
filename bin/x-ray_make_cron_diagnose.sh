@@ -217,6 +217,15 @@ EOF4
             #convert ttl to minutes
             ttl_mins=$(awk -vday_frac=$ttl 'BEGIN{printf "%.0f" ,day_frac * 1440}'); 
 
+            if [ -z $purge_src_dir ]; then
+                echo "ERROR! BRAKING THE PROCEDURE."
+                echo "ERROR! BRAKING THE PROCEDURE."
+                echo "ERROR! BRAKING THE PROCEDURE."
+
+                echo "purge_src_dir is empty! check configuration."
+                exit 1
+            fi
+
             cat >>diag_sync.cron <<EOF5
 MAILTO=""
 $archive_cycle_cron timestamp=\$(date +"\%Y-\%m-\%dT\%H:\%M:\%SZ\%Z"); mkdir -p $purge_src_dir; find $purge_src_dir -type f -mmin +$ttl_mins | egrep "." > $backup_dir/$(hostname)/$diagname-$log-\${timestamp}.archive; tar -czf $backup_dir/$(hostname)/$diagname-$log-\${timestamp}.tar.gz -T $backup_dir/$(hostname)/$diagname-$log-\${timestamp}.archive; test $? -eq 0 && xargs rm < $backup_dir/$(hostname)/$diagname-$log-\${timestamp}.archive; find $purge_src_dir -type d -empty -delete
