@@ -63,7 +63,7 @@ function schedule_diag_sync() {
         case $src_dir_mode in
         date2date)
             # remove data from src directory. all purge operations are performed one step above date directory
-            purge_src_dir=$(dirname $src_dir)
+            purge_src_dir=$(dirname "$src_dir")
             ;;
         *)
             purge_src_dir=$src_dir
@@ -219,7 +219,7 @@ EOF4
 
             cat >>diag_sync.cron <<EOF5
 MAILTO=""
-$archive_cycle_cron timestamp=$(date +"\%Y-\%m-\%dT\%H:\%M:\%SZ\%Z"); mkdir -p $purge_src_dir; find $purge_src_dir -type f -mmin +$ttl_mins | egrep "." > $backup_dir/$(hostname)/$diagname-$log-\${timestamp}.archive; tar -czf $backup_dir/$(hostname)/$diagname-$log-\${timestamp}.tar.gz -T $backup_dir/$(hostname)/$diagname-$log-\${timestamp}.archive; test $? -eq 0 && xargs rm < $backup_dir/$(hostname)/$diagname-$log-\${timestamp}.archive; find $purge_src_dir -type d -empty -delete
+$archive_cycle_cron timestamp=\$(date +"\%Y-\%m-\%dT\%H:\%M:\%SZ\%Z"); mkdir -p $purge_src_dir; find $purge_src_dir -type f -mmin +$ttl_mins | egrep "." > $backup_dir/$(hostname)/$diagname-$log-\${timestamp}.archive; tar -czf $backup_dir/$(hostname)/$diagname-$log-\${timestamp}.tar.gz -T $backup_dir/$(hostname)/$diagname-$log-\${timestamp}.archive; test $? -eq 0 && xargs rm < $backup_dir/$(hostname)/$diagname-$log-\${timestamp}.archive; find $purge_src_dir -type d -empty -delete
 
 EOF5
         else
