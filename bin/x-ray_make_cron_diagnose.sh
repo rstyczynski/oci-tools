@@ -117,7 +117,7 @@ function schedule_diag_sync() {
 
         # keep diagnose.yaml next to archive file to make archive process be aware of config
         mkdir -p $backup_dir/$(hostname)
-        chmod -R +x+w $backup_dir/$(hostname)
+        chmod -R +x+w+r $backup_dir/$(hostname)
         cat $diag_cfg >$backup_dir/$(hostname)/$(basename $diag_cfg)
 
         #echo "$log, $src_dir, $type, $expose_dir, $expose_cycle, $expose_ttl"
