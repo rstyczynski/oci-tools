@@ -160,7 +160,7 @@ function schedule_diag_sync() {
 
 MAILTO=""
 # rsync
-$expose_cycle mkdir -p $expose_dir; if [ -f $HOME/tmp/$diagname-$log.files ]; then echo "\$(date +%Y-%m-%dT%H:%M:%S); rsync overload. Skipped this rsync round." >> $expose_dir/rsync.overload; else $expose_delete_before_cmd mkdir -p $HOME/tmp; cd $src_dir; find -maxdepth $expose_depth -mtime -$expose_age -type f > $HOME/tmp/$diagname-$log.files; umask 022; rsync  -t --chmod=Fu=r,Fgo=r,Dgo=rx,Du=rwx --files-from=$HOME/tmp/$diagname-$log.files $src_dir $expose_dir; rm  $HOME/tmp/$diagname-$log.files; fi
+$expose_cycle mkdir -p $expose_dir; if [ -f $HOME/tmp/$diagname-$log.files ]; then echo "\$(date +\%Y-\%m-\%dT\%H:\%M:\%S); rsync overload. Skipped this rsync round." >> $expose_dir/rsync.overload; else $expose_delete_before_cmd mkdir -p $HOME/tmp; cd $src_dir; find -maxdepth $expose_depth -mtime -$expose_age -type f > $HOME/tmp/$diagname-$log.files; umask 022; rsync  -t --chmod=Fu=r,Fgo=r,Dgo=rx,Du=rwx --files-from=$HOME/tmp/$diagname-$log.files $src_dir $expose_dir; rm  $HOME/tmp/$diagname-$log.files; fi
 
 EOF1
                 ;;
@@ -174,7 +174,7 @@ EOF1
 
 MAILTO=""
 # rsync
-$expose_cycle mkdir -p $expose_dir; if [ -f $HOME/tmp/$diagname-$log.files ]; then echo "\$(date +%Y-%m-%dT%H:%M:%S); rsync overload. Skipped this rsync round." >> $expose_dir/rsync.overload; else $expose_delete_before_cmd mkdir -p $HOME/tmp; cd $src_dir; find -maxdepth $expose_depth -mtime -$expose_age -type f > $HOME/tmp/$diagname-$log.files; umask 022; rsync  -t --append --chmod=Fu=rw,Fgo=r,Dgo=rx --files-from=$HOME/tmp/$diagname-$log.files $src_dir $expose_dir; rm  $HOME/tmp/$diagname-$log.files; fi
+$expose_cycle mkdir -p $expose_dir; if [ -f $HOME/tmp/$diagname-$log.files ]; then echo "\$(date +\%Y-\%m-\%dT\%H:\%M:\%S); rsync overload. Skipped this rsync round." >> $expose_dir/rsync.overload; else $expose_delete_before_cmd mkdir -p $HOME/tmp; cd $src_dir; find -maxdepth $expose_depth -mtime -$expose_age -type f > $HOME/tmp/$diagname-$log.files; umask 022; rsync  -t --append --chmod=Fu=rw,Fgo=r,Dgo=rx --files-from=$HOME/tmp/$diagname-$log.files $src_dir $expose_dir; rm  $HOME/tmp/$diagname-$log.files; fi
 
 EOF2
                 ;;
