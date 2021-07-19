@@ -207,7 +207,8 @@ EOF4
 
             # shift archive by a minute for each log entry. Note - will anyway run in parallel for different diag.yaml configs
             minute_shift=$(( $log_no % 60 ))
-            if [ $ttl -lt 1 ]; then
+            echo $ttl | grep '.' >/dev/null
+            if [ $? -eq 0 ]; then
                 archive_cycle_cron="$minute_shift */1 * * *"
             else
                 archive_cycle_cron="$minute_shift 0 * * *"
@@ -235,11 +236,12 @@ EOF6
 #         cat >>diag_sync.cron <<EOF8
 # # backup, and delete old files from expose and backup locations
 # EOF8
-
 #         if [ "$expose_ttl" != none ]; then
 #             # shift archive by a minute for each log entry. Note - will anyway run in parallel for different diag.yaml configs
 #             minute_shift=$(( $log_no % 60 ))
-#             if [ $expose_ttl -lt 1 ]; then
+#
+#             echo $expose_ttl | grep '.' >/dev/null
+#             if [ $? -eq 0 ]; then
 #                 purge_cycle_cron="$minute_shift */1 * * *"
 #             else
 #                 # add hour shift for different logs - it will distribute work a little 
