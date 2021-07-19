@@ -49,7 +49,9 @@ function schedule_diag_sync() {
 
     echo $cron_section_start >>diag_sync.cron
 
+    log_no=0
     for log in $logs; do
+        log_no=$(($log_cnt + 1))
         echo "##########################################"
         echo "Processing diagnostics source: $diagname/$log"
         echo "##########################################"
@@ -192,34 +194,78 @@ $expose_cycle chmod go+x${expose_access} $expose_dir; chmod go+${expose_access} 
 EOF3
         fi
 
-#
-# backup, and delete old files
-#
-        if [ "$perform_rsync" == yes ]; then
+        #
+        # backup, and delete old files
+        #
 
-            cat >>diag_sync.cron <<EOF4
+
+        cat >>diag_sync.cron <<EOF4
 # backup, and delete old files
 EOF4
 
-            if [ "$archive_cycle" != none ]; then
-                cat >>diag_sync.cron <<EOF5
-MAILTO=""
-# 05.05.2021 rstyczynski mkdir -p \$purge_src_dir added as it may not exist in the moment on archive, what blocks find from locating old files
-1 0 * * * mkdir -p $purge_src_dir; find $purge_src_dir -type f -mtime +$ttl | egrep "$ttl_filter" > $backup_dir/$(hostname)/$diagname-$log-\$(date -I).archive; tar -czf $backup_dir/$(hostname)/$diagname-$log-\$(date -I).tar.gz -T $backup_dir/$(hostname)/$diagname-$log-\$(date -I).archive; test \$? -eq 0 && xargs rm < $backup_dir/$(hostname)/$diagname-$log-\$(date -I).archive; find $purge_src_dir -type d -empty -delete 
-EOF5
+        if [ "$ttl" != none ]; then
+
+            # shift archive by a minute for each log entry. Note - will anyway run in parallel for different diag.yaml configs
+            minute_shift=$(( $log_no % 60 ))
+            if [ $ttl -lt 1 ]; then
+                archive_cycle_cron="$minute_shift */1 * * *"
             else
+                archive_cycle_cron="$minute_shift 0 * * *"
+            fi
+
+            #convert ttl to minutes
+            ttl_mins=$(awk -vday_frac=$ttl 'BEGIN{printf "%.0f" ,day_frac * 1440}'); 
+
+            cat >>diag_sync.cron <<EOF5
+MAILTO=""
+$archive_cycle_cron timestamp=$(date +"\%Y-\%m-\%dT\%H:\%M:\%SZ\%Z"); mkdir -p $purge_src_dir; find $purge_src_dir -type f -mmin +$ttl_mins | egrep "." > $backup_dir/$(hostname)/$diagname-$log-\${timestamp}.archive; tar -czf $backup_dir/$(hostname)/$diagname-$log-\${timestamp}.tar.gz -T $backup_dir/$(hostname)/$diagname-$log-\${timestamp}.archive; test $? -eq 0 && xargs rm < $backup_dir/$(hostname)/$diagname-$log-\${timestamp}.archive; find $purge_src_dir -type d -empty -delete
+
+EOF5
+        else
                 cat >>diag_sync.cron <<EOF6
 # archive skipped by configuration. archive_cycle is none.
 
 EOF6
-            fi
-            else
-            cat >>diag_sync.cron <<EOF7
-# archive skipped by configuration. files are stored in expose dir.
-
-EOF7
         fi
 
+        #
+        # permamanent delete from expose and backup locations
+        #
+
+#         cat >>diag_sync.cron <<EOF8
+# # backup, and delete old files from expose and backup locations
+# EOF8
+
+#         if [ "$expose_ttl" != none ]; then
+#             # shift archive by a minute for each log entry. Note - will anyway run in parallel for different diag.yaml configs
+#             minute_shift=$(( $log_no % 60 ))
+#             if [ $expose_ttl -lt 1 ]; then
+#                 purge_cycle_cron="$minute_shift */1 * * *"
+#             else
+#                 # add hour shift for different logs - it will distribute work a little 
+#                 hour_shift=$(( $log_no % 12 ))
+#                 purge_cycle_cron="$minute_shift $hour_shift * * *"
+#             fi
+
+#             # for expose dir with date, remove date part to operate on all dates
+#             expose_dir_no_date=sed=$(echo $expose_dir | 's/\/\$todayiso8601//g')
+            
+#             # convert ttl to minutes
+#             expose_ttl_mins=$(awk -vday_frac=$expose_ttl 'BEGIN{printf "%.0f" ,day_frac * 1440}'); 
+
+#             cat >>diag_sync.cron <<EOF9
+# MAILTO=""
+# $purge_cycle_cron timestamp=$(date +"\%Y-\%m-\%dT\%H:\%M:\%SZ\%Z"); find $expose_dir_no_date -type f -mmin +$expose_ttl_mins | egrep "." > $backup_dir/$(hostname)/$diagname-$log-\${timestamp}.purge; xargs rm < $backup_dir/$(hostname)/$diagname-$log-\${timestamp}.purge; find $expose_dir_no_date -type d -empty -delete
+# $purge_cycle_cron timestamp=$(date +"\%Y-\%m-\%dT\%H:\%M:\%SZ\%Z"); find $backup_dir/$(hostname)/$diagname-$log-* -type f -mmin +$expose_ttl_mins | egrep "." > $backup_dir/$(hostname)/$diagname-$log-\${timestamp}.purge_backup; xargs rm < $backup_dir/$(hostname)/$diagname-$log-\${timestamp}.purge_backup
+# EOF9
+#         else
+#                 cat >>diag_sync.cron <<EOF10
+# # purge skipped by configuration. expose_ttl is none.
+
+# EOF10
+#         fi
+
+    # log loop
     done
 
     echo "#" >>diag_sync.cron
