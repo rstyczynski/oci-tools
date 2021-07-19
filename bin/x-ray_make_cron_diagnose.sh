@@ -227,6 +227,15 @@ EOF4
                 exit 1
             fi
 
+            if [[ $backup_dir != */x-ray/* ]]; then
+                echo "ERROR! BRAKING THE PROCEDURE."
+                echo "ERROR! BRAKING THE PROCEDURE."
+                echo "ERROR! BRAKING THE PROCEDURE."
+
+                echo "backup_dir must contain /x-ray/ subdirectory! check configuration."
+                exit 1
+            fi
+
             cat >>diag_sync.cron <<EOF5
 MAILTO=""
 $archive_cycle_cron timestamp=\$(date +"\%Y-\%m-\%dT\%H:\%M:\%SZ\%Z"); mkdir $backup_dir/$(hostname)/source; mkdir -p $purge_src_dir; find $purge_src_dir -type f -mmin +$ttl_mins | egrep "." > $backup_dir/$(hostname)/source/$diagname-$log-\${timestamp}.archive; tar -czf $backup_dir/source/$(hostname)/$diagname-$log-\${timestamp}.tar.gz -T $backup_dir/source/$(hostname)/$diagname-$log-\${timestamp}.archive; test $? -eq 0 && xargs rm < $backup_dir/$(hostname)/source/$diagname-$log-\${timestamp}.archive; find $purge_src_dir -type d -empty -delete
@@ -262,12 +271,21 @@ EOF6
 #             # for expose dir with date, remove date part to operate on all dates
 #             expose_dir_no_date=$(echo $expose_dir | sed 's/\/\$todayiso8601//g')
             
-#             if [ -z $expose_dir_no_date ]; then
+#             if [[ $expose_dir_no_date != */x-ray/* ]]; then
 #                 echo "ERROR! BRAKING THE PROCEDURE."
 #                 echo "ERROR! BRAKING THE PROCEDURE."
 #                 echo "ERROR! BRAKING THE PROCEDURE."
 
-#                 echo "expose_dir_no_date is empty! check configuration."
+#                 echo "expose_dir_no_date must contain /x-ray/ subdirectory! check configuration."
+#                 exit 1
+#             fi
+
+#             if [[ $backup_dir != */x-ray/* ]]; then
+#                 echo "ERROR! BRAKING THE PROCEDURE."
+#                 echo "ERROR! BRAKING THE PROCEDURE."
+#                 echo "ERROR! BRAKING THE PROCEDURE."
+
+#                 echo "backup_dir must contain /x-ray/ subdirectory! check configuration."
 #                 exit 1
 #             fi
 

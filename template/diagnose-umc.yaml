@@ -1,6 +1,6 @@
 ---
 backup:
-    dir: $env_files/backup
+    dir: $env_files/x-ray/backup
 diagnose:
     os:
         dir:    ~/x-ray/diag/os/log

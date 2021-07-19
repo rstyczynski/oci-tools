@@ -1,6 +1,6 @@
 ---
 backup:
-    dir: $env_files/backup
+    dir: $env_files/x-ray/backup
 diagnose:
     wls_logs:
         dir:    $domain_home/servers/$wls_server/logs
