@@ -207,7 +207,7 @@ EOF4
 
             # shift archive by a minute for each log entry. Note - will anyway run in parallel for different diag.yaml configs
             minute_shift=$(( $log_no % 60 ))
-            echo $ttl | grep '.' >/dev/null
+            echo $ttl | grep '\.' >/dev/null
             if [ $? -eq 0 ]; then
                 archive_cycle_cron="$minute_shift */1 * * *"
             else
@@ -240,7 +240,7 @@ EOF6
 #             # shift archive by a minute for each log entry. Note - will anyway run in parallel for different diag.yaml configs
 #             minute_shift=$(( $log_no % 60 ))
 #
-#             echo $expose_ttl | grep '.' >/dev/null
+#             echo $expose_ttl | grep '\.' >/dev/null
 #             if [ $? -eq 0 ]; then
 #                 purge_cycle_cron="$minute_shift */1 * * *"
 #             else
