@@ -218,12 +218,12 @@ EOF4
             #convert ttl to minutes
             ttl_mins=$(awk -vday_frac=$ttl 'BEGIN{printf "%.0f" ,day_frac * 1440}'); 
 
-            if [[ $purge_src_dir != */x-ray/* ]]; then
+            if [ -z $purge_src_dir ] || [ $purge_src_dir == '/' ] || [ $purge_src_dir == '~' ] || [ $purge_src_dir == "$HOME" ]; then
                 echo "ERROR! BRAKING THE PROCEDURE."
                 echo "ERROR! BRAKING THE PROCEDURE."
                 echo "ERROR! BRAKING THE PROCEDURE."
 
-                echo "purge_src_dir is not started with ~/x-ray! check configuration."
+                echo "purge_src_dir is empty or points to root / home directory! check configuration."
                 exit 1
             fi
 
