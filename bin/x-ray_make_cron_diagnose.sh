@@ -326,6 +326,8 @@ EOF6
         cat diag_sync.cron
     ) | crontab -
 
+    # cleanup
+    rm diag_sync.cron
 }
 
 schedule_diag_sync $@
