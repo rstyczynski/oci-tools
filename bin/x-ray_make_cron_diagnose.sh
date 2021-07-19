@@ -117,6 +117,7 @@ function schedule_diag_sync() {
 
         # keep diagnose.yaml next to archive file to make archive process be aware of config
         mkdir -p $backup_dir/$(hostname)
+        chmod -r +xw $backup_dir/$(hostname)
         cat $diag_cfg >$backup_dir/$(hostname)/$(basename $diag_cfg)
 
         #echo "$log, $src_dir, $type, $expose_dir, $expose_cycle, $expose_ttl"
@@ -217,12 +218,12 @@ EOF4
             #convert ttl to minutes
             ttl_mins=$(awk -vday_frac=$ttl 'BEGIN{printf "%.0f" ,day_frac * 1440}'); 
 
-            if [ -z $purge_src_dir ]; then
+            if [[ $purge_src_dir != ~/x-ray/* ]]; then
                 echo "ERROR! BRAKING THE PROCEDURE."
                 echo "ERROR! BRAKING THE PROCEDURE."
                 echo "ERROR! BRAKING THE PROCEDURE."
 
-                echo "purge_src_dir is empty! check configuration."
+                echo "purge_src_dir is not started with ~/x-ray! check configuration."
                 exit 1
             fi
 
