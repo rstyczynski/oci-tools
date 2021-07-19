@@ -218,7 +218,7 @@ EOF4
             #convert ttl to minutes
             ttl_mins=$(awk -vday_frac=$ttl 'BEGIN{printf "%.0f" ,day_frac * 1440}'); 
 
-            if [[ $purge_src_dir != ~/x-ray/* ]]; then
+            if [[ $purge_src_dir != */x-ray/* ]]; then
                 echo "ERROR! BRAKING THE PROCEDURE."
                 echo "ERROR! BRAKING THE PROCEDURE."
                 echo "ERROR! BRAKING THE PROCEDURE."
