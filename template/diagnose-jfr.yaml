@@ -5,7 +5,7 @@ diagnose:
     jfr:
         dir:    ~/x-ray/diag/wls/jfr
         type:   binary
-        ttl:    1
+        ttl:    0.08
         expose:   
             cycle: "*/16 * * * *"
             age:   1

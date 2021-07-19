@@ -4,7 +4,7 @@ diagnose:
     logs:
         dir:    $HOME/x-ray/diag/wls/alert/$domain_name/$wls_server/$todayiso8601
         type:   logappend
-        ttl:    1
+        ttl:    0.08
         ttl_filter: ""
         mode:   date2date
         expose:   
