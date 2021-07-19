@@ -178,4 +178,4 @@ mwowner_home=$(cat /etc/passwd | grep "^$os_user:" | cut -d: -f6)
 
 find $mwowner_home/.x-ray -name "diagnose-*" -exec cp -- "{}" $backup_dir/$(hostname) \;
 
-ls -l  $backup_dir/$(hostname)/diagnose-*
+ls -l  $backup_dir/x-ray/$(hostname)/diagnose-*
