@@ -159,7 +159,7 @@ done
 
 step "502. Keep diagnose-*.yaml files at shared dir"
 
-export backup_dir=$env_files/backup
+export backup_dir=$env_files/x-ray/backup
 
 source ~/wls-tools/bin/discover_processes.sh 
 discoverWLS
@@ -178,4 +178,4 @@ mwowner_home=$(cat /etc/passwd | grep "^$os_user:" | cut -d: -f6)
 
 find $mwowner_home/.x-ray -name "diagnose-*" -exec cp -- "{}" $backup_dir/$(hostname) \;
 
-ls -l  $backup_dir/x-ray/$(hostname)/diagnose-*
+ls -l  $backup_dir/$(hostname)/diagnose-*
