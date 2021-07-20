@@ -40,7 +40,11 @@ if [ $? -eq 0 ]; then
   echo '============' >> $backup_dir/$(hostname)/source/$diagname-$log-${timestamp}.archive_trace 2>&1
   echo 'Remove files' >> $backup_dir/$(hostname)/source/$diagname-$log-${timestamp}.archive_trace 2>&1
   echo '============' >> $backup_dir/$(hostname)/source/$diagname-$log-${timestamp}.archive_trace 2>&1
-  xargs rm -v < $backup_dir/$(hostname)/source/$diagname-$log-${timestamp}.archive >> $backup_dir/$(hostname)/source/$diagname-$log-${timestamp}.archive_trace 2>&1
+  if [ -s $backup_dir/$(hostname)/source/$diagname-$log-${timestamp}.archive ]; then
+    xargs rm -v < $backup_dir/$(hostname)/source/$diagname-$log-${timestamp}.archive >> $backup_dir/$(hostname)/source/$diagname-$log-${timestamp}.archive_trace 2>&1
+  else
+    echo 'no filesto be removed' >> $backup_dir/$(hostname)/source/$diagname-$log-${timestamp}.archive_trace 2>&1
+  fi
   result=done
 else
   result=error
