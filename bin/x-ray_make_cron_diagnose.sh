@@ -166,7 +166,6 @@ function schedule_diag_sync() {
                 # TODO: move $HOME/tmp/$diagname-$log.files to $expose_dir/$diagname-$log.inProgress
 
                 cat >>diag_sync.cron <<EOF1
-
 ##############
 # regular rsync: $log
 ##############
@@ -180,7 +179,6 @@ EOF1
 
             yes)
                 cat >>diag_sync.cron <<EOF2
-
 ##############
 # append only rsync: $log
 ##############
@@ -196,7 +194,6 @@ EOF2
         else
 
             cat >>diag_sync.cron <<EOF3
-
 ##############
 # rsync not necessary as src dir is the same as expose dir. Taking care of chmod only.
 ##############
@@ -258,78 +255,79 @@ EOF5
 EOF6
         fi
 
-#         #
-#         # permamanent delete from expose and backup locations
-#         #
+        #
+        # permamanent delete from expose and backup locations
+        #
 
-#         cat >>diag_sync.cron <<EOF8
-# # purge old files
-# EOF8
-#         if [ "$expose_ttl" != none ]; then
+        cat >>diag_sync.cron <<EOF8
+# purge old files. files will be permanently delted
+EOF8
+        if [ "$expose_ttl" != none ]; then
 
-#             # shift purge start by a minute for each log entry. Note - will anyway run in parallel for different diag.yaml configs
-#             minute_shift=$(( $log_no % 60 ))
+            # shift purge start by a minute for each log entry. Note - will anyway run in parallel for different diag.yaml configs
+            minute_shift=$(( $log_no % 60 ))
 
-#             echo $expose_ttl | grep '\.' >/dev/null
-#             if [ $? -eq 0 ]; then
-#                 purge_cycle_cron="$minute_shift */1 * * *"
-#             else
-#                 # add hour shift for different logs - it will distribute work a little 
-#                 hour_shift=$(( $log_no % 12 ))
-#                 purge_cycle_cron="$minute_shift $hour_shift * * *"
-#             fi
+            echo $expose_ttl | grep '\.' >/dev/null
+            if [ $? -eq 0 ]; then
+                purge_cycle_cron="$minute_shift */1 * * *"
+            else
+                # add hour shift for different logs - it will distribute work a little 
+                hour_shift=$(( $log_no % 12 ))
+                purge_cycle_cron="$minute_shift $hour_shift * * *"
+            fi
 
-#             # for expose dir with date, remove date part to operate on all dates
-#             expose_dir_no_date=$(echo $expose_dir | sed 's/\/\$todayiso8601//g')
+            # for expose dir with date, remove date part to operate on all dates
+            expose_dir_no_date=$(echo $expose_dir | sed 's/\/\$todayiso8601//g')
             
-#             if [[ $expose_dir_no_date != */x-ray/* ]]; then
-#                 echo "ERROR! BRAKING THE PROCEDURE."
-#                 echo "ERROR! BRAKING THE PROCEDURE."
-#                 echo "ERROR! BRAKING THE PROCEDURE."
+            if [[ $expose_dir_no_date != */x-ray/* ]]; then
+                echo "ERROR! BRAKING THE PROCEDURE."
+                echo "ERROR! BRAKING THE PROCEDURE."
+                echo "ERROR! BRAKING THE PROCEDURE."
 
-#                 echo "expose_dir_no_date must contain /x-ray/ subdirectory! check configuration."
-#                 exit 1
-#             fi
+                echo "expose_dir_no_date must contain /x-ray/ subdirectory! check configuration."
+                exit 1
+            fi
 
-#             if [[ $backup_dir != */x-ray/* ]]; then
-#                 echo "ERROR! BRAKING THE PROCEDURE."
-#                 echo "ERROR! BRAKING THE PROCEDURE."
-#                 echo "ERROR! BRAKING THE PROCEDURE."
+            if [[ $backup_dir != */x-ray/* ]]; then
+                echo "ERROR! BRAKING THE PROCEDURE."
+                echo "ERROR! BRAKING THE PROCEDURE."
+                echo "ERROR! BRAKING THE PROCEDURE."
 
-#                 echo "backup_dir must contain /x-ray/ subdirectory! check configuration."
-#                 exit 1
-#             fi
+                echo "backup_dir must contain /x-ray/ subdirectory! check configuration."
+                exit 1
+            fi
 
-#             cat >>diag_sync.cron <<EOF_purge_expose
+            cat >>diag_sync.cron <<EOF_purge_expose
+# Archive old files from expose locations
+MAILTO=""
+$purge_cycle_cron ~/oci-tools/bin/x-ray_archive_expose.sh $diagname $log $expose_dir_no_date $expose_ttl $backup_dir
 
-# # Archive old files from expose locations
-# MAILTO=""
-# $purge_cycle_cron ~/oci-tools/bin/x-ray_archive_expose.sh $diagname $log $expose_dir_no_date $expose_ttl $backup_dir
+EOF_purge_expose
 
-# EOF_purge_expose
+            cat >>diag_sync.cron <<EOF_purge_backup
+# Archive old backup files locations (both source backup, and exspose backup).
+MAILTO=""
+$purge_cycle_cron ~/oci-tools/bin/x-ray_archive_backup.sh $diagname $log $backup_dir $backup_ttl
 
-#             cat >>diag_sync.cron <<EOF_purge_backup
-# # Archive old backup files locations (both source backup, and exspose backup).
-# MAILTO=""
-# $purge_cycle_cron ~/oci-tools/bin/x-ray_archive_backup.sh $diagname $log $backup_dir $backup_ttl
+EOF_purge_backup
 
-# EOF_purge_backup
+#
+# purge archive
+#
+            cat >>diag_sync.cron <<EOF_purge_archive
+# purge old archive files 
+MAILTO=""
+$purge_cycle_cron ~/oci-tools/bin/x-ray_archive_purge.sh $diagname $log $backup_dir $archive_ttl
 
-# #
-# # purge archive
-# #
-#             cat >>diag_sync.cron <<EOF_purge_archive
-# # purge old archive files 
-# MAILTO=""
-# $purge_cycle_cron ~/oci-tools/bin/x-ray_archive_purge.sh $diagname $log $backup_dir $archive_ttl
-# EOF_purge_archive
+EOF_purge_archive
 
-#         else
-#                 cat >>diag_sync.cron <<EOF10
-# # purge skipped by configuration. expose_ttl is none.
+        else
+                cat >>diag_sync.cron <<EOF_purge_final
+# purge skipped by configuration. expose_ttl is none.
 
-# EOF10
-#         fi
+EOF_purge_final
+
+        fi
 
     # log loop
     done
