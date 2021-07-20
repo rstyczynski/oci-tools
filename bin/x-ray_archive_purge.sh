@@ -30,7 +30,7 @@ archive_ttl_mins=$(awk -vday_frac=$archive_ttl 'BEGIN{printf "%.0f" ,day_frac * 
 find $backup_dir/$(hostname)/archive/$diagname-$log-* -type f -mmin +$archive_ttl_mins | egrep "." > $backup_dir/$(hostname)/archive/$diagname-$log-${timestamp}.purge_archive_progress
 
 # remove old archive files
-echo '============' >> $backup_dir/$(hostname)/archive/$diagname-$log-${timestamp}.purge_archive_trace 2>&1
+echo '============' > $backup_dir/$(hostname)/archive/$diagname-$log-${timestamp}.purge_archive_trace 2>&1
 echo 'Remove files' >> $backup_dir/$(hostname)/archive/$diagname-$log-${timestamp}.purge_archive_trace 2>&1
 echo '============' >> $backup_dir/$(hostname)/archive/$diagname-$log-${timestamp}.purge_archive_trace 2>&1
 if [ -s $backup_dir/$(hostname)/archive/$diagname-$log-${timestamp}.purge_archive_progress ]; then
