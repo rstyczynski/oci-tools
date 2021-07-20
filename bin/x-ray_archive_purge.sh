@@ -27,10 +27,17 @@ timestamp=$(date +"%Y-%m-%dT%H:%M:%SZ%Z")
 archive_ttl_mins=$(awk -vday_frac=$archive_ttl 'BEGIN{printf "%.0f" ,day_frac * 1440}'); 
 
 # locate old archive files
-find $backup_dir/$(hostname)/archive/$diagname-$log-* -type f -mmin +$archive_ttl_mins | egrep "." > $backup_dir/$(hostname)/archive/$diagname-$log-\${timestamp}.purge_archive_progress
+find $backup_dir/$(hostname)/archive/$diagname-$log-* -type f -mmin +$archive_ttl_mins | egrep "." > $backup_dir/$(hostname)/archive/$diagname-$log-${timestamp}.purge_archive_progress
 
 # remove old archive files
-xargs rm < $backup_dir/$(hostname)/archive/$diagname-$log-\${timestamp}.purge_archive_progress
+echo '============' >> $backup_dir/$(hostname)/archive/$diagname-$log-${timestamp}.purge_archive_trace 2>&1
+echo 'Remove files' >> $backup_dir/$(hostname)/archive/$diagname-$log-${timestamp}.purge_archive_trace 2>&1
+echo '============' >> $backup_dir/$(hostname)/archive/$diagname-$log-${timestamp}.purge_archive_trace 2>&1
+if [ -s $backup_dir/$(hostname)/archive/$diagname-$log-${timestamp}.purge_backup_progress ]; then
+  xargs rm -v < $backup_dir/$(hostname)/archive/$diagname-$log-${timestamp}.purge_archive_progress >> $backup_dir/$(hostname)/archive/$diagname-$log-${timestamp}.purge_archive_trace 2>&1
+else
+  echo 'no files to be removed' >> $backup_dir/$(hostname)/expose/$diagname-$log-${timestamp}.purge_backup_trace 2>&1
+fi
 
 # mark process done
-mv $backup_dir/$(hostname)/archive/$diagname-$log-\${timestamp}.purge_archive_progress $backup_dir/$(hostname)/archive/$diagname-$log-\${timestamp}.purge_archive_done
+mv $backup_dir/$(hostname)/archive/$diagname-$log-${timestamp}.purge_archive_progress $backup_dir/$(hostname)/archive/$diagname-$log-${timestamp}.purge_archive_done

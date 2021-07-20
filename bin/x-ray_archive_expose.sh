@@ -31,16 +31,26 @@ expose_ttl_mins=$(awk -vday_frac=$expose_ttl 'BEGIN{printf "%.0f" ,day_frac * 14
 find $expose_dir_no_date -type f -mmin +$expose_ttl_mins | egrep "." > $backup_dir/$(hostname)/expose/$diagname-$log-${timestamp}.purge_expose_progress
 
 # transfter files to tar backup, before removal. do not compress to save cpu
-tar -cf $backup_dir/$(hostname)/expose/$diagname-$log-${timestamp}.tar -T $backup_dir/$(hostname)/expose/$diagname-$log-${timestamp}.purge_expose_progress
-if [ $? -eq 0 ]; then 
-  xargs rm < $backup_dir/$(hostname)/expose/$diagname-$log-${timestamp}.purge_expose_progress
+echo '=========' >  $backup_dir/$(hostname)/expose/$diagname-$log-${timestamp}.purge_expose_trace 2>&1
+echo 'Tar files' >> $backup_dir/$(hostname)/expose/$diagname-$log-${timestamp}.purge_expose_trace 2>&1
+echo '=========' >> $backup_dir/$(hostname)/expose/$diagname-$log-${timestamp}.purge_expose_trace 2>&1
+tar -cvf $backup_dir/$(hostname)/expose/$diagname-$log-${timestamp}.tar -T $backup_dir/$(hostname)/expose/$diagname-$log-${timestamp}.purge_expose_progress >> $backup_dir/$(hostname)/expose/$diagname-$log-${timestamp}.purge_expose_trace 2>&1
+if [ $? -eq 0 ]; then
+  echo '============' >> $backup_dir/$(hostname)/expose/$diagname-$log-${timestamp}.purge_expose_trace 2>&1
+  echo 'Remove files' >> $backup_dir/$(hostname)/expose/$diagname-$log-${timestamp}.purge_expose_trace 2>&1
+  echo '============' >> $backup_dir/$(hostname)/expose/$diagname-$log-${timestamp}.purge_expose_trace 2>&1
+  if [ -s $backup_dir/$(hostname)/expose/$diagname-$log-${timestamp}.purge_expose_progress ]; then
+    xargs rm -v < $backup_dir/$(hostname)/expose/$diagname-$log-${timestamp}.purge_expose_progress >> $backup_dir/$(hostname)/expose/$diagname-$log-${timestamp}.purge_expose_trace 2>&1
+  else
+    echo 'no files to be removed' >> $backup_dir/$(hostname)/expose/$diagname-$log-${timestamp}.purge_expose_trace 2>&1
+  fi
   result=done
 else 
   result=error
 fi
 
 # mark archive result in a file with archived file list
-mv $backup_dir/$(hostname)/expose/$diagname-$log-${timestamp}.purge_expose_progres $backup_dir/$(hostname)/expose/$diagname-$log-${timestamp}.purge_expose_$result
+mv $backup_dir/$(hostname)/expose/$diagname-$log-${timestamp}.purge_expose_progress $backup_dir/$(hostname)/expose/$diagname-$log-${timestamp}.purge_expose_$result
 
 # remove empty directories
 find $expose_dir_no_date -type d -empty -delete
