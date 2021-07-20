@@ -3,7 +3,7 @@
 diagname=$1; shift
 log=$1; shift
 backup_dir=$1; shift
-backup_ttl_mins=$1; shift 
+backup_ttl=$1; shift 
 
 function usage() {
   cat <<EOF_usage
