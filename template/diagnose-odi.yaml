@@ -6,7 +6,7 @@ diagnose:
     logs:
         dir:    $domain_home/servers/$wls_server/logs/oracledi
         type:   logappend
-        ttl:    2
+        ttl:    30
         ttl_filter: "[0-9][0-9]+$"
         expose:   
             cycle: "* * * * *"
