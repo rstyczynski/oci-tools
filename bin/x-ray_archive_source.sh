@@ -40,7 +40,7 @@ if [ $? -eq 0 ]; then
   echo '============' >> $backup_dir/$(hostname)/source/$diagname-$log-${timestamp}.archive_trace 2>&1
   echo 'Remove files' >> $backup_dir/$(hostname)/source/$diagname-$log-${timestamp}.archive_trace 2>&1
   echo '============' >> $backup_dir/$(hostname)/source/$diagname-$log-${timestamp}.archive_trace 2>&1
-  xargs rm < $backup_dir/$(hostname)/source/$diagname-$log-\${timestamp}.archive >> $backup_dir/$(hostname)/source/$diagname-$log-${timestamp}.archive_trace 2>&1
+  xargs rm < $backup_dir/$(hostname)/source/$diagname-$log-${timestamp}.archive >> $backup_dir/$(hostname)/source/$diagname-$log-${timestamp}.archive_trace 2>&1
   result=done
 else
   result=error
