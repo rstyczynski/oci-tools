@@ -1,4 +1,4 @@
-!#/bin/bash
+#!/bin/bash
 
 diagname=$1; shift
 log=$1; shift
