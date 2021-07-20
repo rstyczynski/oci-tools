@@ -35,12 +35,12 @@ find $purge_src_dir -type f -mmin +$ttl_mins | egrep "." > $backup_dir/$(hostnam
 echo '=========' > $backup_dir/$(hostname)/source/$diagname-$log-${timestamp}.archive_trace 2>&1
 echo 'Tar files' >> $backup_dir/$(hostname)/source/$diagname-$log-${timestamp}.archive_trace 2>&1
 echo '=========' >> $backup_dir/$(hostname)/source/$diagname-$log-${timestamp}.archive_trace 2>&1
-tar -cf $backup_dir/$(hostname)/source/$diagname-$log-${timestamp}.tar -T $backup_dir/$(hostname)/source/$diagname-$log-${timestamp}.archive >> $backup_dir/$(hostname)/source/$diagname-$log-${timestamp}.archive_trace 2>&1
+tar -cvf $backup_dir/$(hostname)/source/$diagname-$log-${timestamp}.tar -T $backup_dir/$(hostname)/source/$diagname-$log-${timestamp}.archive >> $backup_dir/$(hostname)/source/$diagname-$log-${timestamp}.archive_trace 2>&1
 if [ $? -eq 0 ]; then
   echo '============' >> $backup_dir/$(hostname)/source/$diagname-$log-${timestamp}.archive_trace 2>&1
   echo 'Remove files' >> $backup_dir/$(hostname)/source/$diagname-$log-${timestamp}.archive_trace 2>&1
   echo '============' >> $backup_dir/$(hostname)/source/$diagname-$log-${timestamp}.archive_trace 2>&1
-  xargs rm < $backup_dir/$(hostname)/source/$diagname-$log-${timestamp}.archive >> $backup_dir/$(hostname)/source/$diagname-$log-${timestamp}.archive_trace 2>&1
+  xargs rm -v < $backup_dir/$(hostname)/source/$diagname-$log-${timestamp}.archive >> $backup_dir/$(hostname)/source/$diagname-$log-${timestamp}.archive_trace 2>&1
   result=done
 else
   result=error
