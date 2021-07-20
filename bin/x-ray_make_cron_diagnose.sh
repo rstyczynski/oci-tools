@@ -11,11 +11,11 @@ function y2j() {
 function schedule_diag_sync() {
     diag_cfg=$1
     cron_action=$2
-    test_run=$3
+    run_mode=$3
 
     : ${diag_cfg:=~/.x-ray/diagnose.yaml}
     : ${cron_action:=create}
-    : ${test_run:=no}
+    : ${run_mode:=DEPLOY}
 
     diagname=$(basename $diag_cfg | cut -f1 -d. | cut -f2-999 -d'-')
     if [ "$diagname" == diagnose ]; then
@@ -338,7 +338,7 @@ EOF6
     echo "$cron_section_stop" >>diag_sync.cron
 
 
-    if [ $test_run == NO ]; then
+    if [ $run_mode == DEPLOY ]; then
         # 
         # update crontab
         #
@@ -352,6 +352,8 @@ EOF6
         # cleanup
         #
         rm diag_sync.cron
+    else
+        cat diag_sync.cron
     fi
 }
 
