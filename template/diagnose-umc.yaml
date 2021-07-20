@@ -1,6 +1,7 @@
 ---
 backup:
     dir: $env_files/x-ray/backup
+    ttl: 30
 diagnose:
     os:
         dir:    ~/x-ray/diag/os/log

@@ -1,5 +1,6 @@
 backup:
     dir: $env_files/x-ray/backup
+    ttl: 30
 diagnose:
     logs:
         dir:    $HOME/x-ray/diag/wls/alert/$domain_name/$wls_server/$todayiso8601

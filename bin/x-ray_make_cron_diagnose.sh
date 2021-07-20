@@ -11,9 +11,11 @@ function y2j() {
 function schedule_diag_sync() {
     diag_cfg=$1
     cron_action=$2
+    test_run=$3
 
     : ${diag_cfg:=~/.x-ray/diagnose.yaml}
     : ${cron_action:=create}
+    : ${test_run:=no}
 
     diagname=$(basename $diag_cfg | cut -f1 -d. | cut -f2-999 -d'-')
     if [ "$diagname" == diagnose ]; then
@@ -105,12 +107,16 @@ function schedule_diag_sync() {
 
         archive_dir=$(cat $diag_cfg | y2j | jq -r ".diagnose.$log.archive.dir" | rn)
         : ${archive_dir:=oci_os://$bucket}
-        backup_root=$(cat $diag_cfg | y2j | jq -r ".backup.dir" | rn)
-        : ${backup_root:=~/backup}
+
         archive_cycle=$(cat $diag_cfg | y2j | jq -r ".diagnose.$log.archive.cycle" | rn)
         : ${archive_cycle:="1 0 * * *"}
         archive_ttl=$(cat $diag_cfg | y2j | jq -r ".diagnose.$log.archive.ttl" | rn)
         : ${archive_ttl:=90}
+
+        backup_root=$(cat $diag_cfg | y2j | jq -r ".backup.dir" | rn)
+        : ${backup_root:=~/backup}
+        backup_ttl=$(cat $diag_cfg | y2j | jq -r ".backup.ttl" | rn)
+        : ${backup_ttl:=30}
 
         # not required here
         #oci_os_bucket=$(cat $diag_cfg | y2j | jq -r ".diagnose.$log.archive.dir" | sed 's|oci_os://||')
@@ -152,6 +158,13 @@ function schedule_diag_sync() {
 
             case $appendonly in
             no)
+
+                #
+                # DO NOT USE % char i cron as ut has special meaning. % must be escaped by \% !!!!
+                #
+
+                # TODO: move $HOME/tmp/$diagname-$log.files to $expose_dir/$diagname-$log.inProgress
+
                 cat >>diag_sync.cron <<EOF1
 
 ##############
@@ -215,9 +228,6 @@ EOF4
                 archive_cycle_cron="$minute_shift 0 * * *"
             fi
 
-            #convert ttl to minutes
-            ttl_mins=$(awk -vday_frac=$ttl 'BEGIN{printf "%.0f" ,day_frac * 1440}'); 
-
             if [ -z $purge_src_dir ] || [ $purge_src_dir == '/' ] || [ $purge_src_dir == '~' ] || [ $purge_src_dir == "$HOME" ]; then
                 echo "ERROR! BRAKING THE PROCEDURE."
                 echo "ERROR! BRAKING THE PROCEDURE."
@@ -238,7 +248,7 @@ EOF4
 
             cat >>diag_sync.cron <<EOF5
 MAILTO=""
-$archive_cycle_cron timestamp=\$(date +"\%Y-\%m-\%dT\%H:\%M:\%SZ\%Z"); mkdir $backup_dir/$(hostname)/source; mkdir -p $purge_src_dir; find $purge_src_dir -type f -mmin +$ttl_mins | egrep "." > $backup_dir/$(hostname)/source/$diagname-$log-\${timestamp}.archive; tar -czf $backup_dir/source/$(hostname)/$diagname-$log-\${timestamp}.tar.gz -T $backup_dir/source/$(hostname)/$diagname-$log-\${timestamp}.archive; test $? -eq 0 && xargs rm < $backup_dir/$(hostname)/source/$diagname-$log-\${timestamp}.archive; find $purge_src_dir -type d -empty -delete
+$archive_cycle_cron ~/oci-tools/bin/x-ray_archive_source.sh $diagname $log $purge_src_dir $ttl $backup_dir
 
 EOF5
         else
@@ -248,15 +258,16 @@ EOF5
 EOF6
         fi
 
-        #
-        # permamanent delete from expose and backup locations
-        #
+#         #
+#         # permamanent delete from expose and backup locations
+#         #
 
 #         cat >>diag_sync.cron <<EOF8
-# # backup, and delete old files from expose and backup locations
+# # purge old files
 # EOF8
 #         if [ "$expose_ttl" != none ]; then
-#             # shift archive by a minute for each log entry. Note - will anyway run in parallel for different diag.yaml configs
+
+#             # shift purge start by a minute for each log entry. Note - will anyway run in parallel for different diag.yaml configs
 #             minute_shift=$(( $log_no % 60 ))
 
 #             echo $expose_ttl | grep '\.' >/dev/null
@@ -289,25 +300,30 @@ EOF6
 #                 exit 1
 #             fi
 
-#             # convert ttl to minutes
-#             expose_ttl_mins=$(awk -vday_frac=$expose_ttl 'BEGIN{printf "%.0f" ,day_frac * 1440}'); 
+#             cat >>diag_sync.cron <<EOF_purge_expose
 
-#             cat >>diag_sync.cron <<EOF9
+# # Archive old files from expose locations
 # MAILTO=""
-# $purge_cycle_cron 
-# mkdir -p $backup_dir/$(hostname)/expose
-# timestamp=$(date +"\%Y-\%m-\%dT\%H:\%M:\%SZ\%Z" | tr -d '\')
-# find $expose_dir_no_date -type f -mmin +$expose_ttl_mins | egrep "." > $backup_dir/$(hostname)/expose/$diagname-$log-\${timestamp}.purge_expose
-# tar -cf $backup_dir/$(hostname)/expose/$diagname-$log-\${timestamp}.tar.gz -T $backup_dir/$(hostname)/expose/$diagname-$log-\${timestamp}.purge_backup
-# test $? -eq 0 && xargs rm < $backup_dir/$(hostname)/expose/$diagname-$log-\${timestamp}.purge_expose
-# find $expose_dir_no_date -type d -empty -delete
+# $purge_cycle_cron ~/oci-tools/bin/x-ray_archive_expose.sh $diagname $log $expose_dir_no_date $expose_ttl $backup_dir
 
-# $purge_cycle_cron timestamp=$(date +"\%Y-\%m-\%dT\%H:\%M:\%SZ\%Z")
-# find $backup_dir/$(hostname)/$diagname-$log-* -type f -mmin +$expose_ttl_mins | egrep "." > $backup_dir/$(hostname)/$diagname-$log-\${timestamp}.purge_backup
-# find $backup_dir/$(hostname)/expose/$diagname-$log-* -type f -mmin +$expose_ttl_mins | egrep "." >> $backup_dir/$(hostname)/$diagname-$log-\${timestamp}.purge_backup
-# xargs rm < $backup_dir/$(hostname)/$diagname-$log-\${timestamp}.purge_backup
+# EOF_purge_expose
 
-# EOF9
+#             cat >>diag_sync.cron <<EOF_purge_backup
+# # Archive old backup files locations (both source backup, and exspose backup).
+# MAILTO=""
+# $purge_cycle_cron ~/oci-tools/bin/x-ray_archive_backup.sh $diagname $log $backup_dir $backup_ttl
+
+# EOF_purge_backup
+
+# #
+# # purge archive
+# #
+#             cat >>diag_sync.cron <<EOF_purge_archive
+# # purge old archive files 
+# MAILTO=""
+# $purge_cycle_cron ~/oci-tools/bin/x-ray_archive_purge.sh $diagname $log $backup_dir $archive_ttl
+# EOF_purge_archive
+
 #         else
 #                 cat >>diag_sync.cron <<EOF10
 # # purge skipped by configuration. expose_ttl is none.
@@ -321,13 +337,25 @@ EOF6
     echo "#" >>diag_sync.cron
     echo "$cron_section_stop" >>diag_sync.cron
 
-    (
-        crontab -l 2>/dev/null | sed "/$cron_section_start/,/$cron_section_stop/d"
-        cat diag_sync.cron
-    ) | crontab -
 
-    # cleanup
-    rm diag_sync.cron
+    if [ $test_run == NO ]; then
+        # 
+        # update crontab
+        #
+
+        (
+            crontab -l 2>/dev/null | sed "/$cron_section_start/,/$cron_section_stop/d"
+            cat diag_sync.cron
+        ) | crontab -
+
+        #
+        # cleanup
+        #
+        rm diag_sync.cron
+    fi
 }
 
+# 1 - diag name
+# 2 - action: create
+# 3 - test run: yes | no
 schedule_diag_sync $@
