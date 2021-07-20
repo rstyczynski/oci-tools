@@ -31,18 +31,18 @@ find $backup_dir/$(hostname)/source/$diagname-$log-* -type f -mmin +$backup_ttl_
 find $backup_dir/$(hostname)/expose/$diagname-$log-* -type f -mmin +$backup_ttl_mins | egrep "." >> $backup_dir/$(hostname)/archive/$diagname-$log-${timestamp}.purge_backup_progress
 
 # transfter files to tar archive, before removal. do not compress to save cpu
-echo '=========' >  $backup_dir/$(hostname)/expose/$diagname-$log-${timestamp}.purge_backup_trace 2>&1
-echo 'Tar files' >> $backup_dir/$(hostname)/expose/$diagname-$log-${timestamp}.purge_backup_trace 2>&1
-echo '=========' >> $backup_dir/$(hostname)/expose/$diagname-$log-${timestamp}.purge_backup_trace 2>&1
+echo '=========' >  $backup_dir/$(hostname)/archive/$diagname-$log-${timestamp}.purge_backup_trace 2>&1
+echo 'Tar files' >> $backup_dir/$(hostname)/archive/$diagname-$log-${timestamp}.purge_backup_trace 2>&1
+echo '=========' >> $backup_dir/$(hostname)/archive/$diagname-$log-${timestamp}.purge_backup_trace 2>&1
 tar -cf $backup_dir/$(hostname)/archive/$diagname-$log-${timestamp}.tar -T $backup_dir/$(hostname)/archive/$diagname-$log-${timestamp}.purge_backup_progress
 if [ $? -eq 0 ]; then
-  echo '============' >> $backup_dir/$(hostname)/expose/$diagname-$log-${timestamp}.purge_backup_trace 2>&1
-  echo 'Remove files' >> $backup_dir/$(hostname)/expose/$diagname-$log-${timestamp}.purge_backup_trace 2>&1
-  echo '============' >> $backup_dir/$(hostname)/expose/$diagname-$log-${timestamp}.purge_backup_trace 2>&1
+  echo '============' >> $backup_dir/$(hostname)/archive/$diagname-$log-${timestamp}.purge_backup_trace 2>&1
+  echo 'Remove files' >> $backup_dir/$(hostname)/archive/$diagname-$log-${timestamp}.purge_backup_trace 2>&1
+  echo '============' >> $backup_dir/$(hostname)/archive/$diagname-$log-${timestamp}.purge_backup_trace 2>&1
   if [ -s $backup_dir/$(hostname)/archive/$diagname-$log-${timestamp}.purge_backup_progress ]; then
-    xargs xargs rm -v < $backup_dir/$(hostname)/archive/$diagname-$log-${timestamp}.purge_backup_progress >> $backup_dir/$(hostname)/expose/$diagname-$log-${timestamp}.purge_backup_trace 2>&1
+    xargs xargs rm -v < $backup_dir/$(hostname)/archive/$diagname-$log-${timestamp}.purge_backup_progress >> $backup_dir/$(hostname)/archive/$diagname-$log-${timestamp}.purge_backup_trace 2>&1
   else
-    echo 'no files to be removed' >> $backup_dir/$(hostname)/expose/$diagname-$log-${timestamp}.purge_backup_trace 2>&1
+    echo 'no files to be removed' >> $backup_dir/$(hostname)/archive/$diagname-$log-${timestamp}.purge_backup_trace 2>&1
   fi
   result=done
 else 
