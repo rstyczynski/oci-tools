@@ -33,10 +33,10 @@ find $backup_dir/$(hostname)/archive/$diagname-$log-* -type f -mmin +$archive_tt
 echo '============' >> $backup_dir/$(hostname)/archive/$diagname-$log-${timestamp}.purge_archive_trace 2>&1
 echo 'Remove files' >> $backup_dir/$(hostname)/archive/$diagname-$log-${timestamp}.purge_archive_trace 2>&1
 echo '============' >> $backup_dir/$(hostname)/archive/$diagname-$log-${timestamp}.purge_archive_trace 2>&1
-if [ -s $backup_dir/$(hostname)/archive/$diagname-$log-${timestamp}.purge_backup_progress ]; then
+if [ -s $backup_dir/$(hostname)/archive/$diagname-$log-${timestamp}.purge_archive_progress ]; then
   xargs rm -v < $backup_dir/$(hostname)/archive/$diagname-$log-${timestamp}.purge_archive_progress >> $backup_dir/$(hostname)/archive/$diagname-$log-${timestamp}.purge_archive_trace 2>&1
 else
-  echo 'no files to be removed' >> $backup_dir/$(hostname)/expose/$diagname-$log-${timestamp}.purge_backup_trace 2>&1
+  echo 'no files to be removed' >> $backup_dir/$(hostname)/archive/$diagname-$log-${timestamp}.purge_archive_trace 2>&1
 fi
 
 # mark process done
