@@ -15,7 +15,7 @@ function schedule_diag_sync() {
 
     : ${diag_cfg:=~/.x-ray/diagnose.yaml}
     : ${cron_action:=create}
-    : ${run_mode:=DEPLOY}
+    : ${run_mode:=TEST}
 
     diagname=$(basename $diag_cfg | cut -f1 -d. | cut -f2-999 -d'-')
     if [ "$diagname" == diagnose ]; then
