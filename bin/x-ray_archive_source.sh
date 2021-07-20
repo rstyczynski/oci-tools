@@ -23,7 +23,7 @@ fi
 
 timestamp=$(date +"%Y-%m-%dT%H:%M:%SZ%Z")
 
-mkdir $backup_dir/$(hostname)/source
+mkdir -p $backup_dir/$(hostname)/source
 mkdir -p $purge_src_dir
 
 #convert ttl to minutes
@@ -32,16 +32,22 @@ ttl_mins=$(awk -vday_frac=$ttl 'BEGIN{printf "%.0f" ,day_frac * 1440}');
 find $purge_src_dir -type f -mmin +$ttl_mins | egrep "." > $backup_dir/$(hostname)/source/$diagname-$log-${timestamp}.archive
 
 # transfter files to tar backup, before removal. do not compress to save cpu
-tar -cf $backup_dir/source/$(hostname)/$diagname-$log-${timestamp}.tar -T $backup_dir/$(hostname)/source/$diagname-$log-${timestamp}.archive
-if $? -eq 0 ]; then
-  xargs rm < $backup_dir/$(hostname)/source/$diagname-$log-\${timestamp}.archive
+echo '=========' > $backup_dir/$(hostname)/source/$diagname-$log-${timestamp}.archive_trace 2>&1
+echo 'Tar files' >> $backup_dir/$(hostname)/source/$diagname-$log-${timestamp}.archive_trace 2>&1
+echo '=========' >> $backup_dir/$(hostname)/source/$diagname-$log-${timestamp}.archive_trace 2>&1
+tar -cf $backup_dir/$(hostname)/source/$diagname-$log-${timestamp}.tar -T $backup_dir/$(hostname)/source/$diagname-$log-${timestamp}.archive >> $backup_dir/$(hostname)/source/$diagname-$log-${timestamp}.archive_trace 2>&1
+if [ $? -eq 0 ]; then
+  echo '============' >> $backup_dir/$(hostname)/source/$diagname-$log-${timestamp}.archive_trace 2>&1
+  echo 'Remove files' >> $backup_dir/$(hostname)/source/$diagname-$log-${timestamp}.archive_trace 2>&1
+  echo '============' >> $backup_dir/$(hostname)/source/$diagname-$log-${timestamp}.archive_trace 2>&1
+  xargs rm < $backup_dir/$(hostname)/source/$diagname-$log-\${timestamp}.archive >> $backup_dir/$(hostname)/source/$diagname-$log-${timestamp}.archive_trace 2>&1
   result=done
 else
   result=error
 fi
 
 # mark archive result in a file with archived file list
-mv $backup_dir/$(hostname)/source/$diagname-$log-\${timestamp}.archive $backup_dir/$(hostname)/source/$diagname-$log-\${timestamp}.archive_$result
+mv $backup_dir/$(hostname)/source/$diagname-$log-${timestamp}.archive $backup_dir/$(hostname)/source/$diagname-$log-${timestamp}.archive_$result
 
 # remove empty directories
 find $purge_src_dir -type d -empty -delete
