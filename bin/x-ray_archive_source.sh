@@ -21,7 +21,7 @@ if [ -z $diagname ] || [ -z $log ] || [ -z $purge_src_dir ] || [ -z $ttl ] || [ 
   exit 1
 fi
 
-timestamp=\$(date +"%Y-%m-%dT%H:%M:%SZ%Z")
+timestamp=$(date +"%Y-%m-%dT%H:%M:%SZ%Z")
 
 mkdir $backup_dir/$(hostname)/source
 mkdir -p $purge_src_dir
