@@ -66,7 +66,7 @@ diagnose:
     watch_os:
         dir:    ~/x-ray/watch/os
         type:   binary
-        ttl:    2
+        ttl:    1
         expose:   
             cycle: "* * * * *"
             age:   1
@@ -81,7 +81,7 @@ diagnose:
     watch_net:
         dir:    ~/x-ray/watch/net
         type:   binary
-        ttl:    2
+        ttl:    1
         expose:   
             cycle: "* * * * *"
             age:   1
@@ -96,7 +96,7 @@ diagnose:
     watch_wls:
         dir:    ~/x-ray/watch/wls
         type:   binary
-        ttl:    2
+        ttl:    1
         expose:   
             cycle: "* * * * *"
             age:   1
