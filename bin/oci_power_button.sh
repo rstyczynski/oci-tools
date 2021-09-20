@@ -219,7 +219,7 @@ function startup_environment() {
             db_node_state=$(oci db node get --db-node-id $db_node_id | jq '.' | grep "lifecycle-state" | cut -f2 -d: | tr -d '," ')
 
             wait_time=0
-            max_wait_time=300
+            max_wait_time=60
             wait_secs=5
             while [ $db_node_state != AVAILABLE ]; do
                 sleep $wait_secs
