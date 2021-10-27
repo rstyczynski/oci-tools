@@ -65,9 +65,13 @@ function get_data_stats() {
   : ${precision:='%d'}
   : ${multipliction:=1}
 
+  if [ ! -f $umcRoot/bin/csv_rewrite.py ]; then
+    echo "Error. umc tool csv_rewrite not found. Initialize umc before running this tool."
+  fi
+
   data=$(
     cat $data_file | 
-    python3 ~/csv_rewrite.py --columns=$column 2> /dev/null | 
+    python3 $umcRoot/bin/csv_rewrite.py --columns=$column 2> /dev/null | 
     sed -n "/$date $hour_start:/,/$date $hour_stop:/p" | 
     cut -d, -f6 | 
     grep -v $column
