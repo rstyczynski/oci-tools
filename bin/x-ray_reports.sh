@@ -147,6 +147,7 @@ function report_OCI_instances() {
       sayatcell '=================================================' 100
       sayatcell " Compute instance: $host" 100
       sayatcell '=================================================' 100
+      echo
 
       sayatcell '=================================================' 100
       sayatcell "Load average" 100
@@ -228,6 +229,7 @@ function report_WLS() {
     sayatcell '=================================================' 100
     sayatcell "$domain" 100
     sayatcell '=================================================' 100
+    echo
 
     servers=$(ls /mwlogs/x-ray/$env_code/$component/diag/wls/log/$domain)
     for server in $servers; do
@@ -236,6 +238,7 @@ function report_WLS() {
       sayatcell '=================================================' 100
       sayatcell "$domain / $server" 100
       sayatcell '=================================================' 100
+      echo
 
       sayatcell '==================' 100
       sayatcell "General" 100
