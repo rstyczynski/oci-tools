@@ -156,7 +156,7 @@ function report_OCI_instances() {
 
       data_file=/mwlogs/x-ray/$env_code/$component/diag/hosts/$host/os/$date/system-uptime.log
       columns=load1min,load5min,load15min
-      print_avg $data_file $columns
+      print_avg $data_file $columns %0.2f
 
       echo
       sayatcell '=================================================' 100
