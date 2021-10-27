@@ -96,7 +96,7 @@ function print_avg() {
   done
   echo
   for column in $(echo $columns | tr , ' '); do
-    get_data_stats $data_file $column
+    get_data_stats $data_file $column $precision $multipliction
     sayatcell -n "$avg" 30
   done
   echo
@@ -114,7 +114,7 @@ function print_max() {
   done
   echo
   for column in $(echo $columns | tr , ' '); do
-    get_data_stats $data_file $column
+    get_data_stats $data_file $column $precision $multipliction
     sayatcell -n "$max" 30
   done
   echo
