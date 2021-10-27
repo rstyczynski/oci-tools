@@ -1,5 +1,6 @@
 #!/bin/bash
 
+unset sayatcell
 function sayatcell() {
 
     nl=yes
@@ -55,7 +56,7 @@ function sayatcell() {
     fi
 }
 
-
+unset get_data_stats
 function get_data_stats() {
   local data_file=$1
   local column=$2
@@ -83,6 +84,7 @@ function get_data_stats() {
   max=$(echo $data | tr ' ' '\n' | awk "BEGIN {max=0} {if (\$1>0+max) max=\$1} END {printf \"$precision\", max * $multipliction }")
 }
 
+unset print_avg
 function print_avg() {
   local data_file=$1
   local columns=$2
@@ -100,6 +102,7 @@ function print_avg() {
   echo
 }
 
+unset print_max
 function print_max() {
   local data_file=$1
   local columns=$2
@@ -117,6 +120,7 @@ function print_max() {
   echo
 }
 
+unset report_OCI_instances
 function report_OCI_instances() {
   env_code=$1
   component=$2
@@ -133,7 +137,8 @@ function report_OCI_instances() {
   fi
 
   sayatcell '=================================================' 100
-  sayatcell " Compute instances" 100
+  sayatcell "Compute instances" 100
+  sayatcell "from $date $hour_start:00:00 UTC to $date $hour_stop:00:00 UTC" 100
   sayatcell '=================================================' 100
 
   hosts=$(ls /mwlogs/x-ray/$env_code/$component/diag/hosts)
@@ -195,7 +200,7 @@ function report_OCI_instances() {
 
 }
 
-
+unset report_WLS
 function report_WLS() {
   env_code=$1
   component=$2
@@ -213,6 +218,7 @@ function report_WLS() {
 
   sayatcell '=================================================' 100
   sayatcell "WebLogic domains" 100
+  sayatcell "from $date $hour_start:00:00 UTC to $date $hour_stop:00:00 UTC" 100
   sayatcell '=================================================' 100
 
   domains=$(ls /mwlogs/x-ray/$env_code/$component/diag/wls/dms)
