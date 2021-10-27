@@ -149,6 +149,7 @@ function report_OCI_instances() {
       sayatcell '=================================================' 100
       echo
 
+      echo
       sayatcell '=================================================' 100
       sayatcell "Load average" 100
       sayatcell '=================================================' 100
@@ -157,7 +158,7 @@ function report_OCI_instances() {
       columns=load1min,load5min,load15min
       print_avg $data_file $columns
 
-
+      echo
       sayatcell '=================================================' 100
       sayatcell "CPU" 100
       sayatcell '=================================================' 100
@@ -172,24 +173,28 @@ function report_OCI_instances() {
       columns=Interrupts,ContextSwitches
       print_avg $data_file $columns
 
+      echo
       sayatcell '=================================================' 100
       sayatcell "Memory" 100
       sayatcell '=================================================' 100
       columns=MemFree,MemBuff,MemCache
       print_avg $data_file $columns
 
+      echo
       sayatcell '=================================================' 100
       sayatcell "Swap" 100
       sayatcell '=================================================' 100
       columns=MemSwpd,SwapReadBlocks,SwapWriteBlocks
       print_avg $data_file $columns
 
+      echo
       sayatcell '=================================================' 100
       sayatcell "I/O" 100
       sayatcell '=================================================' 100
       columns=IOReadBlocks,IOWriteBlocks
       print_avg $data_file $columns
 
+      echo
       sayatcell '=================================================' 100
       sayatcell "Boot volume space" 100
       sayatcell '=================================================' 100
@@ -240,6 +245,7 @@ function report_WLS() {
       sayatcell '=================================================' 100
       echo
 
+      echo
       sayatcell '==================' 100
       sayatcell "General" 100
       sayatcell '==================' 100
@@ -265,6 +271,7 @@ function report_WLS() {
         echo "      None"
       fi
 
+      echo
       sayatcell '==================' 100
       sayatcell "Channels" 100
       sayatcell '==================' 100
@@ -301,6 +308,7 @@ function report_WLS() {
 
       done
 
+      echo
       sayatcell '==================' 100
       sayatcell "Data sources" 100
       sayatcell '==================' 100
@@ -335,6 +343,7 @@ function report_WLS() {
         fi
       done
 
+      echo
       sayatcell '==================' 100
       sayatcell "JMS Server" 100
       sayatcell '==================' 100
@@ -373,6 +382,7 @@ function report_WLS() {
         fi
       done
 
+      echo
       sayatcell '==================' 100
       sayatcell "JMS Runtime" 100
       sayatcell '==================' 100
