@@ -464,32 +464,32 @@ function report_WLS() {
   echo
   header2 'Channels'
   
-  channels=$(
-    cd /mwlogs/x-ray/$env_code/$component/diag/wls/dms/$domain/$date
-    ls wls_channel_$domain\_$server\_*   2>/dev/null | 
-    grep -v _dt.log | 
-    sed "s/wls_channel_$domain\_$server\_//g" | 
-    sed "s/\.log//g"
-    cd - >/dev/null
-  )
-
-
   columns=_domain,_server,_channel,accepts
   echo; print_header $data_file $columns
   domains=$(ls /mwlogs/x-ray/$env_code/$component/diag/wls/dms)
   for domain in $domains; do
+    for server in $servers; do
 
-    for channel in $channels; do
+      channels=$(
+        cd /mwlogs/x-ray/$env_code/$component/diag/wls/dms/$domain/$date
+        ls wls_channel_$domain\_$server\_*   2>/dev/null | 
+        grep -v _dt.log | 
+        sed "s/wls_channel_$domain\_$server\_//g" | 
+        sed "s/\.log//g"
+        cd - >/dev/null
+      )
 
-      servers=$(ls /mwlogs/x-ray/$env_code/$component/diag/wls/log/$domain)
-      for server in $servers; do
-        data_file=/mwlogs/x-ray/$env_code/$component/diag/wls/dms/$domain/$date/wls_channel_$domain\_$server\_$channel.log 
-        if [ -f $data_file ]; then
-          print_current_data $data_file $columns
-        else
-          : # echo "(none)"
-        fi
-      done
+      for channel in $channels; do
+
+        servers=$(ls /mwlogs/x-ray/$env_code/$component/diag/wls/log/$domain)
+
+          data_file=/mwlogs/x-ray/$env_code/$component/diag/wls/dms/$domain/$date/wls_channel_$domain\_$server\_$channel.log 
+          if [ -f $data_file ]; then
+            print_current_data $data_file $columns
+          else
+            : # echo "(none)"
+          fi
+        done
     done
   done
 
@@ -497,18 +497,28 @@ function report_WLS() {
   echo; print_header $data_file $columns
   domains=$(ls /mwlogs/x-ray/$env_code/$component/diag/wls/dms)
   for domain in $domains; do
+    for server in $servers; do
 
-    for channel in $channels; do
+      channels=$(
+        cd /mwlogs/x-ray/$env_code/$component/diag/wls/dms/$domain/$date
+        ls wls_channel_$domain\_$server\_*   2>/dev/null | 
+        grep -v _dt.log | 
+        sed "s/wls_channel_$domain\_$server\_//g" | 
+        sed "s/\.log//g"
+        cd - >/dev/null
+      )
 
-      servers=$(ls /mwlogs/x-ray/$env_code/$component/diag/wls/log/$domain)
-      for server in $servers; do
-        data_file=/mwlogs/x-ray/$env_code/$component/diag/wls/dms/$domain/$date/wls_channel_$domain\_$server\_$channel.log 
-        if [ -f $data_file ]; then
-          print_counter_data $data_file $columns
-        else
-          : # echo "(none)"
-        fi
-      done
+      for channel in $channels; do
+
+        servers=$(ls /mwlogs/x-ray/$env_code/$component/diag/wls/log/$domain)
+
+          data_file=/mwlogs/x-ray/$env_code/$component/diag/wls/dms/$domain/$date/wls_channel_$domain\_$server\_$channel.log 
+          if [ -f $data_file ]; then
+            print_counter_data $data_file $columns
+          else
+            : # echo "(none)"
+          fi
+        done
     done
   done
 
@@ -516,18 +526,28 @@ function report_WLS() {
   echo; print_header $data_file $columns
   domains=$(ls /mwlogs/x-ray/$env_code/$component/diag/wls/dms)
   for domain in $domains; do
+    for server in $servers; do
 
-    for channel in $channels; do
+      channels=$(
+        cd /mwlogs/x-ray/$env_code/$component/diag/wls/dms/$domain/$date
+        ls wls_channel_$domain\_$server\_*   2>/dev/null | 
+        grep -v _dt.log | 
+        sed "s/wls_channel_$domain\_$server\_//g" | 
+        sed "s/\.log//g"
+        cd - >/dev/null
+      )
 
-      servers=$(ls /mwlogs/x-ray/$env_code/$component/diag/wls/log/$domain)
-      for server in $servers; do
-        data_file=/mwlogs/x-ray/$env_code/$component/diag/wls/dms/$domain/$date/wls_channel_$domain\_$server\_$channel.log 
-        if [ -f $data_file ]; then
-          print_current_data $data_file $columns
-        else
-          : # echo "(none)"
-        fi
-      done
+      for channel in $channels; do
+
+        servers=$(ls /mwlogs/x-ray/$env_code/$component/diag/wls/log/$domain)
+
+          data_file=/mwlogs/x-ray/$env_code/$component/diag/wls/dms/$domain/$date/wls_channel_$domain\_$server\_$channel.log 
+          if [ -f $data_file ]; then
+            print_current_data $data_file $columns
+          else
+            : # echo "(none)"
+          fi
+        done
     done
   done
 
@@ -535,18 +555,28 @@ function report_WLS() {
   echo; print_header $data_file $columns
   domains=$(ls /mwlogs/x-ray/$env_code/$component/diag/wls/dms)
   for domain in $domains; do
+    for server in $servers; do
 
-    for channel in $channels; do
+      channels=$(
+        cd /mwlogs/x-ray/$env_code/$component/diag/wls/dms/$domain/$date
+        ls wls_channel_$domain\_$server\_*   2>/dev/null | 
+        grep -v _dt.log | 
+        sed "s/wls_channel_$domain\_$server\_//g" | 
+        sed "s/\.log//g"
+        cd - >/dev/null
+      )
 
-      servers=$(ls /mwlogs/x-ray/$env_code/$component/diag/wls/log/$domain)
-      for server in $servers; do
-        data_file=/mwlogs/x-ray/$env_code/$component/diag/wls/dms/$domain/$date/wls_channel_$domain\_$server\_$channel.log 
-        if [ -f $data_file ]; then
-          print_current_data $data_file $columns
-        else
-          : # echo "(none)"
-        fi
-      done
+      for channel in $channels; do
+
+        servers=$(ls /mwlogs/x-ray/$env_code/$component/diag/wls/log/$domain)
+
+          data_file=/mwlogs/x-ray/$env_code/$component/diag/wls/dms/$domain/$date/wls_channel_$domain\_$server\_$channel.log 
+          if [ -f $data_file ]; then
+            print_current_data $data_file $columns
+          else
+            : # echo "(none)"
+          fi
+        done
     done
   done
 
@@ -555,31 +585,28 @@ function report_WLS() {
   echo
   header2 "Data sources"
 
-  data_sources=$(
-    cd /mwlogs/x-ray/$env_code/$component/diag/wls/dms/$domain/$date
-    ls wls_datasource_$domain\_$server\_* 2>/dev/null | 
-    grep -v _dt.log | 
-    sed "s/wls_datasource_$domain\_$server\_//g" | 
-    sed "s/\.log//g"
-    cd - >/dev/null
-  )
-
   columns=_domain,_server,_data_source,activeConnectionsAverage,capacity,numAvailable
   echo; print_header $data_file $columns
   domains=$(ls /mwlogs/x-ray/$env_code/$component/diag/wls/dms)
   for domain in $domains; do
-
-    for data_source in $data_sources; do
-
-      servers=$(ls /mwlogs/x-ray/$env_code/$component/diag/wls/log/$domain)
-      for server in $servers; do
-        data_file=/mwlogs/x-ray/$env_code/$component/diag/wls/dms/$domain/$date/wls_datasource_$domain\_$server\_$data_source.log
-        if [ -f $data_file ]; then
-          print_current_data $data_file $columns
-        else
-          : # echo "(none)"
-        fi
-      done
+    servers=$(ls /mwlogs/x-ray/$env_code/$component/diag/wls/log/$domain)
+    for server in $servers; do
+      data_sources=$(
+        cd /mwlogs/x-ray/$env_code/$component/diag/wls/dms/$domain/$date
+        ls wls_datasource_$domain\_$server\_* 2>/dev/null | 
+        grep -v _dt.log | 
+        sed "s/wls_datasource_$domain\_$server\_//g" | 
+        sed "s/\.log//g"
+        cd - >/dev/null
+      )
+      for data_source in $data_sources; do
+          data_file=/mwlogs/x-ray/$env_code/$component/diag/wls/dms/$domain/$date/wls_datasource_$domain\_$server\_$data_source.log
+          if [ -f $data_file ]; then
+            print_current_data $data_file $columns
+          else
+            : # echo "(none)"
+          fi
+        done
     done
   done
 
@@ -587,50 +614,54 @@ function report_WLS() {
   echo; print_header $data_file $columns
   domains=$(ls /mwlogs/x-ray/$env_code/$component/diag/wls/dms)
   for domain in $domains; do
-
-    for data_source in $data_sources; do
-
-      servers=$(ls /mwlogs/x-ray/$env_code/$component/diag/wls/log/$domain)
-      for server in $servers; do
-        data_file=/mwlogs/x-ray/$env_code/$component/diag/wls/dms/$domain/$date/wls_datasource_$domain\_$server\_$data_source.log
-        if [ -f $data_file ]; then
-          print_counter_data $data_file $columns
-        else
-          : # echo "(none)"
-        fi
-      done
+    servers=$(ls /mwlogs/x-ray/$env_code/$component/diag/wls/log/$domain)
+    for server in $servers; do
+      data_sources=$(
+        cd /mwlogs/x-ray/$env_code/$component/diag/wls/dms/$domain/$date
+        ls wls_datasource_$domain\_$server\_* 2>/dev/null | 
+        grep -v _dt.log | 
+        sed "s/wls_datasource_$domain\_$server\_//g" | 
+        sed "s/\.log//g"
+        cd - >/dev/null
+      )
+      for data_source in $data_sources; do
+          data_file=/mwlogs/x-ray/$env_code/$component/diag/wls/dms/$domain/$date/wls_datasource_$domain\_$server\_$data_source.log
+          if [ -f $data_file ]; then
+            print_current_data $data_file $columns
+          else
+            : # echo "(none)"
+          fi
+        done
     done
   done
-
 
   echo
   header2 "JMS Server"
   
-  jms_servers=$(
-    cd /mwlogs/x-ray/$env_code/$component/diag/wls/dms/$domain/$date
-    ls wls_jmsserver_$domain\_$server\_* 2>/dev/null | 
-    grep -v _dt.log | 
-    sed "s/wls_jmsserver_$domain\_$server\_//g" | 
-    sed "s/\.log//g"
-    cd - >/dev/null
-  )
 
   columns=_domain,_server,_jms_server,destinations
   echo; print_header $data_file $columns
   domains=$(ls /mwlogs/x-ray/$env_code/$component/diag/wls/dms)
   for domain in $domains; do
+    servers=$(ls /mwlogs/x-ray/$env_code/$component/diag/wls/log/$domain)
+    for server in $servers; do
 
-    for jms_server in $jms_servers; do
-
-      servers=$(ls /mwlogs/x-ray/$env_code/$component/diag/wls/log/$domain)
-      for server in $servers; do
-        data_file=/mwlogs/x-ray/$env_code/$component/diag/wls/dms/$domain/$date/wls_jmsserver_$domain\_$server\_$jms_server.log
-        if [ -f $data_file ]; then
-          print_current_data $data_file $columns
-        else
-          : # echo "(none)"
-        fi
-      done
+      jms_servers=$(
+        cd /mwlogs/x-ray/$env_code/$component/diag/wls/dms/$domain/$date
+        ls wls_jmsserver_$domain\_$server\_* 2>/dev/null | 
+        grep -v _dt.log | 
+        sed "s/wls_jmsserver_$domain\_$server\_//g" | 
+        sed "s/\.log//g"
+        cd - >/dev/null
+      )
+      for jms_server in $jms_servers; do
+          data_file=/mwlogs/x-ray/$env_code/$component/diag/wls/dms/$domain/$date/wls_jmsserver_$domain\_$server\_$jms_server.log
+          if [ -f $data_file ]; then
+            print_current_data $data_file $columns
+          else
+            : # echo "(none)"
+          fi
+        done
     done
   done
 
@@ -638,18 +669,25 @@ function report_WLS() {
   echo; print_header $data_file $columns
   domains=$(ls /mwlogs/x-ray/$env_code/$component/diag/wls/dms)
   for domain in $domains; do
+    servers=$(ls /mwlogs/x-ray/$env_code/$component/diag/wls/log/$domain)
+    for server in $servers; do
 
-    for jms_server in $jms_servers; do
-
-      servers=$(ls /mwlogs/x-ray/$env_code/$component/diag/wls/log/$domain)
-      for server in $servers; do
-        data_file=/mwlogs/x-ray/$env_code/$component/diag/wls/dms/$domain/$date/wls_jmsserver_$domain\_$server\_$jms_server.log
-        if [ -f $data_file ]; then
-          print_current_data $data_file $columns
-        else
-          : # echo "(none)"
-        fi
-      done
+      jms_servers=$(
+        cd /mwlogs/x-ray/$env_code/$component/diag/wls/dms/$domain/$date
+        ls wls_jmsserver_$domain\_$server\_* 2>/dev/null | 
+        grep -v _dt.log | 
+        sed "s/wls_jmsserver_$domain\_$server\_//g" | 
+        sed "s/\.log//g"
+        cd - >/dev/null
+      )
+      for jms_server in $jms_servers; do
+          data_file=/mwlogs/x-ray/$env_code/$component/diag/wls/dms/$domain/$date/wls_jmsserver_$domain\_$server\_$jms_server.log
+          if [ -f $data_file ]; then
+            print_current_data $data_file $columns
+          else
+            : # echo "(none)"
+          fi
+        done
     done
   done
 
@@ -657,18 +695,25 @@ function report_WLS() {
   echo; print_header $data_file $columns
   domains=$(ls /mwlogs/x-ray/$env_code/$component/diag/wls/dms)
   for domain in $domains; do
+    servers=$(ls /mwlogs/x-ray/$env_code/$component/diag/wls/log/$domain)
+    for server in $servers; do
 
-    for jms_server in $jms_servers; do
-
-      servers=$(ls /mwlogs/x-ray/$env_code/$component/diag/wls/log/$domain)
-      for server in $servers; do
-        data_file=/mwlogs/x-ray/$env_code/$component/diag/wls/dms/$domain/$date/wls_jmsserver_$domain\_$server\_$jms_server.log
-        if [ -f $data_file ]; then
-          print_current_data $data_file $columns
-        else
-          : # echo "(none)"
-        fi
-      done
+      jms_servers=$(
+        cd /mwlogs/x-ray/$env_code/$component/diag/wls/dms/$domain/$date
+        ls wls_jmsserver_$domain\_$server\_* 2>/dev/null | 
+        grep -v _dt.log | 
+        sed "s/wls_jmsserver_$domain\_$server\_//g" | 
+        sed "s/\.log//g"
+        cd - >/dev/null
+      )
+      for jms_server in $jms_servers; do
+          data_file=/mwlogs/x-ray/$env_code/$component/diag/wls/dms/$domain/$date/wls_jmsserver_$domain\_$server\_$jms_server.log
+          if [ -f $data_file ]; then
+            print_current_data $data_file $columns
+          else
+            : # echo "(none)"
+          fi
+        done
     done
   done
 
@@ -676,18 +721,25 @@ function report_WLS() {
   echo; print_header $data_file $columns
   domains=$(ls /mwlogs/x-ray/$env_code/$component/diag/wls/dms)
   for domain in $domains; do
+    servers=$(ls /mwlogs/x-ray/$env_code/$component/diag/wls/log/$domain)
+    for server in $servers; do
 
-    for jms_server in $jms_servers; do
-
-      servers=$(ls /mwlogs/x-ray/$env_code/$component/diag/wls/log/$domain)
-      for server in $servers; do
-        data_file=/mwlogs/x-ray/$env_code/$component/diag/wls/dms/$domain/$date/wls_jmsserver_$domain\_$server\_$jms_server.log
-        if [ -f $data_file ]; then
-          print_counter_data $data_file $columns
-        else
-          : # echo "(none)"
-        fi
-      done
+      jms_servers=$(
+        cd /mwlogs/x-ray/$env_code/$component/diag/wls/dms/$domain/$date
+        ls wls_jmsserver_$domain\_$server\_* 2>/dev/null | 
+        grep -v _dt.log | 
+        sed "s/wls_jmsserver_$domain\_$server\_//g" | 
+        sed "s/\.log//g"
+        cd - >/dev/null
+      )
+      for jms_server in $jms_servers; do
+          data_file=/mwlogs/x-ray/$env_code/$component/diag/wls/dms/$domain/$date/wls_jmsserver_$domain\_$server\_$jms_server.log
+          if [ -f $data_file ]; then
+            print_current_data $data_file $columns
+          else
+            : # echo "(none)"
+          fi
+        done
     done
   done
 
