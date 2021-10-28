@@ -1,5 +1,10 @@
 #!/bin/bash
 
+
+#
+# formating
+# 
+
 unset sayatcell
 function sayatcell() {
 
@@ -55,6 +60,77 @@ function sayatcell() {
             echo -n '|'
     fi
 }
+
+
+
+unset header1
+function header1() {
+
+  for cnt in {1..4}; do
+    echo -n '=================='
+  done
+  echo
+
+  echo "================== $@"
+
+  for cnt in {1..4}; do
+    echo -n '=================='
+  done
+  echo
+}
+
+unset header2
+function header2() {
+
+  for cnt in {1..3}; do
+    echo -n '=================='
+  done
+  echo
+
+  echo "================== $@"
+
+  for cnt in {1..3}; do
+    echo -n '=================='
+  done
+  echo
+}
+
+unset header3
+function header3() {
+
+  for cnt in {1..2}; do
+    echo -n '=================='
+  done
+  echo
+
+  echo "================== $@"
+
+  for cnt in {1..2}; do
+    echo -n '=================='
+  done
+  echo
+}
+
+unset header4
+function header4() {
+
+  for cnt in {1..1}; do
+    echo -n '=================='
+  done
+  echo
+
+  echo "================== $@"
+
+  for cnt in {1..1}; do
+    echo -n '=================='
+  done
+  echo
+}
+
+
+#
+# compute 
+#
 
 unset get_data_stats
 function get_data_stats() {
@@ -205,6 +281,11 @@ function print_ceiling() {
   print_ceiling_data $@
 }
 
+
+#
+# reports
+#
+
 unset report_OCI_instances
 function report_OCI_instances() {
   env_code=$1
@@ -221,16 +302,12 @@ function report_OCI_instances() {
     hour_start=00
   fi
 
-  sayatcell '=================================================' 100
-  sayatcell "Compute instances" 100
-  sayatcell "from $date $hour_start:00:00 UTC to $date $hour_stop:00:00 UTC" 100
-  sayatcell '=================================================' 100
+  header1 "Compute instances" 
+  echo "Time window from $date $hour_start:00:00 UTC to $date $hour_stop:00:00 UTC"
 
   hosts=$(ls /mwlogs/x-ray/$env_code/$component/diag/hosts)
 
-  sayatcell '==================' 100
-  sayatcell "Load average" 100
-  sayatcell '==================' 100
+  header2 "Load average"
 
   columns=_host,load1min,load5min,load15min
   echo; print_header $data_file $columns
@@ -240,9 +317,7 @@ function report_OCI_instances() {
   done
 
   echo
-  sayatcell '==================' 100
-  sayatcell "CPU" 100
-  sayatcell '==================' 100
+  header2 "CPU"
 
   columns=_host,CPUuser,CPUsystem,CPUidle,CPUwaitIO,CPUVMStolenTime
   echo; print_header $data_file $columns
@@ -266,9 +341,7 @@ function report_OCI_instances() {
   done
 
   echo
-  sayatcell '==================' 100
-  sayatcell "Memory" 100
-  sayatcell '==================' 100
+  header2 "Memory"
       
   columns=_host,MemFree,MemBuff,MemCache
   echo; print_header $data_file $columns
@@ -278,9 +351,7 @@ function report_OCI_instances() {
   done
 
   echo
-  sayatcell '==================' 100
-  sayatcell "Swap" 100
-  sayatcell '==================' 100
+  header2 "Swap"
   columns=_host,MemSwpd,SwapReadBlocks,SwapWriteBlocks
   echo; print_header $data_file $columns
   for host in $hosts; do
@@ -289,9 +360,7 @@ function report_OCI_instances() {
   done
 
   echo
-  sayatcell '==================' 100
-  sayatcell "I/O" 100
-  sayatcell '==================' 100
+  header2 "I/O"
   columns=_host,IOReadBlocks,IOWriteBlocks
   echo; print_header $data_file $columns
   for host in $hosts; do
@@ -300,9 +369,7 @@ function report_OCI_instances() {
   done
 
   echo
-  sayatcell '==================' 100
-  sayatcell "Boot volume space" 100
-  sayatcell '==================' 100
+  header2 "Boot volume space" 
   columns=_host,capacity
   echo; print_header $data_file $columns
   for host in $hosts; do
@@ -328,16 +395,11 @@ function report_WLS() {
     hour_start=00
   fi
 
-  sayatcell '=====================================================================================' 100
-  sayatcell "WebLogic domains" 100
-  sayatcell "from $date $hour_start:00:00 UTC to $date $hour_stop:00:00 UTC" 100
-  sayatcell '=====================================================================================' 100
-
+  header1 "WebLogic domains"
+  echo "Time window from $date $hour_start:00:00 UTC to $date $hour_stop:00:00 UTC"
 
   echo
-  sayatcell '====================================' 100
-  sayatcell "General" 100
-  sayatcell '====================================' 100
+  header2 "General"
 
   columns=_domain,_server,thread_total,thread_idle,thread_hogging,thread_standby
   echo; print_header $data_file $columns
@@ -417,10 +479,8 @@ function report_WLS() {
 
 
   echo
-  sayatcell '====================================' 100
-  sayatcell 'Channels' 100
-  sayatcell '====================================' 100
-
+  header2 'Channels'
+  
   channels=$(
     cd /mwlogs/x-ray/$env_code/$component/diag/wls/dms/$domain/$date
     ls wls_channel_$domain\_$server\_*   2>/dev/null | 
@@ -510,9 +570,7 @@ function report_WLS() {
 
 
   echo
-  sayatcell '====================================' 100
-  sayatcell "Data sources" 100
-  sayatcell '====================================' 100
+  header2 "Data sources"
 
   data_sources=$(
     cd /mwlogs/x-ray/$env_code/$component/diag/wls/dms/$domain/$date
@@ -563,10 +621,8 @@ function report_WLS() {
 
 
   echo
-  sayatcell '====================================' 100
-  sayatcell "JMS Server" 100
-  sayatcell '====================================' 100
-
+  header2 "JMS Server"
+  
   jms_servers=$(
     cd /mwlogs/x-ray/$env_code/$component/diag/wls/dms/$domain/$date
     ls wls_jmsserver_$domain\_$server\_* 2>/dev/null | 
@@ -654,10 +710,8 @@ function report_WLS() {
 
 
   echo
-  sayatcell '====================================' 100
-  sayatcell "JMS Runtime" 100
-  sayatcell '====================================' 100
-
+  header2 "JMS Runtime"
+  
   jms_runtimes=$(
     cd /mwlogs/x-ray/$env_code/$component/diag/wls/dms/$domain/$date
     ls wls_jmsruntime_$domain\_$server\_* 2>/dev/null | 
