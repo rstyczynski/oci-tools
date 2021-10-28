@@ -627,7 +627,7 @@ function report_WLS() {
       for data_source in $data_sources; do
           data_file=/mwlogs/x-ray/$env_code/$component/diag/wls/dms/$domain/$date/wls_datasource_$domain\_$server\_$data_source.log
           if [ -f $data_file ]; then
-            print_current_data $data_file $columns
+            print_count_data $data_file $columns
           else
             : # echo "(none)"
           fi
@@ -721,6 +721,7 @@ function report_WLS() {
   echo; print_header $data_file $columns
   domains=$(ls /mwlogs/x-ray/$env_code/$component/diag/wls/dms)
   for domain in $domains; do
+
     servers=$(ls /mwlogs/x-ray/$env_code/$component/diag/wls/log/$domain)
     for server in $servers; do
 
