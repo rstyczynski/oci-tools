@@ -713,7 +713,7 @@ function report_WLS() {
 
       servers=$(ls /mwlogs/x-ray/$env_code/$component/diag/wls/log/$domain)
       for server in $servers; do
-        data_file=/mwlogs/x-ray/$env_code/$component/diag/wls/dms/$domain/$date/wls_jmsserver_$domain\_$server\_$jms_server.log
+        data_file=/mwlogs/x-ray/$env_code/$component/diag/wls/dms/$domain/$date/wls_jmsruntme_$domain\_$server\_$jms_runtime.log
         if [ -f $data_file ]; then
           print_current_data $data_file $columns
         else
@@ -732,7 +732,7 @@ function report_WLS() {
 
       servers=$(ls /mwlogs/x-ray/$env_code/$component/diag/wls/log/$domain)
       for server in $servers; do
-        data_file=/mwlogs/x-ray/$env_code/$component/diag/wls/dms/$domain/$date/wls_jmsserver_$domain\_$server\_$jms_server.log
+        data_file=/mwlogs/x-ray/$env_code/$component/diag/wls/dms/$domain/$date/wls_jmsruntme_$domain\_$server\_$jms_runtime.log
         if [ -f $data_file ]; then
           print_ceiling_data $data_file $columns
         else
@@ -751,7 +751,7 @@ function report_WLS() {
 
       servers=$(ls /mwlogs/x-ray/$env_code/$component/diag/wls/log/$domain)
       for server in $servers; do
-        data_file=/mwlogs/x-ray/$env_code/$component/diag/wls/dms/$domain/$date/wls_jmsserver_$domain\_$server\_$jms_server.log
+        data_file=/mwlogs/x-ray/$env_code/$component/diag/wls/dms/$domain/$date/wls_jmsruntme_$domain\_$server\_$jms_runtime.log
         if [ -f $data_file ]; then
           print_counter_data $data_file $columns
         else
