@@ -78,46 +78,131 @@ function get_data_stats() {
     grep -v $column
   )
   avg=$(echo $data | tr ' ' '\n' | awk "{ total += \$1 } END { printf \"$precision\", total/NR * $multipliction  }")
-  stddev=$(echo $data | tr ' ' '\n'  | awk "{for(i=1;i<=NF;i++) {sum[i] += \$i; sumsq[i] += (\$i)^2}} 
-          END {for (i=1;i<=NF;i++) { printf \"$precision\", sqrt((sumsq[i]-sum[i]^2/NR)/NR) * $multipliction } }")
+  stddev=$(echo $data | tr ' ' '\n'  | 
+          awk "
+              {for(i=1;i<=NF;i++) { sum[i] += \$i; sumsq[i] += (\$i)^2}} 
+              END {for (i=1;i<=NF;i++) { 
+                 val=(sumsq[i]-sum[i]^2/NR)/NR
+                 if (val>0)
+                  val=0
+                 printf \"$precision\", sqrt(val) * $multipliction };
+              }
+              "
+          )
+  : ${stddev:=0}
   min=$(echo $data | tr ' ' '\n' | awk "BEGIN {min=2^52} {if (\$1<0+min) min=\$1} END {printf \"$precision\", min * $multipliction}")
   max=$(echo $data | tr ' ' '\n' | awk "BEGIN {max=0} {if (\$1>0+max) max=\$1} END {printf \"$precision\", max * $multipliction }")
 }
 
-unset print_avg
-function print_avg() {
+unset print_header
+function print_header() {
   local data_file=$1
   local columns=$2
-  local precision=$3
-  local multipliction=$4
 
   for column in $(echo $columns | tr , ' '); do
+    column=$( echo $column | sed 's/^_//' )
     sayatcell -n "$column" 30
-  done
-  echo
-  for column in $(echo $columns | tr , ' '); do
-    get_data_stats $data_file $column $precision $multipliction
-    sayatcell -n "$avg" 30
   done
   echo
 }
 
-unset print_max
-function print_max() {
+unset print_current_data
+function print_current_data() {
   local data_file=$1
   local columns=$2
   local precision=$3
   local multipliction=$4
 
   for column in $(echo $columns | tr , ' '); do
-    sayatcell -n "$column" 30
+    if [[ $column == _* ]]; then
+      var_name=$( echo $column | sed 's/^_//' )
+      var_value=${!var_name}
+      sayatcell -n "$var_value" 30
+    else
+      get_data_stats $data_file $column $precision $multipliction
+      sayatcell -n "$avg" 30
+    fi
   done
   echo
+}
+
+unset print_current
+function print_current() {
+  local data_file=$1
+  local columns=$2
+  local precision=$3
+  local multipliction=$4
+
+  print_header $@
+  print_current_data $@
+}
+
+unset print_counter_data
+function print_counter_data() {
+  local data_file=$1
+  local columns=$2
+  local precision=$3
+  local multipliction=$4
+
   for column in $(echo $columns | tr , ' '); do
-    get_data_stats $data_file $column $precision $multipliction
-    sayatcell -n "$max" 30
+    if [[ $column == _* ]]; then
+      var_name=$( echo $column | sed 's/^_//' )
+      var_value=${!var_name}
+      sayatcell -n "$var_value" 30
+    else
+      get_data_stats $data_file $column $precision $multipliction
+      delta=$(( $max - $min ))
+      minutes=$(( $get_last_hours * 60  ))
+
+      dvdt=$(echo "scale=2; $delta/$minutes" | bc)
+
+      sayatcell -n "$max | $dvdt /min" 30
+    fi
   done
   echo
+}
+
+unset print_counter
+function print_counter() {
+  local data_file=$1
+  local columns=$2
+  local precision=$3
+  local multipliction=$4
+
+  print_header $@
+  print_counter_data $@
+}
+
+unset print_ceiling_data
+function print_ceiling_data() {
+  local data_file=$1
+  local columns=$2
+  local precision=$3
+  local multipliction=$4
+
+  for column in $(echo $columns | tr , ' '); do
+    if [[ $column == _* ]]; then
+      var_name=$( echo $column | sed 's/^_//' )
+      var_value=${!var_name}
+      sayatcell -n "$var_value" 30
+    else
+      get_data_stats $data_file $column $precision $multipliction
+      sayatcell -n "$max" 30
+    fi
+  done
+  echo
+}
+
+
+unset print_ceiling
+function print_ceiling() {
+  local data_file=$1
+  local columns=$2
+  local precision=$3
+  local multipliction=$4
+
+  print_header $@
+  print_ceiling_data $@
 }
 
 unset report_OCI_instances
@@ -142,66 +227,87 @@ function report_OCI_instances() {
   sayatcell '=================================================' 100
 
   hosts=$(ls /mwlogs/x-ray/$env_code/$component/diag/hosts)
+
+  sayatcell '==================' 100
+  sayatcell "Load average" 100
+  sayatcell '==================' 100
+
+  columns=_host,load1min,load5min,load15min
+  echo; print_header $data_file $columns
   for host in $hosts; do
-      echo
-      sayatcell '=================================================' 100
-      sayatcell " Compute instance: $host" 100
-      sayatcell '=================================================' 100
-      echo
-
-      echo
-      sayatcell '=================================================' 100
-      sayatcell "Load average" 100
-      sayatcell '=================================================' 100
-
       data_file=/mwlogs/x-ray/$env_code/$component/diag/hosts/$host/os/$date/system-uptime.log
-      columns=load1min,load5min,load15min
-      print_avg $data_file $columns %0.2f
+      print_current_data $data_file $columns %0.2f
+  done
 
-      echo
-      sayatcell '=================================================' 100
-      sayatcell "CPU" 100
-      sayatcell '=================================================' 100
+  echo
+  sayatcell '==================' 100
+  sayatcell "CPU" 100
+  sayatcell '==================' 100
+
+  columns=_host,CPUuser,CPUsystem,CPUidle,CPUwaitIO,CPUVMStolenTime
+  echo; print_header $data_file $columns
+  for host in $hosts; do
       data_file=/mwlogs/x-ray/$env_code/$component/diag/hosts/$host/os/$date/system-vmstat.log
+      print_current_data $data_file $columns
+  done
+      
+  columns=_host,ProcessRunQueue,ProcessBlocked
+  echo; print_header $data_file $columns
+  for host in $hosts; do
+      data_file=/mwlogs/x-ray/$env_code/$component/diag/hosts/$host/os/$date/system-vmstat.log
+      print_current_data $data_file $columns
+  done
 
-      columns=CPUuser,CPUsystem,CPUidle,CPUwaitIO,CPUVMStolenTime 
-      print_avg $data_file $columns
+  columns=_host,Interrupts,ContextSwitches
+  echo; print_header $data_file $columns
+  for host in $hosts; do
+      data_file=/mwlogs/x-ray/$env_code/$component/diag/hosts/$host/os/$date/system-vmstat.log
+      print_current_data $data_file $columns
+  done
 
-      columns=ProcessRunQueue,ProcessBlocked
-      print_avg $data_file $columns
+  echo
+  sayatcell '==================' 100
+  sayatcell "Memory" 100
+  sayatcell '==================' 100
+      
+  columns=_host,MemFree,MemBuff,MemCache
+  echo; print_header $data_file $columns
+  for host in $hosts; do
+      data_file=/mwlogs/x-ray/$env_code/$component/diag/hosts/$host/os/$date/system-vmstat.log
+      print_current_data $data_file $columns
+  done
 
-      columns=Interrupts,ContextSwitches
-      print_avg $data_file $columns
+  echo
+  sayatcell '==================' 100
+  sayatcell "Swap" 100
+  sayatcell '==================' 100
+  columns=_host,MemSwpd,SwapReadBlocks,SwapWriteBlocks
+  echo; print_header $data_file $columns
+  for host in $hosts; do
+      data_file=/mwlogs/x-ray/$env_code/$component/diag/hosts/$host/os/$date/system-vmstat.log
+      print_current_data $data_file $columns
+  done
 
-      echo
-      sayatcell '=================================================' 100
-      sayatcell "Memory" 100
-      sayatcell '=================================================' 100
-      columns=MemFree,MemBuff,MemCache
-      print_avg $data_file $columns
+  echo
+  sayatcell '==================' 100
+  sayatcell "I/O" 100
+  sayatcell '==================' 100
+  columns=_host,IOReadBlocks,IOWriteBlocks
+  echo; print_header $data_file $columns
+  for host in $hosts; do
+      data_file=/mwlogs/x-ray/$env_code/$component/diag/hosts/$host/os/$date/system-vmstat.log
+      print_current_data $data_file $columns
+  done
 
-      echo
-      sayatcell '=================================================' 100
-      sayatcell "Swap" 100
-      sayatcell '=================================================' 100
-      columns=MemSwpd,SwapReadBlocks,SwapWriteBlocks
-      print_avg $data_file $columns
-
-      echo
-      sayatcell '=================================================' 100
-      sayatcell "I/O" 100
-      sayatcell '=================================================' 100
-      columns=IOReadBlocks,IOWriteBlocks
-      print_avg $data_file $columns
-
-      echo
-      sayatcell '=================================================' 100
-      sayatcell "Boot volume space" 100
-      sayatcell '=================================================' 100
-      columns=capacity
+  echo
+  sayatcell '==================' 100
+  sayatcell "Boot volume space" 100
+  sayatcell '==================' 100
+  columns=_host,capacity
+  echo; print_header $data_file $columns
+  for host in $hosts; do
       data_file=/mwlogs/x-ray/$env_code/$component/diag/hosts/$host/os/$date/disk-space-mount1.log
-      print_avg $data_file $columns
-
+      print_current_data $data_file $columns
   done
 
 }
@@ -222,202 +328,401 @@ function report_WLS() {
     hour_start=00
   fi
 
-  sayatcell '=================================================' 100
+  sayatcell '=====================================================================================' 100
   sayatcell "WebLogic domains" 100
   sayatcell "from $date $hour_start:00:00 UTC to $date $hour_stop:00:00 UTC" 100
-  sayatcell '=================================================' 100
+  sayatcell '=====================================================================================' 100
 
+
+  echo
+  sayatcell '====================================' 100
+  sayatcell "General" 100
+  sayatcell '====================================' 100
+
+  columns=_domain,_server,thread_total,thread_idle,thread_hogging,thread_standby
+  echo; print_header $data_file $columns
   domains=$(ls /mwlogs/x-ray/$env_code/$component/diag/wls/dms)
   for domain in $domains; do
-    
-    echo
-    sayatcell '=================================================' 100
-    sayatcell "$domain" 100
-    sayatcell '=================================================' 100
-    echo
-
     servers=$(ls /mwlogs/x-ray/$env_code/$component/diag/wls/log/$domain)
     for server in $servers; do
-
-      echo
-      sayatcell '=================================================' 100
-      sayatcell "$domain / $server" 100
-      sayatcell '=================================================' 100
-      echo
-
-      echo
-      sayatcell '==================' 100
-      sayatcell "General" 100
-      sayatcell '==================' 100
       data_file=/mwlogs/x-ray/$env_code/$component/diag/wls/dms/$domain/$date/wls_general_$domain\_$server.log
-
       if [ -f $data_file ]; then
-
-        columns=thread_total,thread_idle,thread_hogging,thread_standby
-        print_avg $data_file $columns
-
-        columns=heap_size,heap_free_pct
-        print_avg $data_file $columns
-
-        columns=request_pending,request_completed,request_troughput
-        print_avg $data_file $columns
-    
-        columns=request_completed
-        print_max $data_file $columns
-
-        columns=sockets_open,sockets_opened
-        print_avg $data_file $columns
+        print_current_data $data_file $columns
       else
-        echo "      None"
+        : # echo "(none)"
       fi
-
-      echo
-      sayatcell '==================' 100
-      sayatcell "Channels" 100
-      sayatcell '==================' 100
-
-      channels=$(
-        cd /mwlogs/x-ray/$env_code/$component/diag/wls/dms/$domain/$date
-        ls wls_channel_$domain\_$server\_*   2>/dev/null | 
-        grep -v _dt.log | 
-        sed "s/wls_channel_$domain\_$server\_//g" | 
-        sed "s/\.log//g"
-        cd - >/dev/null
-      )
-      for channel in $channels; do
-        sayatcell '==================' 100
-        sayatcell "$channel" 100
-        sayatcell '==================' 100
-
-        data_file=/mwlogs/x-ray/$env_code/$component/diag/wls/dms/$domain/$date/wls_channel_$domain\_$server\_$channel.log 
-
-        if [ -f $data_file ]; then
-
-          columns=accepts,connections
-          print_max $data_file $columns
-
-          columns=bytesReceived,byteSent
-          print_max $data_file $columns
-
-          columns=msgReceived,msgSent
-          print_max $data_file $columns
-
-        else
-          echo "      None"
-        fi
-
-      done
-
-      echo
-      sayatcell '==================' 100
-      sayatcell "Data sources" 100
-      sayatcell '==================' 100
-
-      data_sources=$(
-        cd /mwlogs/x-ray/$env_code/$component/diag/wls/dms/$domain/$date
-        ls wls_datasource_$domain\_$server\_* 2>/dev/null | 
-        grep -v _dt.log | 
-        sed "s/wls_datasource_$domain\_$server\_//g" | 
-        sed "s/\.log//g"
-        cd - >/dev/null
-      )
-
-      for data_source in $data_sources; do
-
-        sayatcell '==================' 100
-        sayatcell "$data_source" 100
-        sayatcell '==================' 100
-
-        data_file=/mwlogs/x-ray/$env_code/$component/diag/wls/dms/$domain/$date/wls_datasource_$domain\_$server\_$data_source.log
-
-        if [ -f $data_file ]; then
-
-          columns=activeConnectionsAverage,capacity,numAvailable
-          print_avg $data_file $columns
-
-          columns=waitingForConnectionTotal
-          print_max $data_file $columns
-
-        else
-          echo "      None"
-        fi
-      done
-
-      echo
-      sayatcell '==================' 100
-      sayatcell "JMS Server" 100
-      sayatcell '==================' 100
-
-      jms_servers=$(
-        cd /mwlogs/x-ray/$env_code/$component/diag/wls/dms/$domain/$date
-        ls wls_jmsserver_$domain\_$server\_* 2>/dev/null | 
-        grep -v _dt.log | 
-        sed "s/wls_jmsserver_$domain\_$server\_//g" | 
-        sed "s/\.log//g"
-        cd - >/dev/null
-      )
-
-      for jms_server in $jms_servers; do
-        sayatcell '==================' 100
-        sayatcell "$jms_server" 100
-        sayatcell '==================' 100
-
-        data_file=/mwlogs/x-ray/$env_code/$component/diag/wls/dms/$domain/$date/wls_jmsserver_$domain\_$server\_$jms_server.log
-
-        if [ -f $data_file ]; then
-
-          columns=destinations
-          print_avg $data_file $columns
-
-          columns=messagesPending,bytesPending
-          print_avg $data_file $columns
-
-          columns=messages,bytes
-          print_avg $data_file $columns
-
-          columns=messagesReceived,bytesReceived
-          print_max $data_file $columns
-        else
-          echo "      None"
-        fi
-      done
-
-      echo
-      sayatcell '==================' 100
-      sayatcell "JMS Runtime" 100
-      sayatcell '==================' 100
-
-      jms_runtimes=$(
-        cd /mwlogs/x-ray/$env_code/$component/diag/wls/dms/$domain/$date
-        ls wls_jmsruntime_$domain\_$server\_* 2>/dev/null | 
-        grep -v _dt.log | 
-        sed "s/wls_jmsruntime_$domain\_$server\_//g" | 
-        sed "s/\.log//g"
-        cd - >/dev/null
-      )
-
-      for jms_runtime in $jms_runtimes; do
-        sayatcell '==================' 100
-        sayatcell "$jms_runtime" 100
-        sayatcell '==================' 100
-
-        data_file=/mwlogs/x-ray/$env_code/$component/diag/wls/dms/$domain/$date/wls_jmsruntime_$domain\_$server\_$jms_runtime.log
-
-        if [ -f $data_file ]; then
-
-          columns=connections,connectionsHigh
-          print_avg $data_file $columns
-
-          columns=connectionsTotal
-          print_max $data_file $columns
-        else
-          echo "      None"
-        fi
-      done
-
     done
   done
+
+  columns=_domain,_server,heap_size,heap_free_pct
+  echo; print_header $data_file $columns
+  domains=$(ls /mwlogs/x-ray/$env_code/$component/diag/wls/dms)
+  for domain in $domains; do
+    servers=$(ls /mwlogs/x-ray/$env_code/$component/diag/wls/log/$domain)
+    for server in $servers; do
+      data_file=/mwlogs/x-ray/$env_code/$component/diag/wls/dms/$domain/$date/wls_general_$domain\_$server.log
+      if [ -f $data_file ]; then
+        print_current_data $data_file $columns
+      else
+        : # echo "(none)"
+      fi
+    done
+  done
+
+  columns=_domain,_server,request_pending,request_troughput
+  echo; print_header $data_file $columns
+  domains=$(ls /mwlogs/x-ray/$env_code/$component/diag/wls/dms)
+  for domain in $domains; do
+    servers=$(ls /mwlogs/x-ray/$env_code/$component/diag/wls/log/$domain)
+    for server in $servers; do
+      data_file=/mwlogs/x-ray/$env_code/$component/diag/wls/dms/$domain/$date/wls_general_$domain\_$server.log
+      if [ -f $data_file ]; then
+        print_current_data $data_file $columns
+      else
+        : # echo "(none)"
+      fi
+    done
+  done
+
+  columns=_domain,_server,request_completed
+  echo; print_header $data_file $columns
+  domains=$(ls /mwlogs/x-ray/$env_code/$component/diag/wls/dms)
+  for domain in $domains; do
+    servers=$(ls /mwlogs/x-ray/$env_code/$component/diag/wls/log/$domain)
+    for server in $servers; do
+      data_file=/mwlogs/x-ray/$env_code/$component/diag/wls/dms/$domain/$date/wls_general_$domain\_$server.log
+      if [ -f $data_file ]; then
+        print_counter_data $data_file $columns
+      else
+        : # echo "(none)"
+      fi
+    done
+  done
+
+  columns=_domain,_server,sockets_open,sockets_opened
+  echo; print_header $data_file $columns
+  domains=$(ls /mwlogs/x-ray/$env_code/$component/diag/wls/dms)
+  for domain in $domains; do
+    servers=$(ls /mwlogs/x-ray/$env_code/$component/diag/wls/log/$domain)
+    for server in $servers; do
+      data_file=/mwlogs/x-ray/$env_code/$component/diag/wls/dms/$domain/$date/wls_general_$domain\_$server.log
+      if [ -f $data_file ]; then
+        print_current_data $data_file $columns
+      else
+        : # echo "(none)"
+      fi
+    done
+  done
+
+
+
+  echo
+  sayatcell '====================================' 100
+  sayatcell 'Channels' 100
+  sayatcell '====================================' 100
+
+  channels=$(
+    cd /mwlogs/x-ray/$env_code/$component/diag/wls/dms/$domain/$date
+    ls wls_channel_$domain\_$server\_*   2>/dev/null | 
+    grep -v _dt.log | 
+    sed "s/wls_channel_$domain\_$server\_//g" | 
+    sed "s/\.log//g"
+    cd - >/dev/null
+  )
+
+
+  columns=_domain,_server,_channel,accepts
+  echo; print_header $data_file $columns
+  domains=$(ls /mwlogs/x-ray/$env_code/$component/diag/wls/dms)
+  for domain in $domains; do
+
+    for channel in $channels; do
+
+      servers=$(ls /mwlogs/x-ray/$env_code/$component/diag/wls/log/$domain)
+      for server in $servers; do
+        data_file=/mwlogs/x-ray/$env_code/$component/diag/wls/dms/$domain/$date/wls_channel_$domain\_$server\_$channel.log 
+        if [ -f $data_file ]; then
+          print_current_data $data_file $columns
+        else
+          : # echo "(none)"
+        fi
+      done
+    done
+  done
+
+  columns=_domain,_server,_channel,connections
+  echo; print_header $data_file $columns
+  domains=$(ls /mwlogs/x-ray/$env_code/$component/diag/wls/dms)
+  for domain in $domains; do
+
+    for channel in $channels; do
+
+      servers=$(ls /mwlogs/x-ray/$env_code/$component/diag/wls/log/$domain)
+      for server in $servers; do
+        data_file=/mwlogs/x-ray/$env_code/$component/diag/wls/dms/$domain/$date/wls_channel_$domain\_$server\_$channel.log 
+        if [ -f $data_file ]; then
+          print_counter_data $data_file $columns
+        else
+          : # echo "(none)"
+        fi
+      done
+    done
+  done
+
+  columns=_domain,_server,_channel,bytesReceived,byteSent
+  echo; print_header $data_file $columns
+  domains=$(ls /mwlogs/x-ray/$env_code/$component/diag/wls/dms)
+  for domain in $domains; do
+
+    for channel in $channels; do
+
+      servers=$(ls /mwlogs/x-ray/$env_code/$component/diag/wls/log/$domain)
+      for server in $servers; do
+        data_file=/mwlogs/x-ray/$env_code/$component/diag/wls/dms/$domain/$date/wls_channel_$domain\_$server\_$channel.log 
+        if [ -f $data_file ]; then
+          print_current_data $data_file $columns
+        else
+          : # echo "(none)"
+        fi
+      done
+    done
+  done
+
+  columns=_domain,_server,_channel,msgReceived,msgSent
+  echo; print_header $data_file $columns
+  domains=$(ls /mwlogs/x-ray/$env_code/$component/diag/wls/dms)
+  for domain in $domains; do
+
+    for channel in $channels; do
+
+      servers=$(ls /mwlogs/x-ray/$env_code/$component/diag/wls/log/$domain)
+      for server in $servers; do
+        data_file=/mwlogs/x-ray/$env_code/$component/diag/wls/dms/$domain/$date/wls_channel_$domain\_$server\_$channel.log 
+        if [ -f $data_file ]; then
+          print_current_data $data_file $columns
+        else
+          : # echo "(none)"
+        fi
+      done
+    done
+  done
+
+
+
+  echo
+  sayatcell '====================================' 100
+  sayatcell "Data sources" 100
+  sayatcell '====================================' 100
+
+  data_sources=$(
+    cd /mwlogs/x-ray/$env_code/$component/diag/wls/dms/$domain/$date
+    ls wls_datasource_$domain\_$server\_* 2>/dev/null | 
+    grep -v _dt.log | 
+    sed "s/wls_datasource_$domain\_$server\_//g" | 
+    sed "s/\.log//g"
+    cd - >/dev/null
+  )
+
+  columns=_domain,_server,_data_source,activeConnectionsAverage,capacity,numAvailable
+  echo; print_header $data_file $columns
+  domains=$(ls /mwlogs/x-ray/$env_code/$component/diag/wls/dms)
+  for domain in $domains; do
+
+    for data_source in $data_sources; do
+
+      servers=$(ls /mwlogs/x-ray/$env_code/$component/diag/wls/log/$domain)
+      for server in $servers; do
+        data_file=/mwlogs/x-ray/$env_code/$component/diag/wls/dms/$domain/$date/wls_datasource_$domain\_$server\_$data_source.log
+        if [ -f $data_file ]; then
+          print_current_data $data_file $columns
+        else
+          : # echo "(none)"
+        fi
+      done
+    done
+  done
+
+  columns=_domain,_server,_data_source,waitingForConnectionTotal
+  echo; print_header $data_file $columns
+  domains=$(ls /mwlogs/x-ray/$env_code/$component/diag/wls/dms)
+  for domain in $domains; do
+
+    for data_source in $data_sources; do
+
+      servers=$(ls /mwlogs/x-ray/$env_code/$component/diag/wls/log/$domain)
+      for server in $servers; do
+        data_file=/mwlogs/x-ray/$env_code/$component/diag/wls/dms/$domain/$date/wls_datasource_$domain\_$server\_$data_source.log
+        if [ -f $data_file ]; then
+          print_counter_data $data_file $columns
+        else
+          : # echo "(none)"
+        fi
+      done
+    done
+  done
+
+
+  echo
+  sayatcell '====================================' 100
+  sayatcell "JMS Server" 100
+  sayatcell '====================================' 100
+
+  jms_servers=$(
+    cd /mwlogs/x-ray/$env_code/$component/diag/wls/dms/$domain/$date
+    ls wls_jmsserver_$domain\_$server\_* 2>/dev/null | 
+    grep -v _dt.log | 
+    sed "s/wls_jmsserver_$domain\_$server\_//g" | 
+    sed "s/\.log//g"
+    cd - >/dev/null
+  )
+
+  columns=_domain,_server,_jms_server,destinations
+  echo; print_header $data_file $columns
+  domains=$(ls /mwlogs/x-ray/$env_code/$component/diag/wls/dms)
+  for domain in $domains; do
+
+    for jms_server in $jms_servers; do
+
+      servers=$(ls /mwlogs/x-ray/$env_code/$component/diag/wls/log/$domain)
+      for server in $servers; do
+        data_file=/mwlogs/x-ray/$env_code/$component/diag/wls/dms/$domain/$date/wls_jmsserver_$domain\_$server\_$jms_server.log
+        if [ -f $data_file ]; then
+          print_current_data $data_file $columns
+        else
+          : # echo "(none)"
+        fi
+      done
+    done
+  done
+
+  columns=_domain,_server,_jms_server,messagesPending,bytesPending
+  echo; print_header $data_file $columns
+  domains=$(ls /mwlogs/x-ray/$env_code/$component/diag/wls/dms)
+  for domain in $domains; do
+
+    for jms_server in $jms_servers; do
+
+      servers=$(ls /mwlogs/x-ray/$env_code/$component/diag/wls/log/$domain)
+      for server in $servers; do
+        data_file=/mwlogs/x-ray/$env_code/$component/diag/wls/dms/$domain/$date/wls_jmsserver_$domain\_$server\_$jms_server.log
+        if [ -f $data_file ]; then
+          print_current_data $data_file $columns
+        else
+          : # echo "(none)"
+        fi
+      done
+    done
+  done
+
+  columns=_domain,_server,_jms_server,messages,bytes
+  echo; print_header $data_file $columns
+  domains=$(ls /mwlogs/x-ray/$env_code/$component/diag/wls/dms)
+  for domain in $domains; do
+
+    for jms_server in $jms_servers; do
+
+      servers=$(ls /mwlogs/x-ray/$env_code/$component/diag/wls/log/$domain)
+      for server in $servers; do
+        data_file=/mwlogs/x-ray/$env_code/$component/diag/wls/dms/$domain/$date/wls_jmsserver_$domain\_$server\_$jms_server.log
+        if [ -f $data_file ]; then
+          print_current_data $data_file $columns
+        else
+          : # echo "(none)"
+        fi
+      done
+    done
+  done
+
+  columns=_domain,_server,_jms_server,messagesReceived,bytesReceived
+  echo; print_header $data_file $columns
+  domains=$(ls /mwlogs/x-ray/$env_code/$component/diag/wls/dms)
+  for domain in $domains; do
+
+    for jms_server in $jms_servers; do
+
+      servers=$(ls /mwlogs/x-ray/$env_code/$component/diag/wls/log/$domain)
+      for server in $servers; do
+        data_file=/mwlogs/x-ray/$env_code/$component/diag/wls/dms/$domain/$date/wls_jmsserver_$domain\_$server\_$jms_server.log
+        if [ -f $data_file ]; then
+          print_counter_data $data_file $columns
+        else
+          : # echo "(none)"
+        fi
+      done
+    done
+  done
+
+
+  echo
+  sayatcell '====================================' 100
+  sayatcell "JMS Runtime" 100
+  sayatcell '====================================' 100
+
+  jms_runtimes=$(
+    cd /mwlogs/x-ray/$env_code/$component/diag/wls/dms/$domain/$date
+    ls wls_jmsruntime_$domain\_$server\_* 2>/dev/null | 
+    grep -v _dt.log | 
+    sed "s/wls_jmsruntime_$domain\_$server\_//g" | 
+    sed "s/\.log//g"
+    cd - >/dev/null
+  )
+
+  columns=_domain,_server,_jms_runtime,connections
+  echo; print_header $data_file $columns
+  domains=$(ls /mwlogs/x-ray/$env_code/$component/diag/wls/dms)
+  for domain in $domains; do
+
+    for jms_runtime in $jms_runtimes; do
+
+      servers=$(ls /mwlogs/x-ray/$env_code/$component/diag/wls/log/$domain)
+      for server in $servers; do
+        data_file=/mwlogs/x-ray/$env_code/$component/diag/wls/dms/$domain/$date/wls_jmsserver_$domain\_$server\_$jms_server.log
+        if [ -f $data_file ]; then
+          print_current_data $data_file $columns
+        else
+          : # echo "(none)"
+        fi
+      done
+    done
+  done
+
+  columns=_domain,_server,_jms_runtime,connectionsHigh
+  echo; print_header $data_file $columns
+  domains=$(ls /mwlogs/x-ray/$env_code/$component/diag/wls/dms)
+  for domain in $domains; do
+
+    for jms_runtime in $jms_runtimes; do
+
+      servers=$(ls /mwlogs/x-ray/$env_code/$component/diag/wls/log/$domain)
+      for server in $servers; do
+        data_file=/mwlogs/x-ray/$env_code/$component/diag/wls/dms/$domain/$date/wls_jmsserver_$domain\_$server\_$jms_server.log
+        if [ -f $data_file ]; then
+          print_ceiling_data $data_file $columns
+        else
+          : # echo "(none)"
+        fi
+      done
+    done
+  done
+
+  columns=_domain,_server,_jms_runtime,connectionsTotal
+  echo; print_header $data_file $columns
+  domains=$(ls /mwlogs/x-ray/$env_code/$component/diag/wls/dms)
+  for domain in $domains; do
+
+     for jms_runtime in $jms_runtimes; do
+
+      servers=$(ls /mwlogs/x-ray/$env_code/$component/diag/wls/log/$domain)
+      for server in $servers; do
+        data_file=/mwlogs/x-ray/$env_code/$component/diag/wls/dms/$domain/$date/wls_jmsserver_$domain\_$server\_$jms_server.log
+        if [ -f $data_file ]; then
+          print_counter_data $data_file $columns
+        else
+          : # echo "(none)"
+        fi
+      done
+    done
+  done
+
+
 }
-
-
-
