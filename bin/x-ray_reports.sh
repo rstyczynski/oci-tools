@@ -71,7 +71,7 @@ function header1() {
   done
   echo
 
-  echo "================== $@"
+  echo "========= $@"
 
   for cnt in {1..4}; do
     echo -n '=================='
@@ -87,7 +87,7 @@ function header2() {
   done
   echo
 
-  echo "================== $@"
+  echo "========= $@"
 
   for cnt in {1..3}; do
     echo -n '=================='
@@ -103,7 +103,7 @@ function header3() {
   done
   echo
 
-  echo "================== $@"
+  echo "========= $@"
 
   for cnt in {1..2}; do
     echo -n '=================='
@@ -119,7 +119,7 @@ function header4() {
   done
   echo
 
-  echo "================== $@"
+  echo "========= $@"
 
   for cnt in {1..1}; do
     echo -n '=================='
