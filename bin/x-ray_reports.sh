@@ -133,7 +133,7 @@ function report_OCI_instances() {
   date_start=$(date -d "$get_last_hours hours ago" -I)
   if [ $date_start != $date ]; then
     echo "Report will be computed fromm $date 00:00:00"
-    hour_start=0
+    hour_start=00
   fi
 
   sayatcell '=================================================' 100
@@ -219,7 +219,7 @@ function report_WLS() {
   date_start=$(date -d "$get_last_hours hours ago" -I)
   if [ $date_start != $date ]; then
     echo "Report will be computed fromm $date 00:00:00"
-    hour_start=0
+    hour_start=00
   fi
 
   sayatcell '=================================================' 100
