@@ -695,31 +695,32 @@ function report_WLS() {
   echo
   header2 "JMS Runtime"
   
-  jms_runtimes=$(
-    cd /mwlogs/x-ray/$env_code/$component/diag/wls/dms/$domain/$date
-    ls wls_jmsruntime_$domain\_$server\_* 2>/dev/null | 
-    grep -v _dt.log | 
-    sed "s/wls_jmsruntime_$domain\_$server\_//g" | 
-    sed "s/\.log//g"
-    cd - >/dev/null
-  )
-
   columns=_domain,_server,_jms_runtime,connections
   echo; print_header $data_file $columns
   domains=$(ls /mwlogs/x-ray/$env_code/$component/diag/wls/dms)
   for domain in $domains; do
 
-    for jms_runtime in $jms_runtimes; do
-
       servers=$(ls /mwlogs/x-ray/$env_code/$component/diag/wls/log/$domain)
       for server in $servers; do
-        data_file=/mwlogs/x-ray/$env_code/$component/diag/wls/dms/$domain/$date/wls_jmsruntme_$domain\_$server\_$jms_runtime.log
-        if [ -f $data_file ]; then
-          print_current_data $data_file $columns
-        else
-          : # echo "(none)"
-        fi
-      done
+
+        jms_runtimes=$(
+          cd /mwlogs/x-ray/$env_code/$component/diag/wls/dms/$domain/$date
+          ls wls_jmsruntime_$domain\_$server\_* 2>/dev/null | 
+          grep -v _dt.log | 
+          sed "s/wls_jmsruntime_$domain\_$server\_//g" | 
+          sed "s/\.log//g"
+          cd - >/dev/null
+        )
+
+        for jms_runtime in $jms_runtimes; do
+
+            data_file=/mwlogs/x-ray/$env_code/$component/diag/wls/dms/$domain/$date/wls_jmsruntime_$domain\_$server\_$jms_runtime.log
+            if [ -f $data_file ]; then
+              print_current_data $data_file $columns
+            else
+              : # echo "(none)"
+            fi
+          done
     done
   done
 
@@ -728,17 +729,27 @@ function report_WLS() {
   domains=$(ls /mwlogs/x-ray/$env_code/$component/diag/wls/dms)
   for domain in $domains; do
 
-    for jms_runtime in $jms_runtimes; do
-
       servers=$(ls /mwlogs/x-ray/$env_code/$component/diag/wls/log/$domain)
       for server in $servers; do
-        data_file=/mwlogs/x-ray/$env_code/$component/diag/wls/dms/$domain/$date/wls_jmsruntme_$domain\_$server\_$jms_runtime.log
-        if [ -f $data_file ]; then
-          print_ceiling_data $data_file $columns
-        else
-          : # echo "(none)"
-        fi
-      done
+
+        jms_runtimes=$(
+          cd /mwlogs/x-ray/$env_code/$component/diag/wls/dms/$domain/$date
+          ls wls_jmsruntime_$domain\_$server\_* 2>/dev/null | 
+          grep -v _dt.log | 
+          sed "s/wls_jmsruntime_$domain\_$server\_//g" | 
+          sed "s/\.log//g"
+          cd - >/dev/null
+        )
+
+        for jms_runtime in $jms_runtimes; do
+
+            data_file=/mwlogs/x-ray/$env_code/$component/diag/wls/dms/$domain/$date/wls_jmsruntime_$domain\_$server\_$jms_runtime.log
+            if [ -f $data_file ]; then
+              print_ceiling_data $data_file $columns
+            else
+              : # echo "(none)"
+            fi
+          done
     done
   done
 
@@ -747,17 +758,27 @@ function report_WLS() {
   domains=$(ls /mwlogs/x-ray/$env_code/$component/diag/wls/dms)
   for domain in $domains; do
 
-     for jms_runtime in $jms_runtimes; do
-
       servers=$(ls /mwlogs/x-ray/$env_code/$component/diag/wls/log/$domain)
       for server in $servers; do
-        data_file=/mwlogs/x-ray/$env_code/$component/diag/wls/dms/$domain/$date/wls_jmsruntme_$domain\_$server\_$jms_runtime.log
-        if [ -f $data_file ]; then
-          print_counter_data $data_file $columns
-        else
-          : # echo "(none)"
-        fi
-      done
+
+        jms_runtimes=$(
+          cd /mwlogs/x-ray/$env_code/$component/diag/wls/dms/$domain/$date
+          ls wls_jmsruntime_$domain\_$server\_* 2>/dev/null | 
+          grep -v _dt.log | 
+          sed "s/wls_jmsruntime_$domain\_$server\_//g" | 
+          sed "s/\.log//g"
+          cd - >/dev/null
+        )
+
+        for jms_runtime in $jms_runtimes; do
+
+            data_file=/mwlogs/x-ray/$env_code/$component/diag/wls/dms/$domain/$date/wls_jmsruntime_$domain\_$server\_$jms_runtime.log
+            if [ -f $data_file ]; then
+              print_counter_data $data_file $columns
+            else
+              : # echo "(none)"
+            fi
+          done
     done
   done
 
