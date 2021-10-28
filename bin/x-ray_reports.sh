@@ -66,14 +66,14 @@ function sayatcell() {
 unset header1
 function header1() {
 
-  for cnt in {1..4}; do
+  for cnt in {1..3}; do
     echo -n '=================='
   done
   echo
 
   echo "========= $@"
 
-  for cnt in {1..4}; do
+  for cnt in {1..3}; do
     echo -n '=================='
   done
   echo
@@ -82,14 +82,14 @@ function header1() {
 unset header2
 function header2() {
 
-  for cnt in {1..3}; do
+  for cnt in {1..2}; do
     echo -n '=================='
   done
   echo
 
   echo "========= $@"
 
-  for cnt in {1..3}; do
+  for cnt in {1..2}; do
     echo -n '=================='
   done
   echo
@@ -98,22 +98,6 @@ function header2() {
 unset header3
 function header3() {
 
-  for cnt in {1..2}; do
-    echo -n '=================='
-  done
-  echo
-
-  echo "========= $@"
-
-  for cnt in {1..2}; do
-    echo -n '=================='
-  done
-  echo
-}
-
-unset header4
-function header4() {
-
   for cnt in {1..1}; do
     echo -n '=================='
   done
@@ -126,7 +110,6 @@ function header4() {
   done
   echo
 }
-
 
 #
 # compute 
