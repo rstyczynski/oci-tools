@@ -369,6 +369,8 @@ function report_WLS() {
   component=$2
   get_last_hours=$3
 
+  : ${xray_root:=/mwlogs/x-ray}
+  
   date=$(date -I)
   hour_stop=$(date "+%H")
   hour_start=$(date -d "$get_last_hours hours ago" "+%H")
