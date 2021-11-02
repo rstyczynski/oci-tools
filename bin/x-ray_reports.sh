@@ -274,6 +274,8 @@ function report_OCI_instances() {
   component=$2
   get_last_hours=$3
 
+  : ${xray_root:=/mwlogs/x-ray}
+
   date=$(date -I)
   hour_stop=$(date "+%H")
   hour_start=$(date -d "$get_last_hours hours ago" "+%H")
@@ -287,14 +289,14 @@ function report_OCI_instances() {
   header1 "Compute instances" 
   echo "Time window from $date $hour_start:00:00 UTC to $date $hour_stop:00:00 UTC"
 
-  hosts=$(ls /mwlogs/x-ray/$env_code/$component/diag/hosts)
+  hosts=$(ls $xray_root/$env_code/$component/diag/hosts)
 
   header2 "Load average"
 
   columns=_host,load1min,load5min,load15min
   echo; print_header $columns
   for host in $hosts; do
-      data_file=/mwlogs/x-ray/$env_code/$component/diag/hosts/$host/os/$date/system-uptime.log
+      data_file=$xray_root/$env_code/$component/diag/hosts/$host/os/$date/system-uptime.log
       print_current_data $data_file $columns %0.2f
   done
 
@@ -304,21 +306,21 @@ function report_OCI_instances() {
   columns=_host,CPUuser,CPUsystem,CPUidle,CPUwaitIO,CPUVMStolenTime
   echo; print_header $columns
   for host in $hosts; do
-      data_file=/mwlogs/x-ray/$env_code/$component/diag/hosts/$host/os/$date/system-vmstat.log
+      data_file=$xray_root/$env_code/$component/diag/hosts/$host/os/$date/system-vmstat.log
       print_current_data $data_file $columns
   done
       
   columns=_host,ProcessRunQueue,ProcessBlocked
   echo; print_header $columns
   for host in $hosts; do
-      data_file=/mwlogs/x-ray/$env_code/$component/diag/hosts/$host/os/$date/system-vmstat.log
+      data_file=$xray_root/$env_code/$component/diag/hosts/$host/os/$date/system-vmstat.log
       print_current_data $data_file $columns
   done
 
   columns=_host,Interrupts,ContextSwitches
   echo; print_header $columns
   for host in $hosts; do
-      data_file=/mwlogs/x-ray/$env_code/$component/diag/hosts/$host/os/$date/system-vmstat.log
+      data_file=$xray_root/$env_code/$component/diag/hosts/$host/os/$date/system-vmstat.log
       print_current_data $data_file $columns
   done
 
@@ -328,7 +330,7 @@ function report_OCI_instances() {
   columns=_host,MemFree,MemBuff,MemCache
   echo; print_header $columns
   for host in $hosts; do
-      data_file=/mwlogs/x-ray/$env_code/$component/diag/hosts/$host/os/$date/system-vmstat.log
+      data_file=$xray_root/$env_code/$component/diag/hosts/$host/os/$date/system-vmstat.log
       print_current_data $data_file $columns
   done
 
@@ -337,7 +339,7 @@ function report_OCI_instances() {
   columns=_host,MemSwpd,SwapReadBlocks,SwapWriteBlocks
   echo; print_header $columns
   for host in $hosts; do
-      data_file=/mwlogs/x-ray/$env_code/$component/diag/hosts/$host/os/$date/system-vmstat.log
+      data_file=$xray_root/$env_code/$component/diag/hosts/$host/os/$date/system-vmstat.log
       print_current_data $data_file $columns
   done
 
@@ -346,7 +348,7 @@ function report_OCI_instances() {
   columns=_host,IOReadBlocks,IOWriteBlocks
   echo; print_header $columns
   for host in $hosts; do
-      data_file=/mwlogs/x-ray/$env_code/$component/diag/hosts/$host/os/$date/system-vmstat.log
+      data_file=$xray_root/$env_code/$component/diag/hosts/$host/os/$date/system-vmstat.log
       print_current_data $data_file $columns
   done
 
@@ -355,7 +357,7 @@ function report_OCI_instances() {
   columns=_host,capacity
   echo; print_header $columns
   for host in $hosts; do
-      data_file=/mwlogs/x-ray/$env_code/$component/diag/hosts/$host/os/$date/disk-space-mount1.log
+      data_file=$xray_root/$env_code/$component/diag/hosts/$host/os/$date/disk-space-mount1.log
       print_current_data $data_file $columns
   done
 
@@ -385,11 +387,11 @@ function report_WLS() {
 
   columns=_domain,_server,thread_total,thread_idle,thread_hogging,thread_standby
   echo; print_header $columns
-  domains=$(ls /mwlogs/x-ray/$env_code/$component/diag/wls/dms)
+  domains=$(ls $xray_root/$env_code/$component/diag/wls/dms)
   for domain in $domains; do
-    servers=$(ls /mwlogs/x-ray/$env_code/$component/diag/wls/log/$domain)
+    servers=$(ls $xray_root/$env_code/$component/diag/wls/log/$domain)
     for server in $servers; do
-      data_file=/mwlogs/x-ray/$env_code/$component/diag/wls/dms/$domain/$date/wls_general_$domain\_$server.log
+      data_file=$xray_root/$env_code/$component/diag/wls/dms/$domain/$date/wls_general_$domain\_$server.log
       if [ -f $data_file ]; then
         print_current_data $data_file $columns
       else
@@ -400,11 +402,11 @@ function report_WLS() {
 
   columns=_domain,_server,heap_size,heap_free_pct
   echo; print_header $columns
-  domains=$(ls /mwlogs/x-ray/$env_code/$component/diag/wls/dms)
+  domains=$(ls $xray_root/$env_code/$component/diag/wls/dms)
   for domain in $domains; do
-    servers=$(ls /mwlogs/x-ray/$env_code/$component/diag/wls/log/$domain)
+    servers=$(ls $xray_root/$env_code/$component/diag/wls/log/$domain)
     for server in $servers; do
-      data_file=/mwlogs/x-ray/$env_code/$component/diag/wls/dms/$domain/$date/wls_general_$domain\_$server.log
+      data_file=$xray_root/$env_code/$component/diag/wls/dms/$domain/$date/wls_general_$domain\_$server.log
       if [ -f $data_file ]; then
         print_current_data $data_file $columns
       else
@@ -415,11 +417,11 @@ function report_WLS() {
 
   columns=_domain,_server,request_pending,request_troughput
   echo; print_header $columns
-  domains=$(ls /mwlogs/x-ray/$env_code/$component/diag/wls/dms)
+  domains=$(ls $xray_root/$env_code/$component/diag/wls/dms)
   for domain in $domains; do
-    servers=$(ls /mwlogs/x-ray/$env_code/$component/diag/wls/log/$domain)
+    servers=$(ls $xray_root/$env_code/$component/diag/wls/log/$domain)
     for server in $servers; do
-      data_file=/mwlogs/x-ray/$env_code/$component/diag/wls/dms/$domain/$date/wls_general_$domain\_$server.log
+      data_file=$xray_root/$env_code/$component/diag/wls/dms/$domain/$date/wls_general_$domain\_$server.log
       if [ -f $data_file ]; then
         print_current_data $data_file $columns
       else
@@ -430,11 +432,11 @@ function report_WLS() {
 
   columns=_domain,_server,request_completed
   echo; print_header $columns
-  domains=$(ls /mwlogs/x-ray/$env_code/$component/diag/wls/dms)
+  domains=$(ls $xray_root/$env_code/$component/diag/wls/dms)
   for domain in $domains; do
-    servers=$(ls /mwlogs/x-ray/$env_code/$component/diag/wls/log/$domain)
+    servers=$(ls $xray_root/$env_code/$component/diag/wls/log/$domain)
     for server in $servers; do
-      data_file=/mwlogs/x-ray/$env_code/$component/diag/wls/dms/$domain/$date/wls_general_$domain\_$server.log
+      data_file=$xray_root/$env_code/$component/diag/wls/dms/$domain/$date/wls_general_$domain\_$server.log
       if [ -f $data_file ]; then
         print_counter_data $data_file $columns
       else
@@ -445,11 +447,11 @@ function report_WLS() {
 
   columns=_domain,_server,sockets_open,sockets_opened
   echo; print_header $columns
-  domains=$(ls /mwlogs/x-ray/$env_code/$component/diag/wls/dms)
+  domains=$(ls $xray_root/$env_code/$component/diag/wls/dms)
   for domain in $domains; do
-    servers=$(ls /mwlogs/x-ray/$env_code/$component/diag/wls/log/$domain)
+    servers=$(ls $xray_root/$env_code/$component/diag/wls/log/$domain)
     for server in $servers; do
-      data_file=/mwlogs/x-ray/$env_code/$component/diag/wls/dms/$domain/$date/wls_general_$domain\_$server.log
+      data_file=$xray_root/$env_code/$component/diag/wls/dms/$domain/$date/wls_general_$domain\_$server.log
       if [ -f $data_file ]; then
         print_current_data $data_file $columns
       else
@@ -465,12 +467,12 @@ function report_WLS() {
   
   columns=_domain,_server,_channel,accepts
   echo; print_header $columns
-  domains=$(ls /mwlogs/x-ray/$env_code/$component/diag/wls/dms)
+  domains=$(ls $xray_root/$env_code/$component/diag/wls/dms)
   for domain in $domains; do
     for server in $servers; do
 
       channels=$(
-        cd /mwlogs/x-ray/$env_code/$component/diag/wls/dms/$domain/$date
+        cd $xray_root/$env_code/$component/diag/wls/dms/$domain/$date
         ls wls_channel_$domain\_$server\_*   2>/dev/null | 
         grep -v _dt.log | 
         sed "s/wls_channel_$domain\_$server\_//g" | 
@@ -480,9 +482,9 @@ function report_WLS() {
 
       for channel in $channels; do
 
-        servers=$(ls /mwlogs/x-ray/$env_code/$component/diag/wls/log/$domain)
+        servers=$(ls $xray_root/$env_code/$component/diag/wls/log/$domain)
 
-          data_file=/mwlogs/x-ray/$env_code/$component/diag/wls/dms/$domain/$date/wls_channel_$domain\_$server\_$channel.log 
+          data_file=$xray_root/$env_code/$component/diag/wls/dms/$domain/$date/wls_channel_$domain\_$server\_$channel.log 
           if [ -f $data_file ]; then
             print_current_data $data_file $columns
           else
@@ -494,12 +496,12 @@ function report_WLS() {
 
   columns=_domain,_server,_channel,connections
   echo; print_header $columns
-  domains=$(ls /mwlogs/x-ray/$env_code/$component/diag/wls/dms)
+  domains=$(ls $xray_root/$env_code/$component/diag/wls/dms)
   for domain in $domains; do
     for server in $servers; do
 
       channels=$(
-        cd /mwlogs/x-ray/$env_code/$component/diag/wls/dms/$domain/$date
+        cd $xray_root/$env_code/$component/diag/wls/dms/$domain/$date
         ls wls_channel_$domain\_$server\_*   2>/dev/null | 
         grep -v _dt.log | 
         sed "s/wls_channel_$domain\_$server\_//g" | 
@@ -509,9 +511,9 @@ function report_WLS() {
 
       for channel in $channels; do
 
-        servers=$(ls /mwlogs/x-ray/$env_code/$component/diag/wls/log/$domain)
+        servers=$(ls $xray_root/$env_code/$component/diag/wls/log/$domain)
 
-          data_file=/mwlogs/x-ray/$env_code/$component/diag/wls/dms/$domain/$date/wls_channel_$domain\_$server\_$channel.log 
+          data_file=$xray_root/$env_code/$component/diag/wls/dms/$domain/$date/wls_channel_$domain\_$server\_$channel.log 
           if [ -f $data_file ]; then
             print_counter_data $data_file $columns
           else
@@ -523,12 +525,12 @@ function report_WLS() {
 
   columns=_domain,_server,_channel,bytesReceived,byteSent
   echo; print_header $columns
-  domains=$(ls /mwlogs/x-ray/$env_code/$component/diag/wls/dms)
+  domains=$(ls $xray_root/$env_code/$component/diag/wls/dms)
   for domain in $domains; do
     for server in $servers; do
 
       channels=$(
-        cd /mwlogs/x-ray/$env_code/$component/diag/wls/dms/$domain/$date
+        cd $xray_root/$env_code/$component/diag/wls/dms/$domain/$date
         ls wls_channel_$domain\_$server\_*   2>/dev/null | 
         grep -v _dt.log | 
         sed "s/wls_channel_$domain\_$server\_//g" | 
@@ -538,9 +540,9 @@ function report_WLS() {
 
       for channel in $channels; do
 
-        servers=$(ls /mwlogs/x-ray/$env_code/$component/diag/wls/log/$domain)
+        servers=$(ls $xray_root/$env_code/$component/diag/wls/log/$domain)
 
-          data_file=/mwlogs/x-ray/$env_code/$component/diag/wls/dms/$domain/$date/wls_channel_$domain\_$server\_$channel.log 
+          data_file=$xray_root/$env_code/$component/diag/wls/dms/$domain/$date/wls_channel_$domain\_$server\_$channel.log 
           if [ -f $data_file ]; then
             print_current_data $data_file $columns
           else
@@ -552,12 +554,12 @@ function report_WLS() {
 
   columns=_domain,_server,_channel,msgReceived,msgSent
   echo; print_header $columns
-  domains=$(ls /mwlogs/x-ray/$env_code/$component/diag/wls/dms)
+  domains=$(ls $xray_root/$env_code/$component/diag/wls/dms)
   for domain in $domains; do
     for server in $servers; do
 
       channels=$(
-        cd /mwlogs/x-ray/$env_code/$component/diag/wls/dms/$domain/$date
+        cd $xray_root/$env_code/$component/diag/wls/dms/$domain/$date
         ls wls_channel_$domain\_$server\_*   2>/dev/null | 
         grep -v _dt.log | 
         sed "s/wls_channel_$domain\_$server\_//g" | 
@@ -567,9 +569,9 @@ function report_WLS() {
 
       for channel in $channels; do
 
-        servers=$(ls /mwlogs/x-ray/$env_code/$component/diag/wls/log/$domain)
+        servers=$(ls $xray_root/$env_code/$component/diag/wls/log/$domain)
 
-          data_file=/mwlogs/x-ray/$env_code/$component/diag/wls/dms/$domain/$date/wls_channel_$domain\_$server\_$channel.log 
+          data_file=$xray_root/$env_code/$component/diag/wls/dms/$domain/$date/wls_channel_$domain\_$server\_$channel.log 
           if [ -f $data_file ]; then
             print_current_data $data_file $columns
           else
@@ -586,12 +588,12 @@ function report_WLS() {
 
   columns=_domain,_server,_data_source,activeConnectionsAverage,capacity,numAvailable
   echo; print_header $columns
-  domains=$(ls /mwlogs/x-ray/$env_code/$component/diag/wls/dms)
+  domains=$(ls $xray_root/$env_code/$component/diag/wls/dms)
   for domain in $domains; do
-    servers=$(ls /mwlogs/x-ray/$env_code/$component/diag/wls/log/$domain)
+    servers=$(ls $xray_root/$env_code/$component/diag/wls/log/$domain)
     for server in $servers; do
       data_sources=$(
-        cd /mwlogs/x-ray/$env_code/$component/diag/wls/dms/$domain/$date
+        cd $xray_root/$env_code/$component/diag/wls/dms/$domain/$date
         ls wls_datasource_$domain\_$server\_* 2>/dev/null | 
         grep -v _dt.log | 
         sed "s/wls_datasource_$domain\_$server\_//g" | 
@@ -599,7 +601,7 @@ function report_WLS() {
         cd - >/dev/null
       )
       for data_source in $data_sources; do
-          data_file=/mwlogs/x-ray/$env_code/$component/diag/wls/dms/$domain/$date/wls_datasource_$domain\_$server\_$data_source.log
+          data_file=$xray_root/$env_code/$component/diag/wls/dms/$domain/$date/wls_datasource_$domain\_$server\_$data_source.log
           if [ -f $data_file ]; then
             print_current_data $data_file $columns
           else
@@ -611,12 +613,12 @@ function report_WLS() {
 
   columns=_domain,_server,_data_source,waitingForConnectionTotal
   echo; print_header $columns
-  domains=$(ls /mwlogs/x-ray/$env_code/$component/diag/wls/dms)
+  domains=$(ls $xray_root/$env_code/$component/diag/wls/dms)
   for domain in $domains; do
-    servers=$(ls /mwlogs/x-ray/$env_code/$component/diag/wls/log/$domain)
+    servers=$(ls $xray_root/$env_code/$component/diag/wls/log/$domain)
     for server in $servers; do
       data_sources=$(
-        cd /mwlogs/x-ray/$env_code/$component/diag/wls/dms/$domain/$date
+        cd $xray_root/$env_code/$component/diag/wls/dms/$domain/$date
         ls wls_datasource_$domain\_$server\_* 2>/dev/null | 
         grep -v _dt.log | 
         sed "s/wls_datasource_$domain\_$server\_//g" | 
@@ -624,7 +626,7 @@ function report_WLS() {
         cd - >/dev/null
       )
       for data_source in $data_sources; do
-          data_file=/mwlogs/x-ray/$env_code/$component/diag/wls/dms/$domain/$date/wls_datasource_$domain\_$server\_$data_source.log
+          data_file=$xray_root/$env_code/$component/diag/wls/dms/$domain/$date/wls_datasource_$domain\_$server\_$data_source.log
           if [ -f $data_file ]; then
             print_counter_data $data_file $columns
           else
@@ -640,13 +642,13 @@ function report_WLS() {
 
   columns=_domain,_server,_jms_server,destinations
   echo; print_header $columns
-  domains=$(ls /mwlogs/x-ray/$env_code/$component/diag/wls/dms)
+  domains=$(ls $xray_root/$env_code/$component/diag/wls/dms)
   for domain in $domains; do
-    servers=$(ls /mwlogs/x-ray/$env_code/$component/diag/wls/log/$domain)
+    servers=$(ls $xray_root/$env_code/$component/diag/wls/log/$domain)
     for server in $servers; do
 
       jms_servers=$(
-        cd /mwlogs/x-ray/$env_code/$component/diag/wls/dms/$domain/$date
+        cd $xray_root/$env_code/$component/diag/wls/dms/$domain/$date
         ls wls_jmsserver_$domain\_$server\_* 2>/dev/null | 
         grep -v _dt.log | 
         sed "s/wls_jmsserver_$domain\_$server\_//g" | 
@@ -654,7 +656,7 @@ function report_WLS() {
         cd - >/dev/null
       )
       for jms_server in $jms_servers; do
-          data_file=/mwlogs/x-ray/$env_code/$component/diag/wls/dms/$domain/$date/wls_jmsserver_$domain\_$server\_$jms_server.log
+          data_file=$xray_root/$env_code/$component/diag/wls/dms/$domain/$date/wls_jmsserver_$domain\_$server\_$jms_server.log
           if [ -f $data_file ]; then
             print_current_data $data_file $columns
           else
@@ -666,13 +668,13 @@ function report_WLS() {
 
   columns=_domain,_server,_jms_server,messagesPending,bytesPending
   echo; print_header $columns
-  domains=$(ls /mwlogs/x-ray/$env_code/$component/diag/wls/dms)
+  domains=$(ls $xray_root/$env_code/$component/diag/wls/dms)
   for domain in $domains; do
-    servers=$(ls /mwlogs/x-ray/$env_code/$component/diag/wls/log/$domain)
+    servers=$(ls $xray_root/$env_code/$component/diag/wls/log/$domain)
     for server in $servers; do
 
       jms_servers=$(
-        cd /mwlogs/x-ray/$env_code/$component/diag/wls/dms/$domain/$date
+        cd $xray_root/$env_code/$component/diag/wls/dms/$domain/$date
         ls wls_jmsserver_$domain\_$server\_* 2>/dev/null | 
         grep -v _dt.log | 
         sed "s/wls_jmsserver_$domain\_$server\_//g" | 
@@ -680,7 +682,7 @@ function report_WLS() {
         cd - >/dev/null
       )
       for jms_server in $jms_servers; do
-          data_file=/mwlogs/x-ray/$env_code/$component/diag/wls/dms/$domain/$date/wls_jmsserver_$domain\_$server\_$jms_server.log
+          data_file=$xray_root/$env_code/$component/diag/wls/dms/$domain/$date/wls_jmsserver_$domain\_$server\_$jms_server.log
           if [ -f $data_file ]; then
             print_current_data $data_file $columns
           else
@@ -692,13 +694,13 @@ function report_WLS() {
 
   columns=_domain,_server,_jms_server,messages,bytes
   echo; print_header $columns
-  domains=$(ls /mwlogs/x-ray/$env_code/$component/diag/wls/dms)
+  domains=$(ls $xray_root/$env_code/$component/diag/wls/dms)
   for domain in $domains; do
-    servers=$(ls /mwlogs/x-ray/$env_code/$component/diag/wls/log/$domain)
+    servers=$(ls $xray_root/$env_code/$component/diag/wls/log/$domain)
     for server in $servers; do
 
       jms_servers=$(
-        cd /mwlogs/x-ray/$env_code/$component/diag/wls/dms/$domain/$date
+        cd $xray_root/$env_code/$component/diag/wls/dms/$domain/$date
         ls wls_jmsserver_$domain\_$server\_* 2>/dev/null | 
         grep -v _dt.log | 
         sed "s/wls_jmsserver_$domain\_$server\_//g" | 
@@ -706,7 +708,7 @@ function report_WLS() {
         cd - >/dev/null
       )
       for jms_server in $jms_servers; do
-          data_file=/mwlogs/x-ray/$env_code/$component/diag/wls/dms/$domain/$date/wls_jmsserver_$domain\_$server\_$jms_server.log
+          data_file=$xray_root/$env_code/$component/diag/wls/dms/$domain/$date/wls_jmsserver_$domain\_$server\_$jms_server.log
           if [ -f $data_file ]; then
             print_current_data $data_file $columns
           else
@@ -718,14 +720,14 @@ function report_WLS() {
 
   columns=_domain,_server,_jms_server,messagesReceived,bytesReceived
   echo; print_header $columns
-  domains=$(ls /mwlogs/x-ray/$env_code/$component/diag/wls/dms)
+  domains=$(ls $xray_root/$env_code/$component/diag/wls/dms)
   for domain in $domains; do
 
-    servers=$(ls /mwlogs/x-ray/$env_code/$component/diag/wls/log/$domain)
+    servers=$(ls $xray_root/$env_code/$component/diag/wls/log/$domain)
     for server in $servers; do
 
       jms_servers=$(
-        cd /mwlogs/x-ray/$env_code/$component/diag/wls/dms/$domain/$date
+        cd $xray_root/$env_code/$component/diag/wls/dms/$domain/$date
         ls wls_jmsserver_$domain\_$server\_* 2>/dev/null | 
         grep -v _dt.log | 
         sed "s/wls_jmsserver_$domain\_$server\_//g" | 
@@ -733,7 +735,7 @@ function report_WLS() {
         cd - >/dev/null
       )
       for jms_server in $jms_servers; do
-          data_file=/mwlogs/x-ray/$env_code/$component/diag/wls/dms/$domain/$date/wls_jmsserver_$domain\_$server\_$jms_server.log
+          data_file=$xray_root/$env_code/$component/diag/wls/dms/$domain/$date/wls_jmsserver_$domain\_$server\_$jms_server.log
           if [ -f $data_file ]; then
             print_current_data $data_file $columns
           else
@@ -749,14 +751,14 @@ function report_WLS() {
   
   columns=_domain,_server,_jms_runtime,connections
   echo; print_header $columns
-  domains=$(ls /mwlogs/x-ray/$env_code/$component/diag/wls/dms)
+  domains=$(ls $xray_root/$env_code/$component/diag/wls/dms)
   for domain in $domains; do
 
-      servers=$(ls /mwlogs/x-ray/$env_code/$component/diag/wls/log/$domain)
+      servers=$(ls $xray_root/$env_code/$component/diag/wls/log/$domain)
       for server in $servers; do
 
         jms_runtimes=$(
-          cd /mwlogs/x-ray/$env_code/$component/diag/wls/dms/$domain/$date
+          cd $xray_root/$env_code/$component/diag/wls/dms/$domain/$date
           ls wls_jmsruntime_$domain\_$server\_* 2>/dev/null | 
           grep -v _dt.log | 
           sed "s/wls_jmsruntime_$domain\_$server\_//g" | 
@@ -766,7 +768,7 @@ function report_WLS() {
 
         for jms_runtime in $jms_runtimes; do
 
-            data_file=/mwlogs/x-ray/$env_code/$component/diag/wls/dms/$domain/$date/wls_jmsruntime_$domain\_$server\_$jms_runtime.log
+            data_file=$xray_root/$env_code/$component/diag/wls/dms/$domain/$date/wls_jmsruntime_$domain\_$server\_$jms_runtime.log
             if [ -f $data_file ]; then
               print_current_data $data_file $columns
             else
@@ -778,14 +780,14 @@ function report_WLS() {
 
   columns=_domain,_server,_jms_runtime,connectionsHigh
   echo; print_header $columns
-  domains=$(ls /mwlogs/x-ray/$env_code/$component/diag/wls/dms)
+  domains=$(ls $xray_root/$env_code/$component/diag/wls/dms)
   for domain in $domains; do
 
-      servers=$(ls /mwlogs/x-ray/$env_code/$component/diag/wls/log/$domain)
+      servers=$(ls $xray_root/$env_code/$component/diag/wls/log/$domain)
       for server in $servers; do
 
         jms_runtimes=$(
-          cd /mwlogs/x-ray/$env_code/$component/diag/wls/dms/$domain/$date
+          cd $xray_root/$env_code/$component/diag/wls/dms/$domain/$date
           ls wls_jmsruntime_$domain\_$server\_* 2>/dev/null | 
           grep -v _dt.log | 
           sed "s/wls_jmsruntime_$domain\_$server\_//g" | 
@@ -795,7 +797,7 @@ function report_WLS() {
 
         for jms_runtime in $jms_runtimes; do
 
-            data_file=/mwlogs/x-ray/$env_code/$component/diag/wls/dms/$domain/$date/wls_jmsruntime_$domain\_$server\_$jms_runtime.log
+            data_file=$xray_root/$env_code/$component/diag/wls/dms/$domain/$date/wls_jmsruntime_$domain\_$server\_$jms_runtime.log
             if [ -f $data_file ]; then
               print_ceiling_data $data_file $columns
             else
@@ -807,14 +809,14 @@ function report_WLS() {
 
   columns=_domain,_server,_jms_runtime,connectionsTotal
   echo; print_header $columns
-  domains=$(ls /mwlogs/x-ray/$env_code/$component/diag/wls/dms)
+  domains=$(ls $xray_root/$env_code/$component/diag/wls/dms)
   for domain in $domains; do
 
-      servers=$(ls /mwlogs/x-ray/$env_code/$component/diag/wls/log/$domain)
+      servers=$(ls $xray_root/$env_code/$component/diag/wls/log/$domain)
       for server in $servers; do
 
         jms_runtimes=$(
-          cd /mwlogs/x-ray/$env_code/$component/diag/wls/dms/$domain/$date
+          cd $xray_root/$env_code/$component/diag/wls/dms/$domain/$date
           ls wls_jmsruntime_$domain\_$server\_* 2>/dev/null | 
           grep -v _dt.log | 
           sed "s/wls_jmsruntime_$domain\_$server\_//g" | 
@@ -824,7 +826,7 @@ function report_WLS() {
 
         for jms_runtime in $jms_runtimes; do
 
-            data_file=/mwlogs/x-ray/$env_code/$component/diag/wls/dms/$domain/$date/wls_jmsruntime_$domain\_$server\_$jms_runtime.log
+            data_file=$xray_root/$env_code/$component/diag/wls/dms/$domain/$date/wls_jmsruntime_$domain\_$server\_$jms_runtime.log
             if [ -f $data_file ]; then
               print_counter_data $data_file $columns
             else
