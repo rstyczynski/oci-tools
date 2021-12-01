@@ -218,6 +218,8 @@ metric_namespace=xray_os
 #
 states=$(ls $env_files/x-ray/*/*/watch/hosts/*/os/obd/disk-space-mount1/state)
 for state in $states; do
+
+    # get env, component, hostname from os path. Valid only for OS/OBD path!
     extract_data_form_path_os
     # get details from state file
     extract_timestamp
@@ -241,6 +243,8 @@ done
 #
 states=$(ls $env_files/x-ray/*/*/watch/hosts/*/os/obd/system-vmstat/state)
 for state in $states; do
+
+    # get env, component, hostname from os path. Valid only for OS/OBD path!
     extract_data_form_path_os
     # get details from state file
     extract_timestamp
