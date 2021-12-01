@@ -1,0 +1,72 @@
+
+
+env=prod
+component=soa
+
+host=abc1
+metrics[$env.$component.os.$host.vmstat.CPUidle]=83
+
+host=abc2
+metrics[$env.$component.os.$host.vmstat.CPUidle]=33
+
+host=bcd3
+metrics[$env.$component.os.$host.vmstat.CPUidle]=60
+
+host=bcd4
+metrics[$env.$component.os.$host.vmstat.CPUidle]=83
+
+define var.var1 = 123
+define var.var2 = 12
+define var.var3 = os.bcd4.vmstat.CPUidle
+define var.var3 = prod.soa.os.bcd4.vmstat.CPUidle
+
+warning when "os.abc\d*.vmstat.CPUidle" == os.bcd4.vmstat.CPUidle
+warning when "os.abc\d*.vmstat.CPUidle" lt var.var1 
+warning when "os.abc\d*.vmstat.CPUidle" gt var.var2
+warning when "os.abc\d*.vmstat.CPUidle" gt var.var_non_existing
+
+warning when .*.vmstat.CPUidle gt var.var2
+warning when ".*.vmstat.CPUidle gt 3"
+
+dump variables
+dump metrics
+
+get value prod.soa.os.bcd4.vmstat.CPUidle
+get value prod.*.CPUidle
+
+if warning when prod.*.CPUidle gt 90; then echo $?; fi
+if warning when prod.*.CPUidle gt 80; then echo $?; fi
+
+if warning when prod.soa.os.bcd4.vmstat.CPUidle gt 80; then echo $?; fi
+
+check if prod.soa.hosts.omcscbailqkcuh.os.system-vmstat.MemSwpd.avg lt 27981460 \
+&& echo smaller \
+|| echo bigger or equal
+
+check if prod.soa.hosts.omcscbailqkcuh.os.system-vmstat.MemSwpd.avg lt 2798146 \
+&& echo smaller \
+|| echo bigger or equal
+
+#
+#
+#
+
+function when_confirmed() {
+  test $result -eq 0
+}
+
+function when_not_confirmed() {
+  test $result -ne 0
+}
+
+
+get value prod.soa.hosts.omcscbailqkcuh.os.system-vmstat.CPUidle.avg
+check if prod.soa.hosts.omcscbailqkcuh.os.system-vmstat.CPUidle.avg lt 90
+when_confirmed && cat <<__EOF
+xxx
+__EOF
+
+when_not_confirmed && cat <<__EOF
+yyy
+__EOF
+
