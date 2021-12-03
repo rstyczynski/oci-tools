@@ -32,7 +32,7 @@ function secure_put() {
       if [ $? -eq 0 ]; then
         unset secret_put
         cd $tmp
-        tar -cvf $file.tar $file.enc $file.key.enc
+        tar -cf $file.tar $file.enc $file.key.enc
         if [ $? -eq 0 ]; then
           cd - >/dev/null
           rm $tmp/$file.enc $tmp/$file.key.enc
