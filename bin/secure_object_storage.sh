@@ -23,14 +23,14 @@ function secure_put() {
   result=100
 
   # encrypt
-  secret_put=$(openssl rand 32)
+  openssl rand 32 > $tmp/secret_put
   if [ $? -eq 0 ]; then
-    DEBUG && echo $secret_put | xxd -l 16 -p
-    openssl $cipher_set -in $file -pass "pass:$secret_put" -out $tmp/$file.enc 
+    DEBUG && cat $tmp/secret_put | xxd -l 16 -p
+    openssl $cipher_set -in $file -pass file:$tmp/secret_put -out $tmp/$file.enc 
     if [ $? -eq 0 ]; then
-      openssl rsautl -encrypt -oaep -pubin -inkey <(ssh-keygen -e -f $public_key -m PKCS8) -in <(echo $secret_put) -out $tmp/$file.key.enc
+      openssl rsautl -encrypt -oaep -pubin -inkey <(ssh-keygen -e -f $public_key -m PKCS8) -in <(cat $tmp/secret_put) -out $tmp/$file.key.enc
       if [ $? -eq 0 ]; then
-        unset secret_put
+        rm $tmp/secret_put
         cd $tmp
         tar -cf $file.tar $file.enc $file.key.enc
         if [ $? -eq 0 ]; then
@@ -74,7 +74,6 @@ function secure_get() {
   tmp=~/tmp; mkdir -p $tmp
 
   result=100
-
   oci os object get --bucket-name $bucket_name --name $file.secure --file $tmp/$file.tar
   if [ $? -eq 0 ]; then
     cd $tmp
@@ -83,13 +82,13 @@ function secure_get() {
     if [ $? -eq 0 ]; then
       rm $tmp/$file.tar
       # decrypt
-      secret_get=$(openssl rsautl -decrypt -oaep -inkey $private_key -in $tmp/$file.key.enc)
+      openssl rsautl -decrypt -oaep -inkey $private_key -in $tmp/$file.key.enc > $tmp/secret_get
       if [ $? -eq 0 ]; then
-        DEBUG && echo $secret_get | xxd -l 16 -p
+        DEBUG && cat $tmp/secret_get | xxd -l 16 -p
         rm $tmp/$file.key.enc
-        openssl $cipher_set -d -in $tmp/$file.enc -pass "pass:$secret_get" -out $file
+        openssl $cipher_set -d -in $tmp/$file.enc -pass file:$tmp/secret_get -out $file
         if [ $? -eq 0 ]; then
-          unset secret_get
+          rm $tmp/secret_get
           rm $tmp/$file.enc 
           result=0
         else
