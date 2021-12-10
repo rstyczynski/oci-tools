@@ -137,8 +137,8 @@ function secure_test() {
 
   rm secure_test_2
 
-  # test no.3 100MB file
-  dd if=/dev/urandom of=secure_test_3 bs=1048576 count=100
+  # test no.3 10MB file
+  dd if=/dev/urandom of=secure_test_3 bs=1048576 count=10
   md5sum secure_test_3 
 
   secure_put $bucket secure_test_3
@@ -148,6 +148,18 @@ function secure_test() {
   md5sum secure_test_3 
 
   rm secure_test_3
+
+  # test no.3 100MB file
+  dd if=/dev/urandom of=secure_test_4 bs=1048576 count=100
+  md5sum secure_test_4
+
+  secure_put $bucket secure_test_4
+  rm secure_test_4
+
+  secure_get $bucket secure_test_4
+  md5sum secure_test_4 
+
+  rm secure_test_4
 
 }
 
