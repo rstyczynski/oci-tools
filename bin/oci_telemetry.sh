@@ -85,7 +85,6 @@ function oci_metric() {
     metric_name=$1; shift
     metric_value=$1; shift
     metric_unit=$1; shift
-    # metric_more=$1; shift
 
     if [ -z $oci_json_file ]; then
         logger -t $script_name -s -p local3.err "Error. oci_json_file not set. Use oci_metric initialize file first."
@@ -165,8 +164,9 @@ function forward_data_to_OCI() {
         logger -t $script_name -s -p local3.notice "Data sent. Data: $(cat $tmp/response.json)"
         oci_metric_status=SENT
     else
-        logger -t $script_name -s -p local3.notice "Error sending data. Data: $(cat $tmp/response.json)"
+        logger -t $script_name -s -p local3.err "Error sending data. Data: $(cat $tmp/response.json)"
         oci_metric_status=SEND_ERROR
+        return 1
     fi    
 }
 
