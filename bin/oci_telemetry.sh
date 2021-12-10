@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# Reference: https://docs.oracle.com/en-us/iaas/Content/Monitoring/Tasks/publishingcustommetrics.htm
+
 #
 # helpers
 #
@@ -85,6 +87,8 @@ function oci_metric() {
     metric_name=$1; shift
     metric_value=$1; shift
     metric_unit=$1; shift
+
+    : ${metric_unit:=level}
 
     if [ -z $oci_json_file ]; then
         logger -t $script_name -s -p local3.err "Error. oci_json_file not set. Use oci_metric initialize file first."
@@ -208,9 +212,9 @@ function oci_telemetry_test() {
   # keep this date format. The datapoint timestamps must be between 2 hours ago and 10 minutes from now.
   datetime=$(date +"%Y-%m-%dT%H:%M:%S.000Z")  
 
-  # send data with 45 data points buffer
-  oci_metric $namespace $datetime metric_name $RANDOM level 
-  oci_metric $namespace $datetime metric_name $RANDOM level 
+  # send data with 45 data points buffer. last parameter is unit as specified by OCI, you my skip it to use defaut "level".
+  oci_metric $namespace $datetime random1 $RANDOM  
+  oci_metric $namespace $datetime random2 $RANDOM level 
 
   # flush buffer anf forward all to OCI
   oci_metric close
