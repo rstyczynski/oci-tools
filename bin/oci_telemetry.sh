@@ -7,7 +7,7 @@
 #
 
 function clean() {
-    rm -rf ~/tmp/$$
+    rm -rf ~/tmp/$$\_OCI_Telementry_$script_name
 }
 trap clean SIGINT EXIT
 
@@ -16,6 +16,23 @@ trap clean SIGINT EXIT
 #
 
 function oci_metric() {
+
+    #
+    # Script context discovery
+    #
+
+    script_pathname=$0
+    if [ -f $script_pathname ]; then
+      script_dir=$(dirname $script_pathname)
+      script_name=$(basename $script_pathname)
+      script_mode=SCRIPT
+    else
+      script_dir=$PWD
+      script_name=OCI_telemetry
+      script_mode=CLI
+    fi
+
+    : ${SCRIPT_DEBUG:=0}
 
     if [ "$1" == "initialize" ]; then
         if [ -z "$telemetry_endpoint" ]; then
@@ -32,7 +49,7 @@ function oci_metric() {
           fi
         fi
         
-        tmp=~/tmp/$$; mkdir -p $tmp
+        tmp=~/tmp/$$\_OCI_Telementry_$script_name; mkdir -p $tmp
         
         oci_json_file=$tmp/data.json
 
@@ -61,7 +78,7 @@ function oci_metric() {
     fi
 
     if [ "$1" == "clean" ]; then
-        rm -rf ~/tmp/$$
+        rm -rf ~/tmp/$$\_OCI_Telementry_$script_name
         unset oci_json_array_started
         return
     fi
@@ -77,8 +94,8 @@ function oci_metric() {
     fi
 
 
-    if [ "$#" -ne 5 ]; then
-        logger -t $script_name -s -p local3.err "Error. oci_metric takes 5 mandatory parameters. Provided: $#"
+    if [ "$#" -lt 4 ]; then
+        logger -t $script_name -s -p local3.err "Error. oci_metric takes 4 mandatory parameters. Provided: $#"
         return 1
     fi
 
@@ -174,23 +191,6 @@ function forward_data_to_OCI() {
     fi    
 }
 
-
-#
-# Script context discovery
-#
-
-script_pathname=$0
-if [ -f $script_pathname ]; then
-  script_dir=$(dirname $script_pathname)
-  script_name=$(basename $script_pathname)
-  script_mode=SCRIPT
-else
-  script_dir=$PWD
-  script_name=OCI_telemetry
-  script_mode=CLI
-fi
-
-: ${SCRIPT_DEBUG:=0}
 
 #
 # test
