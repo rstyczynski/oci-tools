@@ -179,3 +179,13 @@ mwowner_home=$(cat /etc/passwd | grep "^$os_user:" | cut -d: -f6)
 find $mwowner_home/.x-ray -name "diagnose-*" -exec cp -- "{}" $backup_dir/$(hostname) \;
 
 ls -l  $backup_dir/$(hostname)/diagnose-*
+
+step "600. Writing install mark."
+
+SCRIPT_NAME=$0; test -f $0 ||  SCRIPT_NAME=shell
+cat >> ~/.x-ray/version <<EOF
+$(TZ=UTC date +%Y-%m-%dT%H:%M:%SZ),$(date +%s),$SCRIPT_NAME
+EOF
+cp ~/.x-ray/version $backup_dir/$(hostname)
+
+
