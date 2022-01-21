@@ -182,7 +182,7 @@ ls -l  $backup_dir/$(hostname)/diagnose-*
 
 step "600. Writing install mark."
 
-SCRIPT_NAME=$0; test -f $0 ||  SCRIPT_NAME=shell
+SCRIPT_NAME=$(basename "$0"); test -f $0 ||  SCRIPT_NAME=shell
 mkdir -p ~/.x-ray/.version
 cat >> ~/.x-ray/.version/$SCRIPT_NAME <<EOF
 $(TZ=UTC date +%Y-%m-%dT%H:%M:%SZ),$(date +%s),$SCRIPT_NAME
