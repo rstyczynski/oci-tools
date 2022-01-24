@@ -60,8 +60,6 @@ function port_forward_prepare() {
 }
 
 function port_forward_remove() {
-    local fwd_ifname=$1
-
     sysctl -w net.ipv4.ip_forward=0
     rm -f /etc/sysctl.d/port_forward.conf
 
