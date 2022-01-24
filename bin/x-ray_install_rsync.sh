@@ -188,6 +188,7 @@ cat >> ~/.x-ray/version/$SCRIPT_NAME <<EOF
 $(TZ=UTC date +%Y-%m-%dT%H:%M:%SZ),$(date +%s),$SCRIPT_NAME
 EOF
 mkdir -p $backup_dir/$(hostname)/version
-chmod 744 $backup_dir/$(hostname)/version
+chmod 777 $backup_dir/$(hostname)/version
 cp ~/.x-ray/version/* $backup_dir/$(hostname)/version
+ls -l $backup_dir/$(hostname)/version
 
