@@ -92,7 +92,7 @@ diagnose:
         expose:   
             cycle: "* * * * *"
             age:   1
-            depth: 1
+            depth: 10
             dir:   $env_files/x-ray/$env/$component/diag/apics/$hostname/$domain_name/$wls_server/custom/tmp/$todayiso8601
             access: +r
             ttl:   45
