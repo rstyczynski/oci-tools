@@ -62,7 +62,7 @@ function tcpdump_host() {
         ;;
     dump)
 	echo "Dump of files from ${dump_dir}/${hostname}/${dateISO}:"	
-    	for tcp_file in $(ls -t ${dump_dir}/${hostname}/${dateISO}/${tcp_file_pfx}_*; do
+    	for tcp_file in $(ls -t ${dump_dir}/${hostname}/${dateISO}/${tcp_file_pfx}_*); do
            tcpdump -A -nn -r  $tcp_file
 	done
         ;;
