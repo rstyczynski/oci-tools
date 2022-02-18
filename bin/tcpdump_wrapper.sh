@@ -1,22 +1,6 @@
 #!/bin/bash
 
-function tcpdump_wrapper() {
-    pcap_filter=$1
-    cmd=$2 
-    pcap_dir=$3
-    netif=$4
-
-    : ${cmd:=status}
-    : ${pcap_dir:=$HOME/x-ray/net/traffic} 
-    : ${netif:=$(ip a | grep -i mtu | grep -v lo: | head -1 | tr -d ' ' | cut -f2 -d:)}
-
-    tcp_file_pfx="tcpdump_filter_$(echo ${pcap_filter} | tr -c 'a-zA-Z0-9' '_')"
-
-    dateISO=$(date -I)
-    pcap_dir=$pcap_dir/$dateISO
-
-    case $cmd in
-    start)
+function tcpdump_start() {
         sudo mkdir -p ${pcap_dir}
         sudo chmod 777 ${pcap_dir}
 
@@ -31,8 +15,9 @@ function tcpdump_wrapper() {
             echo "Already running"
             ps aux | grep tcpdump | grep ${pcap_dir} | grep ${tcp_file_pfx} 
         fi
-        ;;
-    stop)
+}
+
+function tcpdump_stop() {
         if [ $(ps aux | grep tcpdump | grep ${pcap_dir} | grep ${tcp_file_pfx} | grep -v grep | wc -l) -eq 0 ]; then
             echo "Capture not running."
         else
@@ -41,6 +26,30 @@ function tcpdump_wrapper() {
             tcp_file=$(ls -t ${pcap_dir}/*/${tcp_file_pfx}_* | head -1)
             echo "Done. Capture file: $tcp_file"
         fi
+}
+
+function tcpdump_wrapper() {
+    pcap_filter=$1
+    cmd=$2 
+    pcap_dir=$3
+    netif=$4
+
+    : ${cmd:=status}
+    : ${pcap_dir:=$HOME/x-ray/net/traffic/$(date -I)} 
+    : ${netif:=$(ip a | grep -i mtu | grep -v lo: | head -1 | tr -d ' ' | cut -f2 -d:)}
+
+    tcp_file_pfx="tcpdump_filter_$(echo ${pcap_filter} | tr -c 'a-zA-Z0-9' '_')"
+
+    case $cmd in
+    start)
+	tcpdump_start
+        ;;
+    stop)
+	tcpdump_stop
+        ;;
+    restart)
+	tcpdump_stop
+	tcpdump_start
         ;;
     status)
         if [ $(ps aux | grep tcpdump | grep ${pcap_dir} | grep ${tcp_file_pfx} | grep -v grep | wc -l) -eq 0 ]; then
