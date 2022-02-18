@@ -3,12 +3,12 @@
 function tcpdump_wrapper() {
     pcap_filter=$1
     cmd=$2 
-    pcap_dir=$4
-    netif=$5
+    pcap_dir=$3
+    netif=$4
 
     : ${cmd:=status}
     : ${pcap_dir:=$HOME/x-ray/net/traffic} 
-    : ${netif:=$(ip a | grep -i mtu | grep -v lo: | head -1 | tr -d ' ' | cut -f2 -d:)"}
+    : ${netif:=$(ip a | grep -i mtu | grep -v lo: | head -1 | tr -d ' ' | cut -f2 -d:)}
 
     tcp_file_pfx="tcpdump_filter_$(echo ${pcap_filter} | tr -c 'a-zA-Z0-9' '_')"
 
@@ -25,7 +25,7 @@ function tcpdump_wrapper() {
         if [ $(ps aux | grep tcpdump | grep ${tcp_file_pfx} | grep -v grep | wc -l) -eq 0 ]; then
 
             echo "Invoking command: tcpdump -i $netif -U -w ${pcap_dir}/${tcp_file_pfx}_%Y%m%dT%H%M%S.pcap -G 3600 '${pcap_filter}' "
-            sudo -- bash -c "umask o+r; nohup tcpdump -i $netif -U -w ${pcap_dir}/${tcp_file_pfx}_%Y%m%dT%H%M%S.pcap -G 3600 '${pcap_filter}' > ${pcap_dir}/${tcp_file_pfx}.out 2 > ${pcap_dir}/${tcp_file_pfx}.err" &
+            sudo -- bash -c "umask o+r; nohup tcpdump -i $netif -U -w ${pcap_dir}/${tcp_file_pfx}_%Y%m%dT%H%M%S.pcap -G 3600 '${pcap_filter}' > ${pcap_dir}/${tcp_file_pfx}.out 2> ${pcap_dir}/${tcp_file_pfx}.err" &
             echo "Started. Use dump|tail to check traffic. Use stop to finish capture."
         else
             echo "Already running"
