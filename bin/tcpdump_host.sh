@@ -72,11 +72,8 @@ function tcpdump_host() {
         tcpdump -A -nn -r $tcp_file | tail 
         ;;
     '')
-        echo "Usage: tcpdump_ftp ifname ftp_ip start|stop|dump|tail"
+        echo "Usage: tcpdump_host ifname filter start|stop|status|dump|tail"
         ;;
     esac
 }
 
-if [ $0 != '-bash' ]; then
-    tcpdump_host $@
-fi
