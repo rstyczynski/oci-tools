@@ -7,7 +7,7 @@ function rn() {
 function y2j() {
     python -c "import json, sys, yaml ; y=yaml.safe_load(sys.stdin.read()) ; print(json.dumps(y))"
     if [ $? -ne 0 ]; then
-        ruby -ryaml -rjson -e 'puts(YAML.load(ARGF.read).to_json)'
+        ruby -ryaml -rjson -e 'puts(YAML.load(ARGF.read).to_json)'    
         if [ $? -ne 0 ]; then
             echo "Error convering yaml to json. Exiting."
             exit 1
@@ -48,6 +48,11 @@ function schedule_diag_sync() {
     backup_dir=$(cat $diag_cfg | y2j | jq -r ".backup.dir")
 
     logs=$(cat $diag_cfg | y2j | jq -r ".diagnose | keys[]")
+
+    if [ -z "$logs" ]; then
+        echo "Error reading log sync descriptor."
+        exit 1
+    fi
 
     rm -rf diag_sync.cron
     if [ -f diag_sync.cron ]; then

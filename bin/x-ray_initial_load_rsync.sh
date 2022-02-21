@@ -29,6 +29,11 @@ function initial_load_rsync() {
 
     logs=$(cat $diag_cfg | y2j | jq -r ".diagnose | keys[]")
 
+    if [ -z "$logs" ]; then
+        echo "Error reading log sync descriptor."
+        exit 1
+    fi
+    
     for log in $logs
     do
         echo "##########################################"
