@@ -49,6 +49,24 @@ function initial_load_rsync() {
     done
 }
 
+
+function mkdir_force() {
+  dst_dir=$1
+
+  mkdir -p $dst_dir 2>/dev/null
+  if [ $? -ne 0 ]; then
+    parent_dir=$(dirname $dst_dir)
+    sudo chmod 777 $parent_dir
+  fi
+
+  mkdir -p $dst_dir
+  if [ $? -ne 0 ]; then
+    echo "Error creating directory."
+    return 1
+  fi
+}
+
+
 function initial_rsync_flat2date() {
     src_dir=$1
     expose_dir=$2
@@ -68,6 +86,10 @@ function initial_rsync_flat2date() {
     # in fact: replace $(date -I) into current date.
     src_dir=$(echo "$src_dir" | sed "s/$todayiso8601/$(date -I)/g" | sed "s/\$(hostname)/$(hostname)/g")
 
+    if [ ! -d $src_dir ]; then
+        "Error. Source directory does not exist."
+    fi
+
     IFS=$'\n'
     for file_meta in $(ls -la --time-style=full-iso $src_dir | grep -v '^d' | tr -s ' ' | tr ' ' ';' | grep -v '^total')
     do
@@ -84,10 +106,15 @@ function initial_rsync_flat2date() {
         dst_dir=$(echo "$expose_dir" | sed "s/$todayiso8601/$date/g" | sed "s/\$(hostname)/$(hostname)/g")
 
         # rsync creates dst dir, but create to have right permissions
-        mkdir -p $dst_dir
+        #mkdir -p $dst_dir
+        mkdir_force $dst_dir
         chmod g+rx $dst_dir
         chmod o+rx $dst_dir
 
+        if [ ! -d $dst_dir ]; then
+            "Error. Destination directory does not exist."
+        fi
+        
         # chmod does not work properly on some rsync e.g. 3.0.6; added  umask to fix        
         umask 022
         #rsync  --dry-run \

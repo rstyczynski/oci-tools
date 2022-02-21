@@ -8,6 +8,22 @@ function y2j() {
     python -c "import json, sys, yaml ; y=yaml.safe_load(sys.stdin.read()) ; print(json.dumps(y))"
 }
 
+function mkdir_force() {
+  dst_dir=$1
+
+  mkdir -p $dst_dir 2>/dev/null
+  if [ $? -ne 0 ]; then
+    parent_dir=$(dirname $dst_dir)
+    sudo chmod 777 $parent_dir
+  fi
+
+  mkdir -p $dst_dir
+  if [ $? -ne 0 ]; then
+    echo "Error creating directory."
+    return 1
+  fi
+}
+
 function schedule_diag_sync() {
     diag_cfg=$1
     cron_action=$2
@@ -122,14 +138,25 @@ function schedule_diag_sync() {
         #oci_os_bucket=$(cat $diag_cfg | y2j | jq -r ".diagnose.$log.archive.dir" | sed 's|oci_os://||')
 
         # keep diagnose.yaml next to archive file to make archive process be aware of config
-	org_umask=$(umask)
+	    org_umask=$(umask)
         umask 000
-	mkdir -p $backup_dir/$(hostname)
+	    
+        #mkdir -p $backup_dir/$(hostname)
+        mkdir_force $backup_dir/$(hostname)
         umask $org_umask
-	#sudo chmod +x+w+r $backup_dir/$(hostname)
+	    #sudo chmod +x+w+r $backup_dir/$(hostname)
         cat $diag_cfg >$backup_dir/$(hostname)/$(basename $diag_cfg)
 
         #echo "$log, $src_dir, $type, $expose_dir, $expose_cycle, $expose_ttl"
+
+        if [ ! -d $src_dir ]; then
+            "Error. Source directory does not exist."
+        fi
+
+        mkdir_force $expose_dir
+        if [ ! -d $expose_dir ]; then
+            "Error. Destination directory does not exist."
+        fi
 
         #
         # rsync files to central location
