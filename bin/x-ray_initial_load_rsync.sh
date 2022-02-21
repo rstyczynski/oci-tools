@@ -124,6 +124,11 @@ function initial_rsync_date2date() {
     src_dir=$(echo "$src_dir" | sed "s/$todayiso8601$//g" | sed "s/\$(hostname)/$(hostname)/g")
     dst_dir=$(echo "$expose_dir" | sed "s/$todayiso8601$//g" | sed "s/\$(hostname)/$(hostname)/g")
 
+    if [ ! -d $src_dir ]; then
+        echo "Error. Source directory does not exist. Exiting."
+        exit 1
+    fi
+
     cd $src_dir
     find . -type f > $iload_tmp/sync_files
     cd - > /dev/null
