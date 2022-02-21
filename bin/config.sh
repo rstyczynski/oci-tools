@@ -46,10 +46,12 @@ function setcfg() {
 
     case $global in
     Y)  
-        timeout -s 9 1 sudo touch /etc/$which.config >/dev/null 2>/dev/null 
+        timeout -s 9 1 sudo touch /etc/$which.config >/dev/null 2>/dev/null
         if [ $? -ne 0 ]; then
             >&2 echo "Global cfg. not available (root?). Falling back to user level cfg."
             unset global
+        else
+            timeout -s 9 1 sudo chmod 644 /etc/$which.config
         fi
         ;;
     esac
