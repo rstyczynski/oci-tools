@@ -35,16 +35,20 @@ if [ -z "$domain_home" ] || [ "$domain_home" = undefined ]; then
   domain_home=$(getWLSjvmAttr ${wls_managed[0]} domain_home)
   : ${domain_home:=$(getWLSjvmAttr ${wls_admin[0]} domain_home)}
 
+  setcfg fmw domain_home ${domain_home:=undefined} force
+fi
+domain_home=$(getcfg fmw domain_home)
+
+export domain_name=$(getcfg fmw domain_name)
+if [ -z "$domain_name" ] || [ "$domain_name" = undefined ]; then
+  source $env_files/tools/wls-tools/bin/discover_processes.sh
+  discoverWLS
+
   domain_name=$(getWLSjvmAttr ${wls_managed[0]} domain_name)
   : ${domain_name:=$(getWLSjvmAttr ${wls_admin[0]} domain_name)}
 
-  setcfg fmw domain_home ${domain_home:=undefined} force
   setcfg fmw domain_name ${domain_name:=undefined} force
 fi
-getcfg fmw domain_home
-domain_home=$(getcfg fmw domain_home)
-
-getcfg fmw domain_name
 domain_home=$(getcfg fmw domain_name)
 
 
