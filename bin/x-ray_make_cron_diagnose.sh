@@ -122,8 +122,11 @@ function schedule_diag_sync() {
         #oci_os_bucket=$(cat $diag_cfg | y2j | jq -r ".diagnose.$log.archive.dir" | sed 's|oci_os://||')
 
         # keep diagnose.yaml next to archive file to make archive process be aware of config
-        mkdir -p $backup_dir/$(hostname)
-        chmod -R +x+w+r $backup_dir/$(hostname)
+	org_umask=$(umask)
+        umask 000
+	mkdir -p $backup_dir/$(hostname)
+        umask $org_umask
+	#sudo chmod +x+w+r $backup_dir/$(hostname)
         cat $diag_cfg >$backup_dir/$(hostname)/$(basename $diag_cfg)
 
         #echo "$log, $src_dir, $type, $expose_dir, $expose_cycle, $expose_ttl"
