@@ -87,7 +87,7 @@ function initial_rsync_flat2date() {
     src_dir=$(echo "$src_dir" | sed "s/$todayiso8601/$(date -I)/g" | sed "s/\$(hostname)/$(hostname)/g")
 
     if [ ! -d "$src_dir" ]; then
-        echo "Error. Source directory does not exist."
+        echo "Error. Source directory does not exist: $src_dir"
         exit 1
     fi
 
@@ -113,7 +113,7 @@ function initial_rsync_flat2date() {
         chmod o+rx $dst_dir
 
         if [ ! -d "$dst_dir" ]; then
-            echo "Error. Destination directory does not exist."
+            echo "Error. Destination directory does not exist: $dst_dir"
             exit 1
         fi
         

@@ -150,13 +150,13 @@ function schedule_diag_sync() {
         #echo "$log, $src_dir, $type, $expose_dir, $expose_cycle, $expose_ttl"
 
         if [ ! -d "$src_dir" ]; then
-            echo "Error. Source directory does not exist."
+            echo "Error. Source directory does not exist: $src_dir"
             exit 1
         fi
 
         mkdir_force $expose_dir
         if [ ! -d "$expose_dir" ]; then
-            echo "Error. Destination directory does not exist."
+            echo "Error. Destination directory does not exist: $dst_dir"
             exit 1
         fi
 
