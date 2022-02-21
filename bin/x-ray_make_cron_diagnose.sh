@@ -151,6 +151,8 @@ function schedule_diag_sync() {
 
         if [ ! -d "$src_dir" ]; then
             echo "Error. Source directory does not exist: $src_dir"
+            ls $src_dir
+            hostname
             exit 1
         fi
 
