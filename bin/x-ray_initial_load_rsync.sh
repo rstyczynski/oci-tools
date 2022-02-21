@@ -154,7 +154,7 @@ function initial_rsync_date2date() {
     dst_dir=$(echo "$expose_dir" | sed "s/$todayiso8601$//g" | sed "s/\$(hostname)/$(hostname)/g")
 
     if [ ! -d $src_dir ]; then
-        echo "Error. Source directory does not exist. Exiting."
+        echo "Error. Source directory does not exist: $src_dir"
         exit 1
     fi
 
@@ -171,7 +171,8 @@ function initial_rsync_date2date() {
     # rsync: mkdir "/mwlogs/x-ray/preprod/soa/diag/wls/alert/soa_domain/osb_server1" failed: No such file or directory (2)
     # rsync error: error in file IO (code 11) at main.c(657) [Receiver=3.1.2]
     # rsync creates dst dir, but create to have right permissions
-    mkdir -p $dst_dir
+    #mkdir -p $dst_dir
+    mkdir_force $dst_dir
     chmod g+rx $dst_dir
     chmod o+rx $dst_dir
 
