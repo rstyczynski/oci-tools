@@ -14,7 +14,9 @@ export mw_owner=$(getcfg fmw mw_owner)
 # ohs only? take data from node manager.
 if [ -z "$mw_owner" ] || [ "$mw_owner" = undefined ]; then
   mw_owner=$(ps aux | grep weblogic.nodemanager | grep -v grep | cut -f1 -d' ' | sort -u)
-  setcfg fmw mw_owner ${mw_owner} force
+  if [ ! -z "$mw_owner" ]; then
+    setcfg fmw mw_owner ${mw_owner} force
+  fi
 fi
 
 if [ -z "$mw_owner" ] || [ "$mw_owner" = undefined ]; then
