@@ -87,7 +87,8 @@ function initial_rsync_flat2date() {
     src_dir=$(echo "$src_dir" | sed "s/$todayiso8601/$(date -I)/g" | sed "s/\$(hostname)/$(hostname)/g")
 
     if [ ! -d "$src_dir" ]; then
-        "Error. Source directory does not exist."
+        echo "Error. Source directory does not exist."
+        exit 1
     fi
 
     IFS=$'\n'
@@ -112,7 +113,8 @@ function initial_rsync_flat2date() {
         chmod o+rx $dst_dir
 
         if [ ! -d "$dst_dir" ]; then
-            "Error. Destination directory does not exist."
+            echo "Error. Destination directory does not exist."
+            exit 1
         fi
         
         # chmod does not work properly on some rsync e.g. 3.0.6; added  umask to fix        
