@@ -9,6 +9,10 @@ function y2j() {
     python -c "import json, sys, yaml ; y=yaml.safe_load(sys.stdin.read()) ; print(json.dumps(y))"
     if [ $? -ne 0 ]; then
         ruby -ryaml -rjson -e 'puts(YAML.load(ARGF.read).to_json)'
+        if [ $? -ne 0 ]; then
+            "Error convering yaml to json. Exiting."
+            exit 1
+        fi
     fi
 }
 
