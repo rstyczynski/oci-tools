@@ -86,7 +86,7 @@ function initial_rsync_flat2date() {
     # in fact: replace $(date -I) into current date.
     src_dir=$(echo "$src_dir" | sed "s/$todayiso8601/$(date -I)/g" | sed "s/\$(hostname)/$(hostname)/g")
 
-    if [ ! -d $src_dir ]; then
+    if [ ! -d "$src_dir" ]; then
         "Error. Source directory does not exist."
     fi
 
@@ -111,7 +111,7 @@ function initial_rsync_flat2date() {
         chmod g+rx $dst_dir
         chmod o+rx $dst_dir
 
-        if [ ! -d $dst_dir ]; then
+        if [ ! -d "$dst_dir" ]; then
             "Error. Destination directory does not exist."
         fi
         
