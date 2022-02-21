@@ -1,15 +1,15 @@
 #!/bin/bash
 
 function tcpdump_start() {
-        sudo mkdir -p ${pcap_dir}
-        sudo chmod 777 ${pcap_dir}
+        mkdir -p ${pcap_dir}
+        chmod 777 ${pcap_dir}
 
         echo "Starting capture at $netif of traffic to ${pcap_filter}..."
 
         if [ $(ps aux | grep tcpdump | grep ${tcp_file_pfx} | grep -v grep | wc -l) -eq 0 ]; then
 
             echo "Invoking command: tcpdump -i $netif -U -w ${pcap_dir}/${tcp_file_pfx}_%Y%m%dT%H%M%S.pcap -G 3600 '${pcap_filter}' "
-            sudo -- bash -c "umask o+r; nohup tcpdump -i $netif -U -w ${pcap_dir}/${tcp_file_pfx}_%Y%m%dT%H%M%S.pcap -G 3600 '${pcap_filter}' > ${pcap_dir}/${tcp_file_pfx}.out 2> ${pcap_dir}/${tcp_file_pfx}.err" &
+            sudo -- bash -c "umask o+r; cd ${pcap_dir}; nohup tcpdump -i $netif -U -w ${tcp_file_pfx}_%Y%m%dT%H%M%S.pcap -G 3600 '${pcap_filter}' > ${tcp_file_pfx}.out 2> ${tcp_file_pfx}.err" &
             echo "Started. Use dump|tail to check traffic. Use stop to finish capture."
         else
             echo "Already running"
@@ -38,6 +38,8 @@ function tcpdump_wrapper() {
     : ${netif:=$(ip a | grep -i mtu | grep -v lo: | head -1 | tr -d ' ' | cut -f2 -d:)}
 
     tcp_file_pfx=tcpdump_filter_$(echo ${pcap_filter} | tr -c 'a-zA-Z0-9' '_')
+
+    
 
     case $cmd in
     start)
