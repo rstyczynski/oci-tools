@@ -49,7 +49,7 @@ if [ -z "$domain_name" ] || [ "$domain_name" = undefined ]; then
 
   setcfg fmw domain_name ${domain_name:=undefined} force
 fi
-domain_home=$(getcfg fmw domain_name)
+domain_name=$(getcfg fmw domain_name)
 
 
 if [ -z "$mw_owner" ]; then
