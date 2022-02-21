@@ -24,7 +24,7 @@ export component=$(getcfg x-ray component)
 export bucket=$(getcfg x-ray bucket)
 
 if [ -z "$env_files" ] || [ -z "$env" ] || [ -z "$component" ] || [ -z "$bucket" ]; then
-    echo "Error. x-ray.config must has defined: env_files, env, component, bucket"
+    echo "Error. x-ray.config must have defined: env_files, env, component, bucket"
     exit 1
 fi
 
