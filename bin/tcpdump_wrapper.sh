@@ -88,7 +88,7 @@ function tcpdump_wrapper() {
 }
 
 function tcpdump_show_egress() {
-    tcp_dir=$1
+    pcap_dir=$1
     src_ip=$2
 
     pcap_filter='tcp[tcpflags] & tcp-syn != 0 and tcp[tcpflags] & tcp-ack == 0'
@@ -100,7 +100,7 @@ function tcpdump_show_egress() {
         return 1
     fi
 
-    ports=$(tcpdump_wrapper "$pcap_filter" dump $tcp_dir 2> /dev/null  |
+    ports=$(tcpdump_wrapper "$pcap_filter" dump $pcap_dir 2> /dev/null  |
     grep -P "^[\d:\.]+ IP $src_ip" |
     cut -d'>' -f2 |
     cut -d: -f1 |
@@ -110,7 +110,7 @@ function tcpdump_show_egress() {
 
     for port in $ports; do
         echo -n " tcp $port:"
-        tcpdump_wrapper "$pcap_filter" dump $tcp_dir 2> /dev/null |
+        tcpdump_wrapper "$pcap_filter" dump $pcap_dir 2> /dev/null |
         grep -P "^[\d:\.]+ IP $src_ip" |
         cut -d'>' -f2 |
         cut -d: -f1 |
