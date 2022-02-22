@@ -28,7 +28,7 @@ function getCfgValue() {
           echo "Error getting data." >&2
           return 3
       fi
-  elif [ ${PIPESTATUS[1]} -ne 0 ]; then
+  elif [ ! -z "${PIPESTATUS[1]}" ] && [ ${PIPESTATUS[1]} -ne 0 ]; then
           echo "Error getting data." >&2
           return 3
   fi
