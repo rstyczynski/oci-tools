@@ -50,6 +50,7 @@ function tcpdump_wrapper() {
         ;;
     restart)
         tcpdump_stop
+        sleep 2
         tcpdump_start
         ;;
     status)
