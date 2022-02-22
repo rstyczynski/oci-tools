@@ -1,19 +1,38 @@
 #!/bin/bash
 
 
-function rn() {
-    sed 's/null//g'
-}
+function getCfgValue() {
+  cfg_yaml=$1
+  jq_query=$2
 
-function y2j() {
-    python -c "import json, sys, yaml ; y=yaml.safe_load(sys.stdin.read()) ; print(json.dumps(y))"
-    if [ $? -ne 0 ]; then
-        ruby -ryaml -rjson -e 'puts(YAML.load(ARGF.read).to_json)'
-        if [ $? -ne 0 ]; then
-            echo "Error convering yaml to json. Exiting."
-            exit 1
-        fi
-    fi
+  desc='Reads values from yaml file using jq query syntax. 
+  To make it possible python one liner is used to convert yaml to json.
+  As sometimes python may be not availabe on host uses json file as backup.
+  '
+
+  if [ ! -f $cfg_yaml ]; then
+    echo "Error. Configuration file not found: $cfg_yaml" >&2
+    return 1
+  fi
+
+  cfg_json=${cfg_yaml%.yaml}.json
+
+  python -c "import json, sys, yaml ; y=yaml.safe_load(sys.stdin.read()) ; print(json.dumps(y))" < $cfg_yaml 2>/dev/null | 
+  jq -r "$jq_query" | sed 's/null//g'
+  if [ ${PIPESTATUS[0]} -ne 0 ]; then
+      if [ ! -f $cfg_json ]; then
+          echo "Error converting yaml to json, and json file is not available." >&2
+          return 2
+      fi
+      cat $cfg_json | jq -r "$jq_query" | sed 's/null//g'
+      if [ ${PIPESTATUS[1]} -ne 0 ]; then
+          echo "Error getting data." >&2
+          return 3
+      fi
+  elif [ ${PIPESTATUS[1]} -ne 0 ]; then
+          echo "Error getting data." >&2
+          return 3
+  fi
 }
 
 
@@ -27,24 +46,24 @@ function initial_load_rsync() {
         diagname=general
     fi
 
-    logs=$(cat $diag_cfg | y2j | jq -r ".diagnose | keys[]")
+    logs=$(getCfgValue $diag_cfg ".diagnose | keys[]")
 
     if [ -z "$logs" ]; then
         echo "Error reading log sync descriptor."
         exit 1
     fi
-    
+
     for log in $logs
     do
         echo "##########################################"
         echo "Processing diagnostics source: $diagname/$log"
         echo "##########################################"
 
-        mode=$(cat $diag_cfg | y2j | jq -r ".diagnose.$log.mode" | rn)
+        mode=$(getCfgValue $diag_cfg ".diagnose.$log.mode" )
         : ${mode:=flat2date}
 
-        src_dir=$(cat $diag_cfg | y2j | jq -r ".diagnose.$log.dir" | rn)
-        expose_dir=$(cat $diag_cfg | y2j | jq -r ".diagnose.$log.expose.dir" | rn)
+        src_dir=$(getCfgValue $diag_cfg ".diagnose.$log.dir" )
+        expose_dir=$(getCfgValue $diag_cfg ".diagnose.$log.expose.dir" )
 
         case $mode in
         flat2date)

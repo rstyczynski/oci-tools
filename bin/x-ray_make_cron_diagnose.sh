@@ -1,19 +1,39 @@
 #!/bin/bash
 
-function rn() {
-    sed 's/null//g'
+function getCfgValue() {
+  cfg_yaml=$1
+  jq_query=$2
+
+  desc='Reads values from yaml file using jq query syntax. 
+  To make it possible python one liner is used to convert yaml to json.
+  As sometimes python may be not availabe on host uses json file as backup.
+  '
+  
+  if [ ! -f $cfg_yaml ]; then
+    echo "Error. Configuration file not found: $cfg_yaml" >&2
+    return 1
+  fi
+
+  cfg_json=${cfg_yaml%.yaml}.json
+
+  python -c "import json, sys, yaml ; y=yaml.safe_load(sys.stdin.read()) ; print(json.dumps(y))" < $cfg_yaml 2>/dev/null | 
+  jq -r "$jq_query" | sed 's/null//g'
+  if [ ${PIPESTATUS[0]} -ne 0 ]; then
+      if [ ! -f $cfg_json ]; then
+          echo "Error converting yaml to json, and json file is not available." >&2
+          return 2
+      fi
+      cat $cfg_json | jq -r "$jq_query" | sed 's/null//g'
+      if [ ${PIPESTATUS[1]} -ne 0 ]; then
+          echo "Error getting data." >&2
+          return 3
+      fi
+  elif [ ${PIPESTATUS[1]} -ne 0 ]; then
+          echo "Error getting data." >&2
+          return 3
+  fi
 }
 
-function y2j() {
-    python -c "import json, sys, yaml ; y=yaml.safe_load(sys.stdin.read()) ; print(json.dumps(y))"
-    if [ $? -ne 0 ]; then
-        ruby -ryaml -rjson -e 'puts(YAML.load(ARGF.read).to_json)'    
-        if [ $? -ne 0 ]; then
-            echo "Error convering yaml to json. Exiting."
-            exit 1
-        fi
-    fi
-}
 
 function mkdir_force() {
   dst_dir=$1
@@ -45,9 +65,9 @@ function schedule_diag_sync() {
         diagname=general
     fi
 
-    backup_dir=$(cat $diag_cfg | y2j | jq -r ".backup.dir")
+    backup_dir=$(getCfgValue $diag_cfg | y2j | jq -r ".backup.dir")
 
-    logs=$(cat $diag_cfg | y2j | jq -r ".diagnose | keys[]")
+    logs=$(getCfgValue $diag_cfg ".diagnose | keys[]")
 
     if [ -z "$logs" ]; then
         echo "Error reading log sync descriptor."
@@ -86,9 +106,9 @@ function schedule_diag_sync() {
         echo "Processing diagnostics source: $diagname/$log"
         echo "##########################################"
 
-        src_dir=$(cat $diag_cfg | y2j | jq -r ".diagnose.$log.dir" | rn)
+        src_dir=$(getCfgValue $diag_cfg ".diagnose.$log.dir" )
 
-        src_dir_mode=$(cat $diag_cfg | y2j | jq -r ".diagnose.$log.mode" | rn)
+        src_dir_mode=$(getCfgValue $diag_cfg ".diagnose.$log.mode" )
         : ${src_dir_mode:=default}
         case $src_dir_mode in
         date2date)
@@ -100,54 +120,54 @@ function schedule_diag_sync() {
             ;;
         esac
 
-        type=$(cat $diag_cfg | y2j | jq -r ".diagnose.$log.type" | rn)
+        type=$(getCfgValue $diag_cfg ".diagnose.$log.type" )
         : ${type:=log}
-        ttl=$(cat $diag_cfg | y2j | jq -r ".diagnose.$log.ttl" | rn)
+        ttl=$(getCfgValue $diag_cfg ".diagnose.$log.ttl" )
         : ${ttl:=15}
-        ttl_filter=$(cat $diag_cfg | y2j | jq -r ".diagnose.$log.ttl_filter" | rn)
+        ttl_filter=$(getCfgValue $diag_cfg ".diagnose.$log.ttl_filter" )
         : ${ttl_filter:='.'}
 
-        expose_cycle=$(cat $diag_cfg | y2j | jq -r ".diagnose.$log.expose.cycle" | rn)
+        expose_cycle=$(getCfgValue $diag_cfg ".diagnose.$log.expose.cycle" )
         : ${expose_cycle:="* * * * *"}
-        expose_dir=$(cat $diag_cfg | y2j | jq -r ".diagnose.$log.expose.dir" | rn)
+        expose_dir=$(getCfgValue $diag_cfg ".diagnose.$log.expose.dir" )
 
         # expose only younger than expose_age. Prevents syncing old files.
-        expose_age=$(cat $diag_cfg | y2j | jq -r ".diagnose.$log.expose.age" | rn)
+        expose_age=$(getCfgValue $diag_cfg ".diagnose.$log.expose.age" )
         : ${expose_age:=1}
 
         # exspose only files from expose_depth directory depth. Prevents syncing whoe directory structure
-        expose_depth=$(cat $diag_cfg | y2j | jq -r ".diagnose.$log.expose.depth" | rn)
+        expose_depth=$(getCfgValue $diag_cfg ".diagnose.$log.expose.depth" )
         : ${expose_depth:=1}
 
-        expose_delete_before=$(cat $diag_cfg | y2j | jq -r ".diagnose.$log.expose.delete_before" | rn)
+        expose_delete_before=$(getCfgValue $diag_cfg ".diagnose.$log.expose.delete_before" )
         if [ ! -z "$expose_delete_before" ]; then
             expose_delete_before_cmd="rm -f $expose_dir/$expose_delete_before;"
         else
             unset expose_delete_before_cmd
         fi
 
-        expose_ttl=$(cat $diag_cfg | y2j | jq -r ".diagnose.$log.expose.ttl" | rn)
+        expose_ttl=$(getCfgValue $diag_cfg ".diagnose.$log.expose.ttl" )
         : ${expose_ttl:=45}
-        expose_access=$(cat $diag_cfg | y2j | jq -r ".diagnose.$log.expose.access" | rn)
+        expose_access=$(getCfgValue $diag_cfg ".diagnose.$log.expose.access" )
         : ${expose_access:=+r}
 
-        archive_dir=$(cat $diag_cfg | y2j | jq -r ".diagnose.$log.archive.dir")
+        archive_dir=$(getCfgValue $diag_cfg ".diagnose.$log.archive.dir")
 
-        archive_dir=$(cat $diag_cfg | y2j | jq -r ".diagnose.$log.archive.dir" | rn)
+        archive_dir=$(getCfgValue $diag_cfg ".diagnose.$log.archive.dir" )
         : ${archive_dir:=oci_os://$bucket}
 
-        archive_cycle=$(cat $diag_cfg | y2j | jq -r ".diagnose.$log.archive.cycle" | rn)
+        archive_cycle=$(getCfgValue $diag_cfg ".diagnose.$log.archive.cycle" )
         : ${archive_cycle:="1 0 * * *"}
-        archive_ttl=$(cat $diag_cfg | y2j | jq -r ".diagnose.$log.archive.ttl" | rn)
+        archive_ttl=$(getCfgValue $diag_cfg ".diagnose.$log.archive.ttl" )
         : ${archive_ttl:=90}
 
-        backup_root=$(cat $diag_cfg | y2j | jq -r ".backup.dir" | rn)
+        backup_root=$(getCfgValue $diag_cfg ".backup.dir" )
         : ${backup_root:=~/backup}
-        backup_ttl=$(cat $diag_cfg | y2j | jq -r ".backup.ttl" | rn)
+        backup_ttl=$(getCfgValue $diag_cfg ".backup.ttl" )
         : ${backup_ttl:=30}
 
         # not required here
-        #oci_os_bucket=$(cat $diag_cfg | y2j | jq -r ".diagnose.$log.archive.dir" | sed 's|oci_os://||')
+        #oci_os_bucket=$(getCfgValue $diag_cfg ".diagnose.$log.archive.dir" | sed 's|oci_os://||')
 
         # keep diagnose.yaml next to archive file to make archive process be aware of config
 	    org_umask=$(umask)
