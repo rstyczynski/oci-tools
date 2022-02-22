@@ -37,7 +37,7 @@ function tcpdump_wrapper() {
     netif=$4
 
     : ${cmd:=status}
-    : ${pcap_dir:=$HOME/x-ray/net/traffic/$(date -I)} 
+    : ${pcap_dir:=$HOME/x-ray/traffic/$(date -I)} 
     : ${netif:=$(ip a | grep -i mtu | grep -v lo: | head -1 | tr -d ' ' | cut -f2 -d:)}
 
     tcp_file_pfx=tcpdump_filter_$(echo ${pcap_filter} | tr -c 'a-zA-Z0-9' '_')
