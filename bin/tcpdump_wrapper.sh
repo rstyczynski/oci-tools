@@ -8,6 +8,9 @@ function tcpdump_start() {
 
         if [ $(ps aux | grep tcpdump | grep ${tcp_file_pfx} | grep -v grep | wc -l) -eq 0 ]; then
 
+            # write props file with additional info. IP adress for now
+            echo "IP:$(hostname -i)" > ${pcap_dir}/${tcp_file_pfx}.props
+
             echo "Invoking command: tcpdump -i $netif -U -w ${pcap_dir}/${tcp_file_pfx}_%Y%m%dT%H%M%S.pcap -G 3600 '${pcap_filter}' "
             sudo -- bash -c "umask o+r; cd ${pcap_dir}; nohup tcpdump -i $netif -U -w ${tcp_file_pfx}_%Y%m%dT%H%M%S.pcap -G 3600 '${pcap_filter}' > ${tcp_file_pfx}.out 2> ${tcp_file_pfx}.err" &
             echo "Started. Use dump|tail to check traffic. Use stop to finish capture."
@@ -86,11 +89,21 @@ function tcpdump_wrapper() {
     esac
 }
 
-function tcpdump_show_engress() {
+function tcpdump_show_egress() {
     tcp_dir=$1
+    src_ip=$2
 
-    ports=$(tcpdump_wrapper 'tcp[tcpflags] & tcp-syn != 0 and tcp[tcpflags] & tcp-ack == 0' dump $tcp_dir 2> /dev/null  |
-    grep -P "^[\d:\.]+ IP $(hostname -i)" |
+    pcap_filter='tcp[tcpflags] & tcp-syn != 0 and tcp[tcpflags] & tcp-ack == 0'
+    tcp_file_pfx=tcpdump_filter_$(echo ${pcap_filter} | tr -c 'a-zA-Z0-9' '_')
+
+    : ${src_ip:=$(cat ${pcap_dir}/${tcp_file_pfx}.props | grep -P "^IP:" | cut -d: -f2)}
+    if [ -z "$src_ip" ]; then
+        echo "source IP not known. Specify as second parameter, after dirname with pcap files."
+        return 1
+    fi
+
+    ports=$(tcpdump_wrapper "$pcap_filter" dump $tcp_dir 2> /dev/null  |
+    grep -P "^[\d:\.]+ IP $src_ip" |
     cut -d'>' -f2 |
     cut -d: -f1 |
     sort -u |
@@ -98,15 +111,15 @@ function tcpdump_show_engress() {
     sort -un)
 
     for port in $ports; do
-    echo -n " tcp $port:"
-    tcpdump_wrapper 'tcp[tcpflags] & tcp-syn != 0 and tcp[tcpflags] & tcp-ack == 0' dump $tcp_dir 2> /dev/null |
-    grep -P "^[\d:\.]+ IP $(hostname -i)" |
-    cut -d'>' -f2 |
-    cut -d: -f1 |
-    sort -u |
-    grep -P "$port$"|
-    cut -d'.' -f1-4 |
-    tr '\n' ' '
-    echo
+        echo -n " tcp $port:"
+        tcpdump_wrapper "$pcap_filter" dump $tcp_dir 2> /dev/null |
+        grep -P "^[\d:\.]+ IP $src_ip" |
+        cut -d'>' -f2 |
+        cut -d: -f1 |
+        sort -u |
+        grep -P "$port$"|
+        cut -d'.' -f1-4 |
+        tr '\n' ' '
+        echo
     done
 }
