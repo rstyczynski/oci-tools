@@ -6,7 +6,7 @@ function getCfgValue() {
 
   desc='Reads values from yaml file using jq query syntax. 
   To make it possible python one liner is used to convert yaml to json.
-  As sometimes python may be not availabe on host uses json file as backup.
+  As sometimes python may be not availabe on host, uses json file as backup.
   '
 
   if [ ! -f $cfg_yaml ]; then
@@ -18,17 +18,18 @@ function getCfgValue() {
 
   python -c "import json, sys, yaml ; y=yaml.safe_load(sys.stdin.read()) ; print(json.dumps(y))" < $cfg_yaml 2>/dev/null | 
   jq -r "$jq_query" | sed 's/null//g'
-  if [ ${PIPESTATUS[0]} -ne 0 ]; then
-      if [ ! -f $cfg_json ]; then
+  RC1=( "${PIPESTATUS[@]}" )
+  if [ "${RC1[0]}" -ne 0 ]; then
+      cat $cfg_json | jq -r "$jq_query" | sed 's/null//g'
+      RC2=( "${PIPESTATUS[@]}" )
+      if [ "${RC2[0]}" -ne 0 ]; then
           echo "Error converting yaml to json, and json file is not available." >&2
           return 2
-      fi
-      cat $cfg_json | jq -r "$jq_query" | sed 's/null//g'
-      if [ ${PIPESTATUS[1]} -ne 0 ]; then
+      elif [ "${RC2[1]}" -ne 0 ]; then
           echo "Error getting data." >&2
           return 3
       fi
-  elif [ ! -z "${PIPESTATUS[1]}" ] && [ ${PIPESTATUS[1]} -ne 0 ]; then
+  elif [ [ "${RC1[1]}" -ne 0 ]; then
           echo "Error getting data." >&2
           return 3
   fi
