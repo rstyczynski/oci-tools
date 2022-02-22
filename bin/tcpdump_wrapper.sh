@@ -86,3 +86,28 @@ function tcpdump_wrapper() {
     esac
 }
 
+function tcpdump_show_engress() {
+    tcp_dir=$1
+
+    ports=$(tcpdump_wrapper 'tcp[tcpflags] & tcp-syn != 0 and tcp[tcpflags] & tcp-ack == 0' dump $tcp_dir 2> /dev/null  |
+    grep -P "^[\d:\.]+ IP $(hostname -i)" |
+    cut -d'>' -f2 |
+    cut -d: -f1 |
+    sort -u |
+    cut -d'.' -f5 |
+    sort -un)
+
+    for port in $ports; do
+    echo -n " tcp $port:"
+    tcpdump_wrapper 'tcp[tcpflags] & tcp-syn != 0 and tcp[tcpflags] & tcp-ack == 0' dump $tcp_dir 2> /dev/null |
+    grep -P "^[\d:\.]+ IP $(hostname -i)" |
+    cut -d'>' -f2 |
+    cut -d: -f1 |
+    sort -u |
+    grep -P "$port$"|
+    cut -d'.' -f1-4 |
+    tr '\n' ' '
+    echo
+    done
+
+}
