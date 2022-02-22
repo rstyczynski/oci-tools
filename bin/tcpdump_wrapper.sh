@@ -42,8 +42,6 @@ function tcpdump_wrapper() {
 
     tcp_file_pfx=tcpdump_filter_$(echo ${pcap_filter} | tr -c 'a-zA-Z0-9' '_')
 
-    
-
     case $cmd in
     start)
         tcpdump_start
