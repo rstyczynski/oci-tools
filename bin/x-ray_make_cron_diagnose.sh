@@ -8,7 +8,7 @@ function getCfgValue() {
   To make it possible python one liner is used to convert yaml to json.
   As sometimes python may be not availabe on host uses json file as backup.
   '
-  
+
   if [ ! -f $cfg_yaml ]; then
     echo "Error. Configuration file not found: $cfg_yaml" >&2
     return 1
@@ -65,7 +65,7 @@ function schedule_diag_sync() {
         diagname=general
     fi
 
-    backup_dir=$(getCfgValue $diag_cfg | y2j | jq -r ".backup.dir")
+    backup_dir=$(getCfgValue $diag_cfg ".backup.dir")
 
     logs=$(getCfgValue $diag_cfg ".diagnose | keys[]")
 
