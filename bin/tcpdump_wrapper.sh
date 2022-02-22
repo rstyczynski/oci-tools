@@ -9,7 +9,7 @@ function tcpdump_start() {
         if [ $(ps aux | grep tcpdump | grep ${tcp_file_pfx} | grep -v grep | wc -l) -eq 0 ]; then
 
             # write props file with additional info. IP adress for now
-            echo "IP:$(hostname -i)" > ${pcap_dir}/${tcp_file_pfx}.props
+            echo "HOST_IP:$(hostname -i)" > ${pcap_dir}/${tcp_file_pfx}.props
 
             echo "Invoking command: tcpdump -i $netif -U -w ${pcap_dir}/${tcp_file_pfx}_%Y%m%dT%H%M%S.pcap -G 3600 '${pcap_filter}' "
             sudo -- bash -c "umask o+r; cd ${pcap_dir}; nohup tcpdump -i $netif -U -w ${tcp_file_pfx}_%Y%m%dT%H%M%S.pcap -G 3600 '${pcap_filter}' > ${tcp_file_pfx}.out 2> ${tcp_file_pfx}.err" &
@@ -96,7 +96,7 @@ function tcpdump_show_egress() {
     pcap_filter='tcp[tcpflags] & tcp-syn != 0 and tcp[tcpflags] & tcp-ack == 0'
     tcp_file_pfx=tcpdump_filter_$(echo ${pcap_filter} | tr -c 'a-zA-Z0-9' '_')
 
-    : ${src_ip:=$(cat ${pcap_dir}/${tcp_file_pfx}.props | grep -P "^IP:" | cut -d: -f2)}
+    : ${src_ip:=$(cat ${pcap_dir}/${tcp_file_pfx}.props | grep -P "^HOST_IP:" | cut -d: -f2)}
     if [ -z "$src_ip" ]; then
         echo "source IP not known. Specify as second parameter, after dirname with pcap files."
         return 1
