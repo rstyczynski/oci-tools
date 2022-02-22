@@ -91,6 +91,8 @@ function tcpdump_show_egress() {
     pcap_dir=$1
     src_ip=$2
 
+    : ${pcap_dir:=$HOME/x-ray/traffic/$(date -I)} 
+
     pcap_filter='tcp[tcpflags] & tcp-syn != 0 and tcp[tcpflags] & tcp-ack == 0'
     tcp_file_pfx=tcpdump_filter_$(echo ${pcap_filter} | tr -c 'a-zA-Z0-9' '_')
 
