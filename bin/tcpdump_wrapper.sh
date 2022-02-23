@@ -130,3 +130,33 @@ function tcpdump_show_egress() {
         echo
     done
 }
+
+function tcpdump_show_ingress() {
+    pcap_dir=$1
+    dest_ip=$2
+
+    : ${pcap_dir:=$HOME/x-ray/traffic/$(date -I)} 
+
+    pcap_filter='tcp[tcpflags] & tcp-syn != 0 and tcp[tcpflags] & tcp-ack == 0'
+    tcp_file_pfx=tcpdump_filter_$(echo ${pcap_filter} | tr -c 'a-zA-Z0-9' '_')
+
+    : ${dest_ip:=$(cat ${pcap_dir}/${tcp_file_pfx}.props | grep -P "^HOST_IP:" | cut -d: -f2)}
+    if [ -z "$dest_ip" ]; then
+        echo "source IP not known. Specify as second parameter, after dirname with pcap files."
+        return 1
+    fi
+
+    ports=$(tcpdump_wrapper "$pcap_filter" dump $pcap_dir 2> /dev/null  |
+        perl -ne "m/^[\d:\.]+ IP (\d+\.\d+\.\d+\.\d+)\.(\d+) > $dest_ip\.(\d+)/ && print \"\$3\n\"" |  
+        sort -un)
+
+    for port in $ports; do
+        echo -n " tcp $port:"
+        tcpdump_wrapper "$pcap_filter" dump $pcap_dir 2> /dev/null |
+        perl -ne "m/^[\d:\.]+ IP (\d+\.\d+\.\d+\.\d+)\.(\d+) > $dest_ip\.(\d+)/ && print \"\$1\n\"" |
+        sort -u |
+        tr '\n' ' '
+        echo
+    done
+}
+
