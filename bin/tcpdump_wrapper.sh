@@ -14,6 +14,12 @@ function tcpdump_start() {
             echo "Invoking command: tcpdump -i $netif -U -w ${pcap_dir}/${tcp_file_pfx}_%Y%m%dT%H%M%S.pcap -G 3600 '${pcap_filter}' "
             umask o+rw
             sudo -- bash -c "umask o+rw; cd ${pcap_dir}; nohup tcpdump -Z $USER -i $netif -U -w ${tcp_file_pfx}_%Y%m%dT%H%M%S.pcap -G 3600 '${pcap_filter}' > ${tcp_file_pfx}.out 2> ${tcp_file_pfx}.err" &
+            sudo chmod o+rw ${tcp_file_pfx}.out
+            sudo chown $USER ${tcp_file_pfx}.out
+            
+            sudo chmod o+rw ${tcp_file_pfx}.err
+            sudo chown $USER ${tcp_file_pfx}.err
+
             echo "Started. Use dump|tail to check traffic. Use stop to finish capture."
         else
             echo "Already running"
