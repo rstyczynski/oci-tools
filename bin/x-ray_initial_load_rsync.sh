@@ -153,7 +153,7 @@ function initial_rsync_flat2date() {
         #rsync  --dry-run \
         rsync --progress -h \
         -t \
-        --chmod=Fu=r,Fgo=r,Dgo=rx,Du=rwx \
+        --chmod=Fu=rw,Fgo=r,Dgo=rx,Du=rwx \
         --files-from=$iload_tmp/$date_file \
         $src_dir $dst_dir
 
@@ -210,7 +210,7 @@ function initial_rsync_date2date() {
     #rsync  --dry-run \
     rsync --progress -h \
     -t \
-    --chmod=Fu=r,Fgo=r,Dgo=rx,Du=rwx \
+    --chmod=Fu=rw,Fgo=r,Dgo=rx,Du=rwx \
     --files-from=$iload_tmp/sync_files \
     $src_dir $dst_dir
 
