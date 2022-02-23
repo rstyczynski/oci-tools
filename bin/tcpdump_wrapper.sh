@@ -13,13 +13,14 @@ function tcpdump_start() {
 
             echo "Invoking command: tcpdump -i $netif -U -w ${pcap_dir}/${tcp_file_pfx}_%Y%m%dT%H%M%S.pcap -G 3600 '${pcap_filter}' "
             umask o+rw
-            sudo -- bash -c "umask o+rw; cd ${pcap_dir}; nohup tcpdump -Z $USER -i $netif -U -w ${tcp_file_pfx}_%Y%m%dT%H%M%S.pcap -G 3600 '${pcap_filter}' > ${tcp_file_pfx}.out 2> ${tcp_file_pfx}.err" &
-            sudo chmod o+rw ${pcap_dir}/${tcp_file_pfx}.out
-            sudo chown $USER ${pcap_dir}/${tcp_file_pfx}.out
-            
-            sudo chmod o+rw ${pcap_dir}/${tcp_file_pfx}.err
-            sudo chown $USER ${pcap_dir}/${tcp_file_pfx}.err
+            sudo -- bash -c "umask o+rw
+                cd ${pcap_dir}; nohup tcpdump -Z $USER -i $netif -U -w ${tcp_file_pfx}_%Y%m%dT%H%M%S.pcap -G 3600 '${pcap_filter}' > ${tcp_file_pfx}.out 2> ${tcp_file_pfx}.err
+                chmod o+rw ${pcap_dir}/${tcp_file_pfx}.out
+                chown $USER ${pcap_dir}/${tcp_file_pfx}.out
 
+                chmod o+rw ${pcap_dir}/${tcp_file_pfx}.err
+                chown $USER ${pcap_dir}/${tcp_file_pfx}.err
+                " &
             echo "Started. Use dump|tail to check traffic. Use stop to finish capture."
         else
             echo "Already running"
@@ -94,6 +95,10 @@ function tcpdump_wrapper() {
     esac
 }
 
+#
+#  reports
+#
+
 function tcpdump_show_egress() {
     pcap_dir=$1
     src_ip=$2
@@ -110,25 +115,43 @@ function tcpdump_show_egress() {
     fi
 
     ports=$(tcpdump_wrapper "$pcap_filter" dump $pcap_dir 2> /dev/null  |
-    grep -P "^[\d:\.]+ IP $src_ip" |
-    cut -d'>' -f2 |
-    cut -d: -f1 |
-    sort -u |
-    cut -d'.' -f5 |
-    sort -un)
-
-    for port in $ports; do
-        echo -n " tcp $port:"
-        tcpdump_wrapper "$pcap_filter" dump $pcap_dir 2> /dev/null |
         grep -P "^[\d:\.]+ IP $src_ip" |
         cut -d'>' -f2 |
         cut -d: -f1 |
         sort -u |
-        grep -P "$port$"|
-        cut -d'.' -f1-4 |
-        tr '\n' ' '
-        echo
-    done
+        cut -d'.' -f5 |
+        sort -un)
+
+    if [ "$tcpdump_show_egress_format" == CSV ]; then
+        : ${tcpdump_show_egress_header:="direction,this,other,port"}
+        echo $tcpdump_show_egress_header
+        for port in $ports; do
+            hosts=$(tcpdump_wrapper "$pcap_filter" dump $pcap_dir 2> /dev/null |
+            grep -P "^[\d:\.]+ IP $src_ip" |
+            cut -d'>' -f2 |
+            cut -d: -f1 |
+            sort -u |
+            grep -P "$port$"|
+            cut -d'.' -f1-4)
+            for host in $hosts; do
+                echo -n $tcpdump_show_egress_insert
+                echo "egress,$src_ip,$host,$port"
+            done
+        done
+    else
+        for port in $ports; do
+            echo -n " tcp $port:"
+            tcpdump_wrapper "$pcap_filter" dump $pcap_dir 2> /dev/null |
+            grep -P "^[\d:\.]+ IP $src_ip" |
+            cut -d'>' -f2 |
+            cut -d: -f1 |
+            sort -u |
+            grep -P "$port$"|
+            cut -d'.' -f1-4 |
+            tr '\n' ' '
+            echo
+        done
+    fi
 }
 
 function tcpdump_show_ingress() {
@@ -150,13 +173,83 @@ function tcpdump_show_ingress() {
         perl -ne "m/^[\d:\.]+ IP (\d+\.\d+\.\d+\.\d+)\.(\d+) > $dest_ip\.(\d+)/ && print \"\$3\n\"" |  
         sort -un)
 
-    for port in $ports; do
-        echo -n " tcp $port:"
-        tcpdump_wrapper "$pcap_filter" dump $pcap_dir 2> /dev/null |
-        perl -ne "m/^[\d:\.]+ IP (\d+\.\d+\.\d+\.\d+)\.(\d+) > $dest_ip\.(\d+)/ && print \"\$1\n\"" |
-        sort -u |
-        tr '\n' ' '
-        echo
-    done
+
+
+    if [ "$tcpdump_show_ingress_format" == CSV ]; then
+        : ${tcpdump_show_ingress_header:="direction,other,this,port"}
+        echo $tcpdump_show_ingress_header
+
+        for port in $ports; do
+            hosts=$(tcpdump_wrapper "$pcap_filter" dump $pcap_dir 2> /dev/null |
+                perl -ne "m/^[\d:\.]+ IP (\d+\.\d+\.\d+\.\d+)\.(\d+) > $dest_ip\.(\d+)/ && print \"\$1\n\"" |
+                sort -u)
+            for host in $hosts; do
+                echo -n $tcpdump_show_ingress_insert
+                echo "ingress,$host,$dest_ip,$port"
+            done
+        done
+    else
+        for port in $ports; do
+            echo -n " tcp $port:"
+            tcpdump_wrapper "$pcap_filter" dump $pcap_dir 2> /dev/null |
+            perl -ne "m/^[\d:\.]+ IP (\d+\.\d+\.\d+\.\d+)\.(\d+) > $dest_ip\.(\d+)/ && print \"\$1\n\"" |
+            sort -u |
+            tr '\n' ' '
+            echo
+        done
+    fi
 }
 
+#
+# x-ray log server reports
+#
+
+function x-ray_report_egress() {
+  env=$1
+  days=$2
+
+  tcpdump_show_egress_format=CSV
+  tcpdump_show_egress_header="date,env,component,host,direction,this,other,port"
+
+  header_displayed=NO
+  components=$(ls /mwlogs/x-ray/$env/)
+  for component in $components; do
+    hosts=$(ls /mwlogs/x-ray/$env/$component/diag/hosts/)
+    for host in $hosts; do
+      for day in $(ls /mwlogs/x-ray/$env/$component/diag/hosts/$host/traffic | grep $days); do
+        
+        if [ "$header_displayed" == OK ]; then
+          tcpdump_show_egress_header=" "
+        fi
+        tcpdump_show_egress_insert="$day,$env,$component,$host,"
+        tcpdump_show_egress /mwlogs/x-ray/dev/$component/diag/hosts/$host/traffic/$day
+        header_displayed=OK
+      done
+    done
+  done
+}
+
+function x-ray_report_ingress() {
+  env=$1
+  days=$2
+
+  tcpdump_show_ingress_format=CSV
+  tcpdump_show_ingress_header="date,env,component,host,direction,other,this,port"
+
+  header_displayed=NO
+  components=$(ls /mwlogs/x-ray/$env/)
+  for component in $components; do
+    hosts=$(ls /mwlogs/x-ray/$env/$component/diag/hosts/)
+    for host in $hosts; do
+      for day in $(ls /mwlogs/x-ray/$env/$component/diag/hosts/$host/traffic | grep $days); do
+        
+        if [ "$header_displayed" == OK ]; then
+          tcpdump_show_ingress_header=" "
+        fi
+        tcpdump_show_ingress_insert="$day,$env,$component,$host,"
+        tcpdump_show_ingress /mwlogs/x-ray/dev/$component/diag/hosts/$host/traffic/$day
+        header_displayed=OK
+      done
+    done
+  done
+}
