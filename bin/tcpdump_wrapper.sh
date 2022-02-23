@@ -108,9 +108,14 @@ function tcpdump_show_egress() {
     pcap_filter='tcp[tcpflags] & tcp-syn != 0 and tcp[tcpflags] & tcp-ack == 0'
     tcp_file_pfx=tcpdump_filter_$(echo ${pcap_filter} | tr -c 'a-zA-Z0-9' '_')
 
+    if [ "$tcpdump_show_egress_format" == CSV ]; then
+        : ${tcpdump_show_egress_header:="direction,this,other,port"}
+        echo $tcpdump_show_egress_header
+    fi
+
     : ${src_ip:=$(cat ${pcap_dir}/${tcp_file_pfx}.props | grep -P "^HOST_IP:" | cut -d: -f2)}
     if [ -z "$src_ip" ]; then
-        echo "source IP not known. Specify as second parameter, after dirname with pcap files."
+        >&2 echo "source IP not known. Specify as second parameter, after dirname with pcap files."
         return 1
     fi
 
@@ -123,8 +128,6 @@ function tcpdump_show_egress() {
         sort -un)
 
     if [ "$tcpdump_show_egress_format" == CSV ]; then
-        : ${tcpdump_show_egress_header:="direction,this,other,port"}
-        echo $tcpdump_show_egress_header
         for port in $ports; do
             hosts=$(tcpdump_wrapper "$pcap_filter" dump $pcap_dir 2> /dev/null |
             grep -P "^[\d:\.]+ IP $src_ip" |
@@ -163,9 +166,14 @@ function tcpdump_show_ingress() {
     pcap_filter='tcp[tcpflags] & tcp-syn != 0 and tcp[tcpflags] & tcp-ack == 0'
     tcp_file_pfx=tcpdump_filter_$(echo ${pcap_filter} | tr -c 'a-zA-Z0-9' '_')
 
+    if [ "$tcpdump_show_ingress_format" == CSV ]; then
+        : ${tcpdump_show_ingress_header:="direction,other,this,port"}
+        echo $tcpdump_show_ingress_header
+    fi
+
     : ${dest_ip:=$(cat ${pcap_dir}/${tcp_file_pfx}.props | grep -P "^HOST_IP:" | cut -d: -f2)}
     if [ -z "$dest_ip" ]; then
-        echo "source IP not known. Specify as second parameter, after dirname with pcap files."
+        >&2 echo "source IP not known. Specify as second parameter, after dirname with pcap files." 
         return 1
     fi
 
@@ -173,11 +181,7 @@ function tcpdump_show_ingress() {
         perl -ne "m/^[\d:\.]+ IP (\d+\.\d+\.\d+\.\d+)\.(\d+) > $dest_ip\.(\d+)/ && print \"\$3\n\"" |  
         sort -un)
 
-
-
     if [ "$tcpdump_show_ingress_format" == CSV ]; then
-        : ${tcpdump_show_ingress_header:="direction,other,this,port"}
-        echo $tcpdump_show_ingress_header
 
         for port in $ports; do
             hosts=$(tcpdump_wrapper "$pcap_filter" dump $pcap_dir 2> /dev/null |
@@ -208,30 +212,37 @@ function x-ray_report_egress() {
   env=$1
   days=$2
 
+  : ${days:=$(date -I | cut -d- -f1-2)}
+
   tcpdump_show_egress_format=CSV
   tcpdump_show_egress_header="date,env,component,host,direction,this,other,port"
 
   header_displayed=NO
   components=$(ls /mwlogs/x-ray/$env/)
   for component in $components; do
-    hosts=$(ls /mwlogs/x-ray/$env/$component/diag/hosts/)
-    for host in $hosts; do
-      for day in $(ls /mwlogs/x-ray/$env/$component/diag/hosts/$host/traffic | grep $days); do
-        
+    compute_instances=$(ls /mwlogs/x-ray/$env/$component/diag/hosts/)
+    for compute_instance in $compute_instances; do
+      for day in $(ls /mwlogs/x-ray/$env/$component/diag/hosts/$compute_instance/traffic | grep $days); do
         if [ "$header_displayed" == OK ]; then
           tcpdump_show_egress_header=" "
         fi
-        tcpdump_show_egress_insert="$day,$env,$component,$host,"
-        tcpdump_show_egress /mwlogs/x-ray/dev/$component/diag/hosts/$host/traffic/$day
+        tcpdump_show_egress_insert="$day,$env,$component,$compute_instance,"
+        tcpdump_show_egress /mwlogs/x-ray/dev/$component/diag/hosts/$compute_instance/traffic/$day
+
         header_displayed=OK
       done
     done
   done
+
+  unset tcpdump_show_egress_header
+  unset tcpdump_show_egress_insert
 }
 
 function x-ray_report_ingress() {
   env=$1
   days=$2
+
+  : ${days:=$(date -I | cut -d- -f1-2)}
 
   tcpdump_show_ingress_format=CSV
   tcpdump_show_ingress_header="date,env,component,host,direction,other,this,port"
@@ -239,17 +250,20 @@ function x-ray_report_ingress() {
   header_displayed=NO
   components=$(ls /mwlogs/x-ray/$env/)
   for component in $components; do
-    hosts=$(ls /mwlogs/x-ray/$env/$component/diag/hosts/)
-    for host in $hosts; do
-      for day in $(ls /mwlogs/x-ray/$env/$component/diag/hosts/$host/traffic | grep $days); do
+    compute_instances=$(ls /mwlogs/x-ray/$env/$component/diag/hosts/)
+    for compute_instance in $compute_instances; do
+      for day in $(ls /mwlogs/x-ray/$env/$component/diag/hosts/$compute_instance/traffic | grep $days); do
         
         if [ "$header_displayed" == OK ]; then
           tcpdump_show_ingress_header=" "
         fi
-        tcpdump_show_ingress_insert="$day,$env,$component,$host,"
-        tcpdump_show_ingress /mwlogs/x-ray/dev/$component/diag/hosts/$host/traffic/$day
+        tcpdump_show_ingress_insert="$day,$env,$component,$compute_instance,"
+        tcpdump_show_ingress /mwlogs/x-ray/dev/$component/diag/hosts/$compute_instance/traffic/$day
         header_displayed=OK
       done
     done
   done
+
+  unset tcpdump_show_ingress_header
+  unset tcpdump_show_ingress_insert
 }
