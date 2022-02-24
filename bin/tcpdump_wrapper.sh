@@ -37,9 +37,12 @@ function tcpdump_stop() {
         if [ $(ps aux | grep tcpdump | grep ${tcp_file_pfx} | grep -v grep | wc -l) -eq 0 ]; then
             echo "Capture not running."
         else
-            echo -n "Stopping tdpdump at $netif of traffic to ${pcap_filter}..."
-            pcap_dir=$(ps aux | grep tcpdump | grep -oP "cd ([/a-zA-Z0-9\-_]+)" | head -1 | cut -d' ' -f2)
 
+            if [ "$pcap_dir_handle" == "dynamic" ]; then
+                pcap_dir=$(ps aux | grep tcpdump | grep -oP "cd ([/a-zA-Z0-9\-_]+)" | head -1 | cut -d' ' -f2)
+            fi
+
+            echo -n "Stopping tdpdump at $netif of traffic to ${pcap_filter}..."
             sudo kill $(ps aux | grep tcpdump | grep ${tcp_file_pfx} | grep -v grep | tr -s ' ' | cut -d' ' -f2)
             echo "Done. Capture files in : ${pcap_dir}"
         fi
@@ -83,6 +86,12 @@ function tcpdump_wrapper() {
         fi
         ;;
     dump)
+
+        if [ "$pcap_dir_handle" == "dynamic" ]; then
+            pcap_dir=$(ps aux | grep tcpdump | grep -oP "cd ([/a-zA-Z0-9\-_]+)" | head -1 | cut -d' ' -f2)
+            : ${pcap_dir:=pcap_dir=$HOME/x-ray/traffic/$(date -I)}
+        fi
+
         echo "Dump of files from ${pcap_dir}:"
         if [ $(ls -t ${pcap_dir}/${tcp_file_pfx}_* 2>/dev/null | wc -l) -gt 0 ]; then
            for tcp_file in $(ls -t ${pcap_dir}/${tcp_file_pfx}_* 2>/dev/null); do
@@ -93,6 +102,12 @@ function tcpdump_wrapper() {
         fi
         ;;
     tail)
+
+        if [ "$pcap_dir_handle" == "dynamic" ]; then
+            pcap_dir=$(ps aux | grep tcpdump | grep -oP "cd ([/a-zA-Z0-9\-_]+)" | head -1 | cut -d' ' -f2)
+            : ${pcap_dir:=pcap_dir=$HOME/x-ray/traffic/$(date -I)}
+        fi
+
         if [ $(ls -t ${pcap_dir}/${tcp_file_pfx}_* 2>/dev/null | wc -l) -gt 0 ]; then
            tcp_file=$(ls -t ${pcap_dir}/${tcp_file_pfx}_* | head -1)
            echo "Tail of $tcp_file:"
