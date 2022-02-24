@@ -39,7 +39,6 @@ function tcpdump_stop() {
         else
             echo -n "Stopping tdpdump at $netif of traffic to ${pcap_filter}..."
             sudo kill $(ps aux | grep tcpdump | grep ${tcp_file_pfx} | grep -v grep | tr -s ' ' | cut -d' ' -f2)
-            echo "Done. Capture files in : ${pcap_dir}"
         fi
 }
 
