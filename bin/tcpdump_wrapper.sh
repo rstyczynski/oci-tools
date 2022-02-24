@@ -2,7 +2,7 @@
 
 function tcpdump_start() {
 
-    if [ "$pcap_dir_handle" == "$dynamic" ]; then
+    if [ "$pcap_dir_handle" == "dynamic" ]; then
         pcap_dir=$HOME/x-ray/traffic/$(date -I)
     fi
 
