@@ -1,31 +1,36 @@
 #!/bin/bash
 
 function tcpdump_start() {
-        mkdir -p ${pcap_dir}
-        chmod 777 ${pcap_dir}
 
-        echo "Starting capture at $netif of traffic to ${pcap_filter}..."
+    if [ "$pcap_dir_handle" == "$dynamic" ]; then
+        pcap_dir=$HOME/x-ray/traffic/$(date -I)
+    fi
 
-        if [ $(ps aux | grep tcpdump | grep ${tcp_file_pfx} | grep -v grep | wc -l) -eq 0 ]; then
+    mkdir -p ${pcap_dir}
+    chmod 777 ${pcap_dir}
 
-            # write props file with additional info. IP adress for now
-            echo "HOST_IP:$(hostname -i)" > ${pcap_dir}/${tcp_file_pfx}.props
+    echo "Starting capture at $netif of traffic to ${pcap_filter}..."
 
-            echo "Invoking command: tcpdump -i $netif -U -w ${pcap_dir}/${tcp_file_pfx}_%Y%m%dT%H%M%S.pcap -G 3600 '${pcap_filter}' "
-            umask o+rw
-            sudo -- bash -c "umask o+rw
-                cd ${pcap_dir}; nohup tcpdump -Z $USER -i $netif -U -w ${tcp_file_pfx}_%Y%m%dT%H%M%S.pcap -G 3600 '${pcap_filter}' > ${tcp_file_pfx}.out 2> ${tcp_file_pfx}.err
-                chmod o+rw ${pcap_dir}/${tcp_file_pfx}.out
-                chown $USER ${pcap_dir}/${tcp_file_pfx}.out
+    if [ $(ps aux | grep tcpdump | grep ${tcp_file_pfx} | grep -v grep | wc -l) -eq 0 ]; then
 
-                chmod o+rw ${pcap_dir}/${tcp_file_pfx}.err
-                chown $USER ${pcap_dir}/${tcp_file_pfx}.err
-                " &
-            echo "Started. Use dump|tail to check traffic. Use stop to finish capture."
-        else
-            echo "Already running"
-            ps aux | grep tcpdump | grep ${tcp_file_pfx} 
-        fi
+        # write props file with additional info. IP adress for now
+        echo "HOST_IP:$(hostname -i)" > ${pcap_dir}/${tcp_file_pfx}.props
+
+        echo "Invoking command: tcpdump -i $netif -U -w ${pcap_dir}/${tcp_file_pfx}_%Y%m%dT%H%M%S.pcap -G 3600 '${pcap_filter}' "
+        umask o+rw
+        sudo -- bash -c "umask o+rw
+            cd ${pcap_dir}; nohup tcpdump -Z $USER -i $netif -U -w ${tcp_file_pfx}_%Y%m%dT%H%M%S.pcap -G 3600 '${pcap_filter}' > ${tcp_file_pfx}.out 2> ${tcp_file_pfx}.err
+            chmod o+rw ${pcap_dir}/${tcp_file_pfx}.out
+            chown $USER ${pcap_dir}/${tcp_file_pfx}.out
+
+            chmod o+rw ${pcap_dir}/${tcp_file_pfx}.err
+            chown $USER ${pcap_dir}/${tcp_file_pfx}.err
+            " &
+        echo "Started. Use dump|tail to check traffic. Use stop to finish capture."
+    else
+        echo "Already running"
+        ps aux | grep tcpdump | grep ${tcp_file_pfx} 
+    fi
 }
 
 function tcpdump_stop() {
@@ -45,8 +50,13 @@ function tcpdump_wrapper() {
     netif=$4
 
     : ${cmd:=status}
-    : ${pcap_dir:=$HOME/x-ray/traffic/$(date -I)} 
     : ${netif:=$(ip a | grep -i mtu | grep -v lo: | head -1 | tr -d ' ' | cut -f2 -d:)}
+
+    if [ -z "$pcap_dir" ]; then
+        pcap_dir_handle=dynamic
+    else
+        pcap_dir_handle=given
+    fi
 
     tcp_file_pfx=tcpdump_filter_$(echo ${pcap_filter} | tr -c 'a-zA-Z0-9' '_')
 
@@ -139,8 +149,10 @@ function tcpdump_show_egress() {
             for host in $hosts; do
                 echo -n $tcpdump_show_egress_insert
                 echo "egress,$src_ip,$host,$port"
+                >&2 echo -n "."
             done
         done
+        >&2 echo "."
     else
         for port in $ports; do
             echo -n " tcp $port:"
@@ -190,8 +202,10 @@ function tcpdump_show_ingress() {
             for host in $hosts; do
                 echo -n $tcpdump_show_ingress_insert
                 echo "ingress,$host,$dest_ip,$port"
+                >&2 echo -n "."
             done
         done
+        >&2 echo "."
     else
         for port in $ports; do
             echo -n " tcp $port:"
