@@ -51,16 +51,17 @@ function tcpdump_stop() {
 function tcpdump_wrapper() {
     pcap_filter=$1
     cmd=$2 
-    pcap_dir=$3
+    pcap_dir_parameter=$3
     netif=$4
 
     : ${cmd:=status}
     : ${netif:=$(ip a | grep -i mtu | grep -v lo: | head -1 | tr -d ' ' | cut -f2 -d:)}
 
-    if [ -z "$pcap_dir" ]; then
+    if [ -z "$pcap_dir_parameter" ]; then
         pcap_dir_handle=dynamic
     else
         pcap_dir_handle=given
+        pcap_dir=$pcap_dir_parameter
     fi
 
     tcp_file_pfx=tcpdump_filter_$(echo ${pcap_filter} | tr -c 'a-zA-Z0-9' '_')
