@@ -36,7 +36,14 @@ function setcfg() {
     if [ -z "$new_value" ]; then
         read -p "Enter value for $what:" new_value
     fi
-    
+
+    # test of special characters
+    new_value_clean=$(tr -dc '[[:print:]]' <<< "$new_value")
+    if [ "$new_value_clean" != "$new_value" ]; then
+      >&2 echo "Error. Entered value contains special characters as e.g. new lines, what is forbidden. Enter only pritable characters. This is critical error. Cannot continue."
+      return 1
+    fi
+
     unset global
     if [ "$force" != force ]; then
         read -t 5 -p "Set in global /etc/$which.config? [Yn]" global
@@ -46,9 +53,9 @@ function setcfg() {
 
     case $global in
     Y)  
-        timeout -s 9 1 sudo touch /etc/$which.config >/dev/null 2>/dev/null
+        timeout -s 9 1 sudo -S touch /etc/$which.config >/dev/null 2>/dev/null
         if [ $? -ne 0 ]; then
-            >&2 echo "Global cfg. not available (root?). Falling back to user level cfg."
+            >&2 echo "Notice that config can't be stored in /etc/x-ray.config, as this user has no root access. Config is stored in user space at ~/.x-ray/config. It's not a problem."
             unset global
         else
             timeout -s 9 1 sudo chmod 644 /etc/$which.config
@@ -112,6 +119,7 @@ function getsetcfg() {
         getcfg $1 $2
     fi
 }
+
 
 
 
