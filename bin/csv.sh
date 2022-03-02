@@ -30,3 +30,20 @@ function get_column_numbers() {
   done | sort -n | tr '\n' , | tr -d ' ' | sed 's/,$//'
 }
 
+# get row if column meets regexp. Replace new lines with semicolon. Requires perl and Text::CSV
+function get_value_when() {
+  condition_column=$1
+  condition_value=$2
+  column_no=$3
+
+  perl -MText::CSV -le '$csv = Text::CSV->new({binary=>1});
+    $filter=uc($ARGV[1]);
+    while ($row = $csv->getline(STDIN)){ 
+      s/\n/;/g for @$row;
+      if (uc($row->[$ARGV[0]-1]) =~ /$filter/) {
+
+        print($row->[$ARGV[2]-1]);
+      }
+    }' $condition_column "$condition_value" $column_no < $csv_file
+} 
+
