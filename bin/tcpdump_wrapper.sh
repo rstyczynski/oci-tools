@@ -508,7 +508,7 @@ EOF
 # Source: https://stackoverflow.com/questions/26701538/how-to-filter-an-array-of-objects-based-on-values-in-an-inner-array-with-jq
 #
 
-test -f ~/network/etc/public_ip_ranges.json && mv ~/network/etc/public_ip_ranges.json ~/network/backup/etc/public_ip_ranges.json.$(date)
+test -f ~/network/etc/public_ip_ranges.json && mv ~/network/etc/public_ip_ranges.json "~/network/backup/etc/public_ip_ranges.json.$(date)"
 curl -Ls https://docs.oracle.com/iaas/tools/public_ip_ranges.json > ~/network/etc/public_ip_ranges.json
 
 OCI_ranges=~/network/etc/public_ip_ranges.json
@@ -545,7 +545,7 @@ done | grep -v -f <(cat $OBJECT_STORAGE_ranges_csv | cut -d, -f1 | grep -v CIDR)
 
 registry=oci_internal
 registry_file=~/network/etc/$registry\_registry.csv
-test -f $registry_file && mv $registry_file $registry_file.$(date)
+test -f $registry_file && mv $registry_file "$registry_file.$(date)"
 cat >  $registry_file <<EOF
 CIDR,category,owner,system,region,desc,url,type,id,cidr_registry
 169.254.0.0/16,subnet,Oracle OCI,OCI direct connection,,OCI internal,,,,$registry_file
