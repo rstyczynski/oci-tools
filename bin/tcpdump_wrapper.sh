@@ -145,9 +145,11 @@ function tcpdump_show_egress() {
 
     : ${src_ip:=$(cat ${pcap_dir}/${tcp_file_pfx}.props | grep -P "^HOST_IP:" | cut -d: -f2)}
     if [ -z "$src_ip" ]; then
-        >&2 echo "source IP not known. Specify as second parameter, after dirname with pcap files."
+        >&2 echo "Source IP not known. Specify as second parameter, after dirname with pcap files."
         return 1
     fi
+
+    >&2 echo "Processing data from $src_ip stored at $pcap_dir"
 
     # TODO handle tmp properly
     tcpdump_wrapper "$pcap_filter" dump $pcap_dir 2> /dev/null  |
@@ -208,6 +210,8 @@ function tcpdump_show_ingress() {
     dest_ip=$2
 
     : ${pcap_dir:=$HOME/x-ray/traffic/$(date -I)} 
+    
+    : ${tcpdump_show_ingress_maxport:=15000}
 
     pcap_filter='tcp[tcpflags] & tcp-syn != 0 and tcp[tcpflags] & tcp-ack == 0'
     tcp_file_pfx=tcpdump_filter_$(echo ${pcap_filter} | tr -c 'a-zA-Z0-9' '_')
@@ -219,13 +223,27 @@ function tcpdump_show_ingress() {
 
     : ${dest_ip:=$(cat ${pcap_dir}/${tcp_file_pfx}.props | grep -P "^HOST_IP:" | cut -d: -f2)}
     if [ -z "$dest_ip" ]; then
-        >&2 echo "source IP not known. Specify as second parameter, after dirname with pcap files." 
+        >&2 echo "Source IP not known. Specify as second parameter, after dirname with pcap files." 
         return 1
     fi
 
-    ports=$(tcpdump_wrapper "$pcap_filter" dump $pcap_dir 2> /dev/null  |
+    >&2 echo "Processing data directed to $src_ip stored at $pcap_dir"
+
+    # TODO fix tmp
+    tcpdump_wrapper "$pcap_filter" dump $pcap_dir 2> /dev/null  |
         perl -ne "m/^[\d:\.]+ IP (\d+\.\d+\.\d+\.\d+)\.(\d+) > $dest_ip\.(\d+)/ && print \"\$3\n\"" |  
-        sort -un)
+        sort -un > /tmp/ingress.ports
+
+    random_ports_cnt=$(cat /tmp/ingress.ports | awk "\$1 > $tcpdump_show_ingress_maxport { print }" | wc -l)
+    if [ $random_ports_cnt -gt 0 ];then
+        >&2 echo 
+        >&2 echo "Warning. High number of random destination ports detected. Possibly FTP communication."
+        >&2 echo "         Report will be limited to low ports only. Set threshold using tcpdump_show_ingress_maxport variable, having default value - 15000"
+        >&2 echo 
+    fi
+
+    ports=$(cat /tmp/ingress.ports | awk "\$1 < $tcpdump_show_ingress_maxport { print }")
+    rm /tmp/ingress.ports
 
     if [ "$tcpdump_show_ingress_format" == CSV ]; then
 
