@@ -277,6 +277,7 @@ function tcpdump_show_ingress() {
 function x-ray_report_egress() {
   env=$1
   days=$2
+  components=$3
 
   : ${days:=$(date -I | cut -d- -f1-2)}
 
@@ -284,7 +285,9 @@ function x-ray_report_egress() {
   tcpdump_show_egress_header="date,env,component,host,direction,this,other,port"
 
   header_displayed=NO
-  components=$(ls /mwlogs/x-ray/$env/)
+  
+  : ${components:=$(ls /mwlogs/x-ray/$env/)}
+
   for component in $components; do
     compute_instances=$(ls /mwlogs/x-ray/$env/$component/diag/hosts/)
     for compute_instance in $compute_instances; do
@@ -307,6 +310,7 @@ function x-ray_report_egress() {
 function x-ray_report_ingress() {
   env=$1
   days=$2
+  components=$3
 
   : ${days:=$(date -I | cut -d- -f1-2)}
 
@@ -314,7 +318,9 @@ function x-ray_report_ingress() {
   tcpdump_show_ingress_header="date,env,component,host,direction,other,this,port"
 
   header_displayed=NO
-  components=$(ls /mwlogs/x-ray/$env/)
+  
+  : ${components:=$(ls /mwlogs/x-ray/$env/)}
+
   for component in $components; do
     compute_instances=$(ls /mwlogs/x-ray/$env/$component/diag/hosts/)
     for compute_instance in $compute_instances; do
