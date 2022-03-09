@@ -163,7 +163,8 @@ function tcpdump_show_egress() {
             cut -d: -f1 |
             sort -u |
             grep -P "$port$"|
-            cut -d'.' -f1-4)
+            cut -d'.' -f1-4 |
+            sort -u)
             for host in $hosts; do
                 echo -n $tcpdump_show_egress_insert
                 echo "egress,$src_ip,$host,$port"
@@ -181,6 +182,7 @@ function tcpdump_show_egress() {
             sort -u |
             grep -P "$port$"|
             cut -d'.' -f1-4 |
+            sort -u |
             tr '\n' ' '
             echo
         done
