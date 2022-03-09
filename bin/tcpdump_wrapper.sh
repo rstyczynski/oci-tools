@@ -160,10 +160,10 @@ function tcpdump_show_egress() {
 
     random_ports_cnt=$(cat /tmp/egress.ports | awk "\$1 > $tcpdump_show_egress_maxport { print }" | wc -l)
     if [ $random_ports_cnt -gt 0 ];then
-        echo 
-        echo "Warning. High number of random destination ports detected. Possibly FTP communication."
-        echo "         Report will be limited to low ports only. Set threshold using tcpdump_show_egress_maxport variable, having default value - 15000"
-        echo 
+        >&2 echo 
+        >&2 echo "Warning. High number of random destination ports detected. Possibly FTP communication."
+        >&2 echo "         Report will be limited to low ports only. Set threshold using tcpdump_show_egress_maxport variable, having default value - 15000"
+        >&2 echo 
     fi
 
     ports=$(cat /tmp/egress.ports | awk "\$1 < $tcpdump_show_egress_maxport { print }")
