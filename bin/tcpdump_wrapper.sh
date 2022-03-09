@@ -492,7 +492,7 @@ function enrich_Xgress_with_subnets() {
 # combine OCI public registry and Alshaya registry to be available at ~/network/etc/cidr_global_registry.csv
 # global file is sorted in such way that wider CIDRs are on bottom of the file
 #
-function bulid_CIDR_registry() {
+function build_CIDR_registry() {
 
   unset host2cidr # clear cache
 
