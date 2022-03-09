@@ -259,7 +259,7 @@ function x-ray_report_egress() {
           tcpdump_show_egress_header=" "
         fi
         tcpdump_show_egress_insert="$day,$env,$component,$compute_instance,"
-        tcpdump_show_egress /mwlogs/x-ray/dev/$component/diag/hosts/$compute_instance/traffic/$day
+        tcpdump_show_egress /mwlogs/x-ray/$env/$component/diag/hosts/$compute_instance/traffic/$day
 
         header_displayed=OK
       done
@@ -290,7 +290,7 @@ function x-ray_report_ingress() {
           tcpdump_show_ingress_header=" "
         fi
         tcpdump_show_ingress_insert="$day,$env,$component,$compute_instance,"
-        tcpdump_show_ingress /mwlogs/x-ray/dev/$component/diag/hosts/$compute_instance/traffic/$day
+        tcpdump_show_ingress /mwlogs/x-ray/$env/$component/diag/hosts/$compute_instance/traffic/$day
         header_displayed=OK
       done
     done
