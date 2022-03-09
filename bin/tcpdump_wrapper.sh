@@ -133,6 +133,8 @@ function tcpdump_show_egress() {
 
     : ${pcap_dir:=$HOME/x-ray/traffic/$(date -I)} 
 
+    : ${tcpdump_show_egress_maxport:=15000}
+
     pcap_filter='tcp[tcpflags] & tcp-syn != 0 and tcp[tcpflags] & tcp-ack == 0'
     tcp_file_pfx=tcpdump_filter_$(echo ${pcap_filter} | tr -c 'a-zA-Z0-9' '_')
 
@@ -147,13 +149,25 @@ function tcpdump_show_egress() {
         return 1
     fi
 
-    ports=$(tcpdump_wrapper "$pcap_filter" dump $pcap_dir 2> /dev/null  |
-        grep -P "^[\d:\.]+ IP $src_ip" |
-        cut -d'>' -f2 |
-        cut -d: -f1 |
-        sort -u |
-        cut -d'.' -f5 |
-        sort -un)
+    # TODO handle tmp properly
+    tcpdump_wrapper "$pcap_filter" dump $pcap_dir 2> /dev/null  |
+    grep -P "^[\d:\.]+ IP $src_ip" |
+    cut -d'>' -f2 |
+    cut -d: -f1 |
+    sort -u |
+    cut -d'.' -f5 |
+    sort -un >  /tmp/egress.ports
+
+    random_ports_cnt=$(cat /tmp/egress.ports | awk "\$1 > $tcpdump_show_egress_maxport { print }" | wc -l)
+    if [ $random_ports_cnt -gt 0 ];then
+        echo 
+        echo "Warning. High number of random destination ports detected. Possibly FTP communication."
+        echo "         Report will be limited to low ports only. Set threshold using tcpdump_show_egress_maxport variable, having default value - 15000"
+        echo 
+    fi
+
+    ports=$(cat /tmp/egress.ports | awk "\$1 < $tcpdump_show_egress_maxport { print }")
+    rm /tmp/egress.ports
 
     if [ "$tcpdump_show_egress_format" == CSV ]; then
         for port in $ports; do
