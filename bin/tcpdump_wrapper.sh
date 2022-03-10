@@ -269,4 +269,3 @@ function tcpdump_show_ingress() {
         done
     fi
 }
-

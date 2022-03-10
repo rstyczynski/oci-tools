@@ -214,7 +214,6 @@ function enrich_Xgress_with_subnets() {
   >&2 echo "."
 }
 
-
 # list non registered destinatino ip
 function get_not_registered_addresses() {
   data_files=$1
