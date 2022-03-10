@@ -254,7 +254,7 @@ function get_not_registered_addresses() {
         : ${owner:=$(whois $host | grep person | cut -d: -f2 | tr -s ' ' | head -1)}
         cidr=$(whois $host | grep CIDR | cut -d: -f2 | tr -s ' ' | head -1 | tr , ';')
         network=$(whois $host | grep inetnum | cut -d: -f2 | tr -s ' ' | head -1 | tr , ';')
-        echo "$src_with_unknown, $host, $owner, $cidr, $network"
+        echo "$src_with_unknown, $host, $port,$owner, $cidr, $network"
       done
     done
     unset IFS
