@@ -40,7 +40,7 @@ for my $component (split /,/, $ARGV[3]) {
     my $csv_file="${data_dir}/traffic_egress_cidr2cidr_ports__${component}.csv";
 
     $worksheet->write( $row, 0,  "Created ${component}:");
-    my $created=gmtime(stat($csv_file)[9]);
+    my $created=stat($csv_file)[9];
     $worksheet->write( $row, 1,  "${created} UTC");
     $row++
 }
