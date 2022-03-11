@@ -40,8 +40,8 @@ for my $component (split /,/, $ARGV[3]) {
     my $csv_file="${data_dir}/traffic_egress_cidr2cidr_ports__${component}.csv";
 
     $worksheet->write( $row, 0,  "Created ${component}:");
-    my $created=stat($csv_file)[9];
-    $worksheet->write( $row, 1,  "${created} UTC");
+    ($device, $inode, $mode, $nlink, $uid, $gid, $rdev, $size, $atime, $mtime, $ctime, $blksize, $blocks) = stat($csv_file);
+    $worksheet->write( $row, 1,  "${mtime} UTC");
     $row++
 }
 
