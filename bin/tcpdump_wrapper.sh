@@ -149,11 +149,10 @@ function tcpdump_show_egress() {
         return 1
     fi
 
-    mkdir -p ~/network~/network/tmp/$$
+    mkdir -p ~/network/tmp/$$
 
     >&2 echo "Processing data from $src_ip stored at $pcap_dir"
 
-    # TODO handle tmp properly
     tcpdump_wrapper "$pcap_filter" dump $pcap_dir 2> /dev/null  |
     grep -P "^[\d:\.]+ IP $src_ip" |
     cut -d'>' -f2 |
@@ -231,7 +230,7 @@ function tcpdump_show_ingress() {
         return 1
     fi
 
-    mkdir -p ~/network~/network/tmp/$$
+    mkdir -p ~/network/tmp/$$
 
     >&2 echo "Processing data directed to $src_ip stored at $pcap_dir"
 
