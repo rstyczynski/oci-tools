@@ -6,7 +6,7 @@
 function x-ray_report_egress() {
   env=$1
   days=$2
-  components=$3
+  components_list=$3
 
   : ${days:=$(date -I | cut -d- -f1-2)}
 
@@ -15,9 +15,9 @@ function x-ray_report_egress() {
 
   header_displayed=NO
   
-  : ${components:=$(ls /mwlogs/x-ray/$env/)}
+  : ${components_list:=$(ls /mwlogs/x-ray/$env/)}
 
-  for component in $components; do
+  for component in $components_list; do
     compute_instances=$(ls /mwlogs/x-ray/$env/$component/diag/hosts/)
     for compute_instance in $compute_instances; do
       for day in $(ls /mwlogs/x-ray/$env/$component/diag/hosts/$compute_instance/traffic | grep $days); do
@@ -39,7 +39,7 @@ function x-ray_report_egress() {
 function x-ray_report_ingress() {
   env=$1
   days=$2
-  components=$3
+  components_list=$3
 
   : ${days:=$(date -I | cut -d- -f1-2)}
 
@@ -48,9 +48,9 @@ function x-ray_report_ingress() {
 
   header_displayed=NO
   
-  : ${components:=$(ls /mwlogs/x-ray/$env/)}
+  : ${components_list:=$(ls /mwlogs/x-ray/$env/)}
 
-  for component in $components; do
+  for component in $components_list; do
     compute_instances=$(ls /mwlogs/x-ray/$env/$component/diag/hosts/)
     for compute_instance in $compute_instances; do
       for day in $(ls /mwlogs/x-ray/$env/$component/diag/hosts/$compute_instance/traffic | grep $days); do
