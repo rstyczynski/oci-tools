@@ -3,6 +3,7 @@
 # Source: https://unix.stackexchange.com/questions/158254/convert-csv-to-xls-file-on-linux
 
 use strict;
+use File::stat;
 use Spreadsheet::WriteExcel;
 use Text::CSV_XS;
 
