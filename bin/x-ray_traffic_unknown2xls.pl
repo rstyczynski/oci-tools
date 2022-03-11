@@ -38,6 +38,11 @@ $worksheet->write( 1, 1,  $data_dir);
 $worksheet->write( 2, 0,  "Description:");
 $worksheet->write( 2, 1,  $desc);
 
+$worksheet->write( 3, 0,  "Created:");
+my $created=gmtime();
+$worksheet->write( 3, 1,  "${created} UTC");
+
+
 for my $component (split /,/, $ARGV[3]) {
 
     my $csv_file="${data_dir}/traffic_egress_unknown_addresses_${component}.csv";
@@ -68,4 +73,4 @@ for my $component (split /,/, $ARGV[3]) {
     }
 }
 
-print("Unknown registry created:${xls_file}")
+print("Registry of unknown addresses exported: ${xls_file}\n")
