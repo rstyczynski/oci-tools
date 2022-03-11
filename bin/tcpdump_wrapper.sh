@@ -173,15 +173,15 @@ function tcpdump_show_egress() {
     rm /tmp/egress.ports
 
     # TODO fix tmp
-    tcpdump_wrapper "$pcap_filter" dump $pcap_dir 2> /dev/null > /tmp/egress.dump
+    tcpdump_wrapper "$pcap_filter" dump $pcap_dir 2> /dev/null |
+        grep -P "^[\d:\.]+ IP $src_ip" |
+        cut -d'>' -f2 |
+        cut -d: -f1 |
+        sort -u > /tmp/egress.dump
 
     if [ "$tcpdump_show_egress_format" == CSV ]; then
         for port in $ports; do
             hosts=$(cat /tmp/egress.dump |
-            grep -P "^[\d:\.]+ IP $src_ip" |
-            cut -d'>' -f2 |
-            cut -d: -f1 |
-            sort -u |
             grep -P "$port$"|
             cut -d'.' -f1-4 |
             sort -u)
@@ -196,10 +196,6 @@ function tcpdump_show_egress() {
         for port in $ports; do
             echo -n " tcp $port:"
             cat /tmp/egress.dump |
-            grep -P "^[\d:\.]+ IP $src_ip" |
-            cut -d'>' -f2 |
-            cut -d: -f1 |
-            sort -u |
             grep -P "$port$"|
             cut -d'.' -f1-4 |
             sort -u |
