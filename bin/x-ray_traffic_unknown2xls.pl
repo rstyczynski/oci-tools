@@ -56,4 +56,4 @@ for my $component (split /,/, $ARGV[1]) {
     }
 }
 
-print("Unknown registry created:${xls_file})"
+print("Unknown registry created:${xls_file}")
