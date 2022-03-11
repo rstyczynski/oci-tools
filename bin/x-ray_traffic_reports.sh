@@ -252,7 +252,7 @@ function get_not_registered_addresses() {
       IFS=$'\n'
       for host in $(cat $data_files/traffic_egress_subnets$component_sfx.csv | grep ",$src_with_unknown," | grep UNKNOWN | grep ",$port," | cut -d, -f$other_column | sort -u); do
         owner=$(whois $host | grep OrgName | cut -d: -f2 | tr -s ' ' | head -1 | tr , ' ')
-        : ${owner:=$(whois $host | grep person | cut -d: -f2 | tr -s ' ' | head -1 | tr , ' ')}
+        : ${owner:=$(whois $host | grep descr | cut -d: -f2 | tr -s ' ' | head -1 | tr , ' ')}
         cidr=$(whois $host | grep CIDR | cut -d: -f2 | tr -s ' ' | head -1 | tr , ';')
         network=$(whois $host | grep inetnum | cut -d: -f2 | tr -s ' ' | head -1 | tr , ';')
         echo "$src_with_unknown, $host, $port,$owner, $cidr, $network"

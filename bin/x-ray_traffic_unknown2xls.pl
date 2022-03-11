@@ -7,8 +7,8 @@ use Spreadsheet::WriteExcel;
 use Text::CSV_XS;
 
 # Check for valid number of arguments
-if ( ( $#ARGV < 1 ) || ( $#ARGV > 2 ) ) {
-    die("Usage: x-ray_traffic_unknown2xls.pl data_dir component,component\n");
+if ( ( $#ARGV < 1 ) || ( $#ARGV > 4 ) ) {
+    die("Usage: x-ray_traffic_unknown2xls.pl env desc data_dir component,component\n");
 }
 
 #  /home/pmaker/network/data/dev/2022-03-10/traffic_egress_unknown_addresses.xls
@@ -19,14 +19,26 @@ if ( ( $#ARGV < 1 ) || ( $#ARGV > 2 ) ) {
 
 # /home/pmaker/network/data/dev/2022-03-10 soa,mft,apics,odi
 
-my $data_dir=$ARGV[0];
+my $env=$ARGV[0];
+my $desc=$ARGV[1];
+my $data_dir=$ARGV[2];
 
 my $xls_file = "${data_dir}/traffic_egress_unknown_addresses.xls";
 
 # Create a new Excel workbook
 my $workbook  = Spreadsheet::WriteExcel->new( $xls_file );
 
-for my $component (split /,/, $ARGV[1]) {
+my $worksheet = $workbook->add_worksheet('ABOUT');
+$worksheet->write( 0, 0, "Environment:");
+$worksheet->write( 0, 1, $env);
+
+$worksheet->write( 1, 0,  "Directory:");
+$worksheet->write( 1, 1,  $data_dir);
+
+$worksheet->write( 2, 0,  "Description:");
+$worksheet->write( 2, 1,  $desc);
+
+for my $component (split /,/, $ARGV[3]) {
 
     my $csv_file="${data_dir}/traffic_egress_unknown_addresses_${component}.csv";
 
