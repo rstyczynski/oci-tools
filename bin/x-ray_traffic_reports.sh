@@ -238,6 +238,7 @@ function get_not_registered_addresses() {
   other_column=$(csv_column other)
 
 
+  echo "source,destination,port,whois_owner,whois_cidr,whois_network"
   for src_with_unknown in $(cat $data_files/traffic_egress_cidr2cidr_ports$component_sfx.csv | grep UNKNOWN | cut -d, -f$CIDR_this_column); do
 
     ports_raw=$(cat $data_files/traffic_egress_cidr2cidr_ports$component_sfx.csv  | grep $src_with_unknown | grep UNKNOWN | cut -d, -f$ports_column)
@@ -250,8 +251,8 @@ function get_not_registered_addresses() {
       #echo Host from subnet $src_with_unknown talks on port: $port to following not registered ip addreses:
       IFS=$'\n'
       for host in $(cat $data_files/traffic_egress_subnets$component_sfx.csv | grep ",$src_with_unknown," | grep UNKNOWN | grep ",$port," | cut -d, -f$other_column | sort -u); do
-        owner=$(whois $host | grep OrgName | cut -d: -f2 | tr -s ' ' | head -1 )
-        : ${owner:=$(whois $host | grep person | cut -d: -f2 | tr -s ' ' | head -1)}
+        owner=$(whois $host | grep OrgName | cut -d: -f2 | tr -s ' ' | head -1 | tr , ' ')
+        : ${owner:=$(whois $host | grep person | cut -d: -f2 | tr -s ' ' | head -1 | tr , ' ')}
         cidr=$(whois $host | grep CIDR | cut -d: -f2 | tr -s ' ' | head -1 | tr , ';')
         network=$(whois $host | grep inetnum | cut -d: -f2 | tr -s ' ' | head -1 | tr , ';')
         echo "$src_with_unknown, $host, $port,$owner, $cidr, $network"
