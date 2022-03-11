@@ -165,15 +165,19 @@ function tcpdump_show_egress() {
         >&2 echo 
         >&2 echo "Warning. High number of random destination ports detected. Possibly FTP communication."
         >&2 echo "         Report will be limited to low ports only. Set threshold using tcpdump_show_egress_maxport variable, having default value - 15000"
-        >&2 echo 
+        >&2 echo "         Number of discovered ports: $random_ports_cnt, $(cat /tmp/egress.ports | sort -nu | head -100)"
+        >&2 echo "         Current value of tcpdump_show_egress_maxport: $tcpdump_show_egress_maxport"
     fi
 
     ports=$(cat /tmp/egress.ports | awk "\$1 < $tcpdump_show_egress_maxport { print }")
     rm /tmp/egress.ports
 
+    # TODO fix tmp
+    tcpdump_wrapper "$pcap_filter" dump $pcap_dir 2> /dev/null > /tmp/egress.dump
+
     if [ "$tcpdump_show_egress_format" == CSV ]; then
         for port in $ports; do
-            hosts=$(tcpdump_wrapper "$pcap_filter" dump $pcap_dir 2> /dev/null |
+            hosts=$(cat /tmp/egress.dump |
             grep -P "^[\d:\.]+ IP $src_ip" |
             cut -d'>' -f2 |
             cut -d: -f1 |
@@ -191,7 +195,7 @@ function tcpdump_show_egress() {
     else
         for port in $ports; do
             echo -n " tcp $port:"
-            tcpdump_wrapper "$pcap_filter" dump $pcap_dir 2> /dev/null |
+            cat /tmp/egress.dump |
             grep -P "^[\d:\.]+ IP $src_ip" |
             cut -d'>' -f2 |
             cut -d: -f1 |
@@ -203,6 +207,8 @@ function tcpdump_show_egress() {
             echo
         done
     fi
+
+    rm /tmp/egress.dump
 }
 
 function tcpdump_show_ingress() {
@@ -239,16 +245,20 @@ function tcpdump_show_ingress() {
         >&2 echo 
         >&2 echo "Warning. High number of random destination ports detected. Possibly FTP communication."
         >&2 echo "         Report will be limited to low ports only. Set threshold using tcpdump_show_ingress_maxport variable, having default value - 15000"
-        >&2 echo 
+        >&2 echo "         Number of discovered ports: $random_ports_cnt, $(cat /tmp/ingress.ports | sort -nu | head -100)"
+        >&2 echo "         Current value of tcpdump_show_egress_maxport: $tcpdump_show_ingress_maxport"
     fi
 
     ports=$(cat /tmp/ingress.ports | awk "\$1 < $tcpdump_show_ingress_maxport { print }")
     rm /tmp/ingress.ports
 
+    # TODO fix tmp
+    tcpdump_wrapper "$pcap_filter" dump $pcap_dir 2> /dev/null > /tmp/ingress.dump
+
     if [ "$tcpdump_show_ingress_format" == CSV ]; then
 
         for port in $ports; do
-            hosts=$(tcpdump_wrapper "$pcap_filter" dump $pcap_dir 2> /dev/null |
+            hosts=$(cat /tmp/ingress.dump |
                 perl -ne "m/^[\d:\.]+ IP (\d+\.\d+\.\d+\.\d+)\.(\d+) > $dest_ip\.(\d+)/ && print \"\$1\n\"" |
                 sort -u)
             for host in $hosts; do
@@ -261,11 +271,13 @@ function tcpdump_show_ingress() {
     else
         for port in $ports; do
             echo -n " tcp $port:"
-            tcpdump_wrapper "$pcap_filter" dump $pcap_dir 2> /dev/null |
+            cat /tmp/ingress.dump |
             perl -ne "m/^[\d:\.]+ IP (\d+\.\d+\.\d+\.\d+)\.(\d+) > $dest_ip\.(\d+)/ && print \"\$1\n\"" |
             sort -u |
             tr '\n' ' '
             echo
         done
     fi
+
+    rm /tmp/ingress.dump
 }
