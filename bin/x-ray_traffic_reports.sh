@@ -274,9 +274,10 @@ function build_CIDR_registry() {
 
   echo "Processing UNKNOWN_registry...."
   cat > ~/network/etc/UNKNOWN_registry.csv <<EOF
-  CIDR,category,owner,owner_person,owner_email,system,region,desc,url,type,id,cidr_registry
-  254.254.254.254/32,UNKNOWN,UNKNOWN,UNKNOWN,UNKNOWN,UNKNOWN,UNKNOWN,UNKNOWN,UNKNOWN,~/network/etc/UNKNOWN_registry.csv
+CIDR,category,owner,owner_person,owner_email,system,region,desc,url,type,id,cidr_registry
+254.254.254.254/32,UNKNOWN,UNKNOWN,UNKNOWN,UNKNOWN,UNKNOWN,UNKNOWN,UNKNOWN,UNKNOWN,UNKNOWN,UNKNOWN,~/network/etc/UNKNOWN_registry.csv
 EOF
+echo Finished
 
   #
   # build OCI public ranges registry 
@@ -328,8 +329,8 @@ EOF
   registry_file=~/network/etc/$registry\_registry.csv
   test -f $registry_file && mv $registry_file $registry_file.$(date +%s)
   cat >  $registry_file <<EOF
-  CIDR,category,owner,owner_person,owner_email,system,region,desc,url,type,id,cidr_registry
-  169.254.0.0/16,subnet,Oracle OCI,,,OCI direct connection,,OCI internal,,,,$registry_file
+CIDR,category,owner,owner_person,owner_email,system,region,desc,url,type,id,cidr_registry
+169.254.0.0/16,subnet,Oracle OCI,,,OCI direct connection,,OCI internal,,,,$registry_file
 EOF
   echo Finished
 
@@ -358,7 +359,7 @@ EOF
     echo Not requested
   fi
 
-  echo -n "Processing OCI_PUBLIC_REGISTRY_registry...."
+  echo -n "Processing ENV_REGISTRY_registry...."
   if [ $ENV_REGISTRY == yes ]; then
     cat $HOME/network/data/$env/$(date -I)/registered_ingress.csv | grep -v "$csv_header"  >> ~/network/tmp/cidr_global_registry.csv
     cat $HOME/network/data/$env/$(date -I)/registered_egress.csv | grep -v "$csv_header"  >> ~/network/tmp/cidr_global_registry.csv
