@@ -42,6 +42,16 @@ $worksheet->write( 3, 0,  "Created:");
 my $created=gmtime();
 $worksheet->write( 3, 1,  "${created} UTC");
 
+my $row = 4;
+for my $component (split /,/, $ARGV[3]) {
+    my $csv_file="${data_dir}/traffic_egress_unknown_addresses_${component}.csv";
+
+    $worksheet->write( $row, 0,  "Created ${component}:");
+    my $created=gmtime(stat($csv_file)->mtime);
+    $worksheet->write( $row, 1,  "${created} UTC");
+    $row++
+}
+
 
 for my $component (split /,/, $ARGV[3]) {
 
