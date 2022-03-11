@@ -267,60 +267,72 @@ function build_CIDR_registry() {
 
   unset host2cidr # clear cache
 
+  echo "================================"
+  echo "======== CIDR registy =========="
+  ls -l $HOME/network/etc/CIDR_registry.xlsx
+  echo "================================"
 
-cat > ~/network/etc/UNKNOWN_registry.csv <<EOF
-CIDR,category,owner,system,region,desc,url,type,id,cidr_registry
-254.254.254.254/32,UNKNOWN,UNKNOWN,UNKNOWN,UNKNOWN,UNKNOWN,UNKNOWN,UNKNOWN,UNKNOWN,~/network/etc/UNKNOWN_registry.csv
+  echo "Processing UNKNOWN_registry...."
+  cat > ~/network/etc/UNKNOWN_registry.csv <<EOF
+  CIDR,category,owner,owner_person,owner_email,system,region,desc,url,type,id,cidr_registry
+  254.254.254.254/32,UNKNOWN,UNKNOWN,UNKNOWN,UNKNOWN,UNKNOWN,UNKNOWN,UNKNOWN,UNKNOWN,~/network/etc/UNKNOWN_registry.csv
 EOF
 
-#
-# build OCI public ranges registry 
-# Source: https://docs.oracle.com/en-us/iaas/Content/General/Concepts/addressranges.htm
-# Source: https://stackoverflow.com/questions/26701538/how-to-filter-an-array-of-objects-based-on-values-in-an-inner-array-with-jq
-#
+  #
+  # build OCI public ranges registry 
+  # Source: https://docs.oracle.com/en-us/iaas/Content/General/Concepts/addressranges.htm
+  # Source: https://stackoverflow.com/questions/26701538/how-to-filter-an-array-of-objects-based-on-values-in-an-inner-array-with-jq
+  #
 
-test -f ~/network/etc/public_ip_ranges.json && mv ~/network/etc/public_ip_ranges.json ~/network/backup/etc/public_ip_ranges.json.$(date +%s)
-curl -Ls https://docs.oracle.com/iaas/tools/public_ip_ranges.json > ~/network/etc/public_ip_ranges.json
+  echo -n "Downloading OCI public adresses...."
+  OCI_ranges=~/network/etc/public_ip_ranges.json
+  test -f ~/network/etc/public_ip_ranges.json && mv ~/network/etc/public_ip_ranges.json ~/network/backup/etc/public_ip_ranges.json.$(date +%s)
+  curl -Ls https://docs.oracle.com/iaas/tools/public_ip_ranges.json > $OCI_ranges
+  echo Finished
 
-OCI_ranges=~/network/etc/public_ip_ranges.json
-OCI_ranges_csv=~/network/etc/OCI_public_ip_ranges.csv
+  echo -n "Processing OCI_PUBLIC_registry...."
+  OCI_ranges_csv=~/network/etc/OCI_PUBLIC_registry.csv
+  echo 'CIDR,category,owner,owner_person,owner_email,system,region,desc,url,type,id,cidr_registry' > $OCI_ranges_csv
+  regions=$(cat $OCI_ranges| jq -r '.regions[].region')
+  for region in $regions; do
+    for cidr in $(cat $OCI_ranges | jq -r ".regions[] | select (.region==\"$region\") | .cidrs[] | select (.tags[] | contains(\"OCI\")) | .cidr") ;do
+      echo "$cidr,subnet,,,Oracle,,,OCI,$region,OCI public addresses,,Internet,,OCI_PUBLIC"
+    done
+  done >> $OCI_ranges_csv
+  echo Finished
 
-echo 'CIDR,category,owner,system,region,desc,url,type,id,cidr_registry' > $OCI_ranges_csv
-regions=$(cat $OCI_ranges| jq -r '.regions[].region')
-for region in $regions; do
-  for cidr in $(cat $OCI_ranges | jq -r ".regions[] | select (.region==\"$region\") | .cidrs[] | select (.tags[] | contains(\"OCI\")) | .cidr") ;do
-    echo "$cidr,subnet,Oracle,OCI,$region,OCI public addresses,,Internet,,public_ip_ranges.json;OCI"
-  done
-done >> $OCI_ranges_csv
+  echo -n "Processing OCI_OBJECT_STORAGE_registry...."
+  OBJECT_STORAGE_ranges_csv=~/network/etc/OCI_OBJECT_STORAGE_registry.csv
+  echo 'CIDR,category,owner,owner_person,owner_email,system,region,desc,url,type,id,cidr_registry' > $OBJECT_STORAGE_ranges_csv
+  regions=$(cat $OCI_ranges| jq -r '.regions[].region')
+  for region in $regions; do
+    for cidr in $(cat $OCI_ranges | jq -r ".regions[] | select (.region==\"$region\") | .cidrs[] | select (.tags[] | contains(\"OBJECT_STORAGE\")) | .cidr") ;do
+      echo "$cidr,subnet,,,Oracle,,,OBJECT_STORAGE,$region,Oracle Object Storage,,Internet,,OCI_OBJECT_STORAGE"
+    done
+  done >> $OBJECT_STORAGE_ranges_csv
+  echo Finished
 
-OBJECT_STORAGE_ranges_csv=~/network/etc/OBJECT_STORAGE_public_ip_ranges.csv
+  echo -n "Processing OCI_OSN_registry...."
+  OSN_ranges_csv=~/network/etc/OCI_OSN_registry.csv
+  echo 'CIDR,category,owner,owner_person,owner_email,system,region,desc,url,type,id,cidr_registry' > $OSN_ranges_csv
+  regions=$(cat $OCI_ranges| jq -r '.regions[].region')
+  for region in $regions; do
+    for cidr in $(cat $OCI_ranges | jq -r ".regions[] | select (.region==\"$region\") | .cidrs[] | select (.tags[] | contains(\"OSN\")) | .cidr") ;do
+      echo "$cidr,subnet,Oracle,,,OSN,$region,Oracle Services Network,,Internet,,OCI_OSN"
+    done
+  done | grep -v -f <(cat $OBJECT_STORAGE_ranges_csv | cut -d, -f1 | grep -v CIDR)  >> $OSN_ranges_csv
+  echo Finished
 
-echo 'CIDR,category,owner,system,region,desc,url,type,id,cidr_registry' > $OBJECT_STORAGE_ranges_csv
-regions=$(cat $OCI_ranges| jq -r '.regions[].region')
-for region in $regions; do
-  for cidr in $(cat $OCI_ranges | jq -r ".regions[] | select (.region==\"$region\") | .cidrs[] | select (.tags[] | contains(\"OBJECT_STORAGE\")) | .cidr") ;do
-    echo "$cidr,subnet,Oracle,OBJECT_STORAGE,$region,Oracle Object Storage,,Internet,,public_ip_ranges.json;OBJECT_STORAGE"
-  done
-done >> $OBJECT_STORAGE_ranges_csv
-
-OSN_ranges_csv=~/network/etc/OSN_public_ip_ranges.csv
-
-echo 'CIDR,category,owner,system,region,desc,url,type,id,cidr_registry' > $OSN_ranges_csv
-regions=$(cat $OCI_ranges| jq -r '.regions[].region')
-for region in $regions; do
-  for cidr in $(cat $OCI_ranges | jq -r ".regions[] | select (.region==\"$region\") | .cidrs[] | select (.tags[] | contains(\"OSN\")) | .cidr") ;do
-    echo "$cidr,subnet,Oracle,OSN,$region,Oracle Services Network,,Internet,,public_ip_ranges.json;OSN"
-  done
-done | grep -v -f <(cat $OBJECT_STORAGE_ranges_csv | cut -d, -f1 | grep -v CIDR)  >> $OSN_ranges_csv
-
-
-registry=oci_internal
-registry_file=~/network/etc/$registry\_registry.csv
-test -f $registry_file && mv $registry_file $registry_file.$(date +%s)
-cat >  $registry_file <<EOF
-CIDR,category,owner,system,region,desc,url,type,id,cidr_registry
-169.254.0.0/16,subnet,Oracle OCI,OCI direct connection,,OCI internal,,,,$registry_file
+  echo -n "Processing OCI_INTERNAL_registry...."
+  registry=OCI_INTERNAL
+  registry_file=~/network/etc/$registry\_registry.csv
+  test -f $registry_file && mv $registry_file $registry_file.$(date +%s)
+  cat >  $registry_file <<EOF
+  CIDR,category,owner,owner_person,owner_email,system,region,desc,url,type,id,cidr_registry
+  169.254.0.0/16,subnet,Oracle OCI,,,OCI direct connection,,OCI internal,,,,$registry_file
 EOF
+  echo Finished
+
 
   csv_file=~/network/etc/UNKNOWN_registry.csv 
   csv_header=$(csv_header)
@@ -328,31 +340,63 @@ EOF
   echo $csv_header > ~/network/tmp/cidr_global_registry.csv
   cat ~/network/etc/UNKNOWN_registry.csv | grep -v "$csv_header" >> ~/network/tmp/cidr_global_registry.csv
 
-  if [ $TENANCY_REGISTRY == yes ]; then
-    cat ~/network/etc/tenancy_registry.csv | grep -v "$csv_header"  >> ~/network/tmp/cidr_global_registry.csv
-  fi
-
+  echo -n "Processing OCI_INTERNAL_registry...."
   if [ $OCI_INTERNAL_REGISTRY == yes ]; then
-    cat ~/network/etc/oci_internal_registry.csv | grep -v "$csv_header"  >> ~/network/tmp/cidr_global_registry.csv
+    cat ~/network/etc/OCI_INTERNAL_registry.csv | grep -v "$csv_header"  >> ~/network/tmp/cidr_global_registry.csv
+    echo Finished
+  else 
+    echo Not requested
   fi
 
+  echo -n "Processing OCI_PUBLIC_REGISTRY_registry...."
   if [ $OCI_PUBLIC_REGISTRY == yes ]; then
     cat $OBJECT_STORAGE_ranges_csv | grep -v "$csv_header"  >> ~/network/tmp/cidr_global_registry.csv
     cat $OSN_ranges_csv | grep -v "$csv_header"  >> ~/network/tmp/cidr_global_registry.csv
     cat $OCI_ranges_csv | grep -v "$csv_header"  >> ~/network/tmp/cidr_global_registry.csv
+    echo Finished
+  else 
+    echo Not requested
   fi
 
-  if [ $CIDR_REGISTRY == yes ]; then
-    cat ~/network/etc/cidr_registry.csv | grep -v "$csv_header"  >> ~/network/tmp/cidr_global_registry.csv
-  fi
-
-  if [ $HOST_REGISTRY == yes ]; then
-    cat ~/network/etc/host_registry.csv | grep -v "$csv_header"  >> ~/network/tmp/cidr_global_registry.csv
-  fi
-
+  echo -n "Processing OCI_PUBLIC_REGISTRY_registry...."
   if [ $ENV_REGISTRY == yes ]; then
-    test  -f $HOME/network/data/$env/$(date -I)/registered_ingress.csv && cat $HOME/network/data/$env/$(date -I)/registered_ingress.csv | grep -v "$csv_header"  >> ~/network/tmp/cidr_global_registry.csv
-    test  -f $HOME/network/data/$env/$(date -I)/registered_egress.csv && cat $HOME/network/data/$env/$(date -I)/registered_egress.csv | grep -v "$csv_header"  >> ~/network/tmp/cidr_global_registry.csv
+    cat $HOME/network/data/$env/$(date -I)/registered_ingress.csv | grep -v "$csv_header"  >> ~/network/tmp/cidr_global_registry.csv
+    cat $HOME/network/data/$env/$(date -I)/registered_egress.csv | grep -v "$csv_header"  >> ~/network/tmp/cidr_global_registry.csv
+    echo Finished
+  else 
+    echo Not requested
+  fi
+
+  echo -n "Processing TENANCY_REGISTRY_registry...."
+  if [ $TENANCY_REGISTRY == yes ]; then
+    xlsx2csv -n tenancy $HOME/network/etc/CIDR_registry.xlsx | grep -v "$csv_header"  >> ~/network/tmp/cidr_global_registry.csv
+    echo Finished
+  else 
+    echo Not requested
+  fi
+
+  echo -n "Processing CUSTOMER_REGISTRY_registry...."
+  if [ $CUSTOMER_REGISTRY == yes ]; then
+    xlsx2csv -n customer $HOME/network/etc/CIDR_registry.xlsx | grep -v "$csv_header"  >> ~/network/tmp/cidr_global_registry.csv
+    echo Finished
+  else 
+    echo Not requested
+  fi
+
+  echo -n "Processing PARTNERS_REGISTRY_registry...."
+  if [ $PARTNERS_REGISTRY == yes ]; then
+    xlsx2csv -n partners $HOME/network/etc/CIDR_registry.xlsx | grep -v "$csv_header"  >> ~/network/tmp/cidr_global_registry.csv
+    echo Finished
+  else 
+    echo Not requested
+  fi
+
+  echo -n "Processing SYSTEM_REGISTRY_registry...."
+  if [ $SYSTEM_REGISTRY == yes ]; then
+    xlsx2csv -n system $HOME/network/etc/CIDR_registry.xlsx | grep -v "$csv_header"  >> ~/network/tmp/cidr_global_registry.csv
+    echo Finished
+  else 
+    echo Not requested
   fi
 
   # sort all cidr and hosts 
