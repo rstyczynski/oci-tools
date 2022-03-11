@@ -38,7 +38,7 @@ $worksheet->write( 3, 1,  "${created} UTC");
 my $row = 4;
 for my $component (split /,/, $ARGV[3]) {
     $worksheet->write( $row, 0,  "Created ${component}:");
-    my $mtime = stat("${data_dir}/traffic_egress_cidr2cidr_ports__${component}.csv")[9];
+    my $mtime = (stat("${data_dir}/traffic_egress_cidr2cidr_ports__${component}.csv"))[9];
     $worksheet->write( $row, 1,  "${mtime} UTC");
     $row++
 }
