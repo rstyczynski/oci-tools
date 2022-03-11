@@ -38,7 +38,7 @@ $worksheet->write( 3, 1,  "${created} UTC");
 my $row = 4;
 for my $component (split /,/, $ARGV[3]) {
     $worksheet->write( $row, 0,  "Created ${component}:");
-    my $mtime = (stat("${data_dir}/traffic_egress_cidr2cidr_ports__${component}.csv"))[9];
+    my $mtime = (stat("${data_dir}/traffic_egress_cidr2cidr_ports_${component}.csv"))[9];
     $worksheet->write( $row, 1,  "${mtime} UTC");
     $row++
 }
@@ -46,7 +46,7 @@ for my $component (split /,/, $ARGV[3]) {
 
 for my $component (split /,/, $ARGV[3]) {
 
-    my $csv_file="${data_dir}/traffic_egress_cidr2cidr_ports__${component}.csv";
+    my $csv_file="${data_dir}/traffic_egress_cidr2cidr_ports_${component}.csv";
 
     # Open the Comma Separated Variable file
     open( CSVFILE, $csv_file ) or die "Error. Source file not found: ${csv_file}\n";
