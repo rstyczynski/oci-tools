@@ -225,10 +225,6 @@ function get_not_registered_addresses() {
     unset component_sfx
   fi
 
-  whois 2>/dev/null; test $? -eq 127 && sudo yum install -y whois
-  source  /mwlogs/tools/oci-tools/bin/csv.sh 
-
-
   csv_file=$data_files/traffic_egress_cidr2cidr_ports$component_sfx.csv
 
   CIDR_this_column=$(csv_column CIDR_this)
@@ -236,7 +232,6 @@ function get_not_registered_addresses() {
 
   csv_file=$data_files/traffic_egress_subnets$component_sfx.csv 
   other_column=$(csv_column other)
-
 
   echo "source,destination,port,whois_owner,whois_cidr,whois_network"
   for src_with_unknown in $(cat $data_files/traffic_egress_cidr2cidr_ports$component_sfx.csv | grep UNKNOWN | cut -d, -f$CIDR_this_column); do

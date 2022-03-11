@@ -48,7 +48,7 @@ for my $component (split /,/, $ARGV[3]) {
     my $csv_file="${data_dir}/traffic_egress_unknown_addresses_${component}.csv";
 
     # Open the Comma Separated Variable file
-    open( CSVFILE, $csv_file ) or print("Warning. Source file not found: ${csv_file}");
+    open( CSVFILE, $csv_file ) or die "Error. Source file not found: ${csv_file}\n";
 
     my $worksheet = $workbook->add_worksheet($component);
 
