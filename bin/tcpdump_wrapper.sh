@@ -249,14 +249,14 @@ function tcpdump_show_ingress() {
     rm /tmp/ingress.ports
 
     # TODO fix tmp
-    tcpdump_wrapper "$pcap_filter" dump $pcap_dir 2> /dev/null > /tmp/ingress.dump
+    tcpdump_wrapper "$pcap_filter" dump $pcap_dir 2> /dev/null |
+        perl -ne "m/^[\d:\.]+ IP (\d+\.\d+\.\d+\.\d+)\.(\d+) > $dest_ip\.(\d+)/ && print \"\$1\n\"" |
+        sort -u > /tmp/ingress.dump
 
     if [ "$tcpdump_show_ingress_format" == CSV ]; then
 
         for port in $ports; do
-            hosts=$(cat /tmp/ingress.dump |
-                perl -ne "m/^[\d:\.]+ IP (\d+\.\d+\.\d+\.\d+)\.(\d+) > $dest_ip\.(\d+)/ && print \"\$1\n\"" |
-                sort -u)
+            hosts=$(cat /tmp/ingress.dump)
             for host in $hosts; do
                 echo -n $tcpdump_show_ingress_insert
                 echo "ingress,$host,$dest_ip,$port"
@@ -268,8 +268,6 @@ function tcpdump_show_ingress() {
         for port in $ports; do
             echo -n " tcp $port:"
             cat /tmp/ingress.dump |
-            perl -ne "m/^[\d:\.]+ IP (\d+\.\d+\.\d+\.\d+)\.(\d+) > $dest_ip\.(\d+)/ && print \"\$1\n\"" |
-            sort -u |
             tr '\n' ' '
             echo
         done
