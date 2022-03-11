@@ -165,7 +165,7 @@ function tcpdump_show_egress() {
         >&2 echo 
         >&2 echo "Warning. High number of random destination ports detected. Possibly FTP communication."
         >&2 echo "         Report will be limited to low ports only. Set threshold using tcpdump_show_egress_maxport variable, having default value - 15000"
-        >&2 echo "         Number of discovered ports: $random_ports_cnt, $(cat /tmp/egress.ports | sort -nu | head -100)"
+        >&2 echo "         Number of discovered ports: $random_ports_cnt, first 100 ports: $(cat /tmp/egress.ports | sort -nu | head -100 | tr '\n' ' ')"
         >&2 echo "         Current value of tcpdump_show_egress_maxport: $tcpdump_show_egress_maxport"
     fi
 
@@ -181,8 +181,7 @@ function tcpdump_show_egress() {
 
     if [ "$tcpdump_show_egress_format" == CSV ]; then
         for port in $ports; do
-            hosts=$(cat /tmp/egress.dump |
-            grep -P "$port$"|
+            hosts=$(grep -P "$port$" /tmp/egress.dump |
             cut -d'.' -f1-4 |
             sort -u)
             for host in $hosts; do
@@ -241,7 +240,7 @@ function tcpdump_show_ingress() {
         >&2 echo 
         >&2 echo "Warning. High number of random destination ports detected. Possibly FTP communication."
         >&2 echo "         Report will be limited to low ports only. Set threshold using tcpdump_show_ingress_maxport variable, having default value - 15000"
-        >&2 echo "         Number of discovered ports: $random_ports_cnt, $(cat /tmp/ingress.ports | sort -nu | head -100)"
+        >&2 echo "         Number of discovered ports: $random_ports_cnt, first 100 ports: $(cat /tmp/ingress.ports | sort -nu | head -100 | tr '\n' ' ')"
         >&2 echo "         Current value of tcpdump_show_egress_maxport: $tcpdump_show_ingress_maxport"
     fi
 
