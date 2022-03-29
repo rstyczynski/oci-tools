@@ -139,29 +139,38 @@ function get_data_stats() {
     echo "Error. umc tool csv_rewrite not found. Initialize umc before running this tool."
   fi
 
-  data=$(
-    cat $data_file | 
-    python3 $umcRoot/bin/csv_rewrite --columns=$column 2> /dev/null | 
-    sed -n "/$date $hour_start:/,/$date $hour_stop:/p" | 
-    cut -d, -f6 | 
-    grep -v $column
-  )
-  count=$(echo $data | tr ' ' '\n' | wc -l)
-  avg=$(echo $data | tr ' ' '\n' | awk "{ total += \$1 } END { printf \"$precision\", total/NR * $multipliction  }")
-  stddev=$(echo $data | tr ' ' '\n'  | 
-          awk "
-              {for(i=1;i<=NF;i++) { sum[i] += \$i; sumsq[i] += (\$i)^2}} 
-              END {for (i=1;i<=NF;i++) { 
-                 val=(sumsq[i]-sum[i]^2/NR)/NR
-                 if (val>0)
-                  val=0
-                 printf \"$precision\", sqrt(val) * $multipliction };
-              }
-              "
-          )
-  : ${stddev:=0}
-  min=$(echo $data | tr ' ' '\n' | awk "BEGIN {min=2^52} {if (\$1<0+min) min=\$1} END {printf \"$precision\", min * $multipliction}")
-  max=$(echo $data | tr ' ' '\n' | awk "BEGIN {max=0} {if (\$1>0+max) max=\$1} END {printf \"$precision\", max * $multipliction }")
+  if [ -f "$data_file" ]; then
+    data=$(
+      cat $data_file | 
+      python3 $umcRoot/bin/csv_rewrite --columns=$column 2> /dev/null | 
+      sed -n "/$date $hour_start:/,/$date $hour_stop:/p" | 
+      cut -d, -f6 | 
+      grep -v $column
+    )
+    count=$(echo $data | tr ' ' '\n' | wc -l)
+    avg=$(echo $data | tr ' ' '\n' | awk "{ total += \$1 } END { printf \"$precision\", total/NR * $multipliction  }")
+    stddev=$(echo $data | tr ' ' '\n'  | 
+            awk "
+                {for(i=1;i<=NF;i++) { sum[i] += \$i; sumsq[i] += (\$i)^2}} 
+                END {for (i=1;i<=NF;i++) { 
+                  val=(sumsq[i]-sum[i]^2/NR)/NR
+                  if (val>0)
+                    val=0
+                  printf \"$precision\", sqrt(val) * $multipliction };
+                }
+                "
+            )
+    : ${stddev:=0}
+    min=$(echo $data | tr ' ' '\n' | awk "BEGIN {min=2^52} {if (\$1<0+min) min=\$1} END {printf \"$precision\", min * $multipliction}")
+    max=$(echo $data | tr ' ' '\n' | awk "BEGIN {max=0} {if (\$1>0+max) max=\$1} END {printf \"$precision\", max * $multipliction }")
+  else
+    data='n/a'
+    count='n/a'
+    avg='n/a'
+    stddev='n/a'
+    min='n/a'
+    max='n/a'
+  fi
 }
 
 #
