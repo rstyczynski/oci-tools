@@ -26,28 +26,19 @@ set_exit_code_variable "Key found and retrieved." 0
 
 # discover script directory
 script_path=$0
-if [ $script_path != '-bash' ]; then
-  script_bin=$(dirname "$0")
-fi
-
-if [ -z "$script_bin" ]; then
-  named_exit "Script bin directory unknown."
-fi
+test $script_path != '-bash' && script_bin=$(dirname "$0")
+test -z "$script_bin" && named_exit "Script bin directory unknown."
 
 # check required tools
 unset missing_tools
-if [ ! -f $script_bin/config.sh ]; then
-  missing_tools="config.sh,$missing_tools"
-fi
+test ! -f $script_bin/config.sh && missing_tools="config.sh,$missing_tools"
 
 for cli_tool in $script_tools; do
   which $cli_tool > /dev/null 2>/dev/null
   test $? -eq 1 && missing_tools="$cli_tool,$missing_tools"
 done
 
-if [ ! -z "$missing_tools" ]; then
-  named_exit "Required tools not available." "$missing_tools"
-fi
+test ! -z "$missing_tools" && named_exit "Required tools not available." "$missing_tools"
 
 # read configuration
 source $script_bin/config.sh
@@ -132,7 +123,7 @@ case $operation in
   store)
     if [ -z $key_file ]; then
       usage
-      named_exit "Missing required paramters."
+      named_exit "Missing required paramters." key_file
     fi
 
     content_payload=$(base64 --wrap 0 $key_file)
@@ -152,7 +143,7 @@ case $operation in
           if [ $? -eq 0 ]; then
             named_exit "Uploaded initial version." 
           else
-            named_exit "OCI reported error." 
+            named_exit "OCI reported error." $?
           fi
     else
         current_payload_hash=$(oci secrets secret-bundle get --secret-id $vsid | tr - _ |
@@ -168,7 +159,7 @@ case $operation in
             if [ $? -eq 0 ]; then
               named_exit "Uploaded new version." 
             else
-              named_exit "OCI reported error." 
+              named_exit "OCI reported error." $?
             fi
         else
             named_exit "The same version already exist in vault."
@@ -192,12 +183,11 @@ case $operation in
       if [ $? -eq 0 ]; then
         named_exit "Key found and retrieved." 
       else
-        named_exit "OCI reported error." 
+        named_exit "OCI reported error." $?
       fi
     fi
     ;;
   *)
-    echo "Error. Wrong operation specified. Allowed: store, retrieve."
-    named_exit "Wrong operation specified."
+    named_exit "Wrong operation specified." "Allowed: store, retrieve."
     ;;
 esac
