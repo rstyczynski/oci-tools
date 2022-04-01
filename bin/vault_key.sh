@@ -140,7 +140,7 @@ case $operation in
 
     if [ -z "$vsid" ]; then
         # create
-        >&2 echo "Uploading $secret_name..."
+        >&2 echo "Uploading initial version of $secret_name..."
         oci vault secret create-base64 \
             --compartment-id $compartment_ocid \
             --vault-id $vault_ocid \
@@ -161,7 +161,7 @@ case $operation in
 
         if [ "$new_payload_hash" != "$current_payload_hash" ]; then
             # add new version
-            >&2 echo "Retrieving $secret_name..."
+             >&2 echo "Uploading new version of $secret_name..."
             oci vault secret update-base64 \
                 --secret-id $vsid \
                 --secret-content-content "$content_payload"
@@ -183,6 +183,7 @@ case $operation in
     
     else
       
+       >&2 echo "Retrieving $secret_name..."
       if [ -z "$key_file" ]; then
         oci secrets secret-bundle get --secret-id $vsid | tr - _ | jq -r '.data.secret_bundle_content.content' | base64 -d
       else
