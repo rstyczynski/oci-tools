@@ -16,6 +16,7 @@ set_exit_code_variable "Wrong ocid entered" 3
 set_exit_code_variable "Wrong operation specified" 4
 set_exit_code_variable "Missing required paramters" 5
 set_exit_code_variable "No such key found" 6
+set_exit_code_variable  "OCI reported error"  7
 
 set_exit_code_variable "Uploaded initial version" 0
 set_exit_code_variable "Uploaded new version" 0
@@ -136,7 +137,7 @@ case $operation in
     fi
 
     content_payload=$(base64 --wrap 0 $key_file)
-    content_name="access key"
+    content_name="access_key"
 
     if [ -z "$vsid" ]; then
         # create
@@ -148,8 +149,11 @@ case $operation in
             --secret-name "$secret_name" \
             --secret-content-content "$content_payload" \
             --secret-content-name "$content_name"
-
+          if [ $? -eq 0 ]; then
             named_exit "Uploaded initial version" 
+          else
+            named_exit "OCI reported error" 
+          fi
     else
         current_payload_hash=$(oci secrets secret-bundle get --secret-id $vsid | tr - _ |
             jq -r '.data.secret_bundle_content.content' | base64 -d | sha384sum | cut -f1 -d ' ')
