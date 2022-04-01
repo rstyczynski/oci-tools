@@ -127,7 +127,7 @@ fi
 secret_name=${environment}_${partner}_${service}_${username}
 
 # discover
-vsid=$(oci vault secret list --compartment-id $compartment_ocid --raw-output --query "data[?\"secret-name\" == '$secret_name'].id" | jq -r .[0])
+vsid=$(oci vault secret list --compartment-id $compartment_ocid --raw-output --query "data[?\"secret-name\" == '$secret_name'].id" 2>/dev/null | jq -r .[0])
 
 case $operation in
   store)
