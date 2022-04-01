@@ -4,7 +4,7 @@ function set_exit_code_variable() {
   desc=$1
   code=$2
 
-  desc_var=$(echo $desc | sed -e 's/[^A-Za-z0-9_-]/_/g'
+  desc_var=$(echo $desc | sed -e 's/[^A-Za-z0-9_-]/_/g')
   eval "script_exit_codes_$desc_var=$code"
 }
 
