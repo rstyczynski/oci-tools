@@ -24,7 +24,11 @@ function named_exit() {
     >&2 echo "Critical. Exit code unknown."
     exit 125
   else
-    >&2 echo "$desc Info: $info"
+    if [ -z "$info" ];then
+      >&2 echo $desc
+    else
+      >&2 echo "$desc Info: $info"
+    fi
     exit $exit_code
   fi 
 }
