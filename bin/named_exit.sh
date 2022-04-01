@@ -4,14 +4,14 @@ function set_exit_code_variable() {
   desc=$1
   code=$2
 
-  desc_var=$(echo $desc | tr ' ' '_')
+  desc_var=$(echo $desc | sed -e 's/[^A-Za-z0-9_-]/_/g'
   eval "script_exit_codes_$desc_var=$code"
 }
 
 function get_exit_code_variable() {
   desc=$1
 
-  desc_var=$(echo $desc | sed -e 's/[^A-Za-z0-9._-]/_/g')
+  desc_var=$(echo $desc | sed -e 's/[^A-Za-z0-9_-]/_/g')
   eval "echo \$script_exit_codes_$desc_var"
 }
 
