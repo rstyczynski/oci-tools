@@ -66,6 +66,7 @@ if [ -z "$compartment_ocid" ]; then
   compartment_ocid=$(curl  --connect-timeout 1 -s http://169.254.169.254/opc/v1/instance/ | jq -r '.compartmentId')
   if [ ! -z "$compartment_ocid" ]; then
     echo OK
+    setcfg $script_cfg compartment_ocid $compartment_ocid
   else
     echo -n "Discovery failed. "
     compartment_ocid=$(getsetcfg $script_cfg compartment_ocid)
