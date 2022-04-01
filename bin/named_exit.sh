@@ -16,12 +16,14 @@ function get_exit_code_variable() {
 }
 
 function named_exit() {
-  des=$1
+  desc=$1
 
   exit_code=$(get_exit_code_variable "$desc")
   if [ -z "$exit_code" ]; then
+    echo "Critical. Exit code unknown."
     exit 125
   else
+    echo $desc
     exit $exit_code
   fi 
 }
