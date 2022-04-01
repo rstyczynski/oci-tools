@@ -125,6 +125,7 @@ fi
 secret_name=${environment}_${partner}_${service}_${username}
 
 # discover
+>&2 echo "Looking for $secret_name..."
 vsid=$(oci vault secret list --compartment-id $compartment_ocid --raw-output --query "data[?\"secret-name\" == '$secret_name'].id" 2>/dev/null | jq -r .[0])
 
 case $operation in
@@ -139,6 +140,7 @@ case $operation in
 
     if [ -z "$vsid" ]; then
         # create
+        >&2 echo "Uploading $secret_name..."
         oci vault secret create-base64 \
             --compartment-id $compartment_ocid \
             --vault-id $vault_ocid \
@@ -159,6 +161,7 @@ case $operation in
 
         if [ "$new_payload_hash" != "$current_payload_hash" ]; then
             # add new version
+            >&2 echo "Retrieving $secret_name..."
             oci vault secret update-base64 \
                 --secret-id $vsid \
                 --secret-content-content "$content_payload"
