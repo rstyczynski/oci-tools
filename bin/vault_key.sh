@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source $(basename "$0")/named_exit.sh
+source $(dirname "$0")/named_exit.sh
 
 # script info
 script_name='vault_key'
@@ -26,7 +26,7 @@ set_exit_code_variable "Key found and retrieved" 0
 # discover script directory
 script_path=$0
 if [ $script_path != '-bash' ]; then
-  script_bin=$(basename "$0")
+  script_bin=$(dirname "$0")
 fi
 
 if [ -z "$script_bin" ]; then
