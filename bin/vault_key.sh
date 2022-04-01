@@ -10,19 +10,19 @@ script_params="store|retrieve environment partner service username [key_file]"
 script_cfg='vault_key'
 script_tools='oci jq curl base64 sha384sum cut tr'
 
-set_exit_code_variable "Script bin directory unknown" 1
-set_exit_code_variable "Required tools not available" 2
-set_exit_code_variable "Wrong ocid entered" 3
-set_exit_code_variable "Wrong operation specified" 4
-set_exit_code_variable "Missing required paramters" 5
-set_exit_code_variable "No such key found" 6
-set_exit_code_variable  "OCI reported error"  7
+set_exit_code_variable "Script bin directory unknown." 1
+set_exit_code_variable "Required tools not available." 2
+set_exit_code_variable "Wrong ocid entered." 3
+set_exit_code_variable "Wrong operation specified." 4
+set_exit_code_variable "Missing required paramters." 5
+set_exit_code_variable "No such key found." 6
+set_exit_code_variable "OCI reported error."  7
 
-set_exit_code_variable "Uploaded initial version" 0
-set_exit_code_variable "Uploaded new version" 0
-set_exit_code_variable "The same version already exist in vault" 0
+set_exit_code_variable "Uploaded initial version." 0
+set_exit_code_variable "Uploaded new version." 0
+set_exit_code_variable "The same version already exist in vault." 0
 
-set_exit_code_variable "Key found and retrieved" 0
+set_exit_code_variable "Key found and retrieved." 0
 
 # discover script directory
 script_path=$0
@@ -31,8 +31,7 @@ if [ $script_path != '-bash' ]; then
 fi
 
 if [ -z "$script_bin" ]; then
-  echo "Script bin directory unknown. Set script_bin before sourcing this script. Exiting..."
-  named_exit "Script bin directory unknown"
+  named_exit "Script bin directory unknown."
 fi
 
 # check required tools
@@ -47,8 +46,7 @@ for cli_tool in $script_tools; do
 done
 
 if [ ! -z "$missing_tools" ]; then
-  echo "Required tools not available. Exiting... Cause: $missing_tools"
-  named_exit "Required tools not available"
+  named_exit "Required tools not available." "$missing_tools"
 fi
 
 # read configuration
@@ -83,7 +81,7 @@ if [ -z "$vault_ocid" ]; then
   if [ -z "$details" ]; then
     echo "Provided vault_ocid is not correct. Exiting."
     unset vault_ocid
-    named_exit "Wrong ocid entered"
+    named_exit "Wrong ocid entered."
   else
     setcfg $script_cfg vault_ocid "$vault_ocid" force
   fi
@@ -97,7 +95,7 @@ if [ -z "$key_ocid" ]; then
   if [ -z "$details" ]; then
     echo "Provided key_ocid is not correct. Exiting."
     unset key_ocid
-    named_exit "Wrong ocid entered"
+    named_exit "Wrong ocid entered."
   else
     setcfg $script_cfg key_ocid "$key_ocid" force
   fi
@@ -120,7 +118,7 @@ key_file=$1; shift
 
 if [ -z $operation ] || [ -z $environment ] || [ -z $partner ] || [ -z $service ] || [ -z $username ]; then
   usage
-  named_exit "Missing required paramters"
+  named_exit "Missing required paramters."
 fi
 
 # set id for the key
@@ -133,7 +131,7 @@ case $operation in
   store)
     if [ -z $key_file ]; then
       usage
-      named_exit "Missing required paramters"
+      named_exit "Missing required paramters."
     fi
 
     content_payload=$(base64 --wrap 0 $key_file)
@@ -150,9 +148,9 @@ case $operation in
             --secret-content-content "$content_payload" \
             --secret-content-name "$content_name"
           if [ $? -eq 0 ]; then
-            named_exit "Uploaded initial version" 
+            named_exit "Uploaded initial version." 
           else
-            named_exit "OCI reported error" 
+            named_exit "OCI reported error." 
           fi
     else
         current_payload_hash=$(oci secrets secret-bundle get --secret-id $vsid | tr - _ |
@@ -165,12 +163,12 @@ case $operation in
                 --secret-id $vsid \
                 --secret-content-content "$content_payload"
             if [ $? -eq 0 ]; then
-              named_exit "Uploaded new version" 
+              named_exit "Uploaded new version." 
             else
-              named_exit "OCI reported error" 
+              named_exit "OCI reported error." 
             fi
         else
-            named_exit "The same version already exist in vault"
+            named_exit "The same version already exist in vault."
         fi
     fi
 
@@ -178,7 +176,7 @@ case $operation in
   retrieve)
 
     if [ -z "$vsid" ]; then
-      named_exit "No such key found"
+      named_exit "No such key found."
     
     else
       
@@ -188,14 +186,14 @@ case $operation in
         oci secrets secret-bundle get --secret-id $vsid | tr - _ | jq -r '.data.secret_bundle_content.content' | base64 -d > $key_file
       fi
       if [ $? -eq 0 ]; then
-        named_exit "Key found and retrieved" 
+        named_exit "Key found and retrieved." 
       else
-        named_exit "OCI reported error" 
+        named_exit "OCI reported error." 
       fi
     fi
     ;;
   *)
     echo "Error. Wrong operation specified. Allowed: store, retrieve."
-    named_exit "Wrong operation specified"
+    named_exit "Wrong operation specified."
     ;;
 esac
