@@ -164,8 +164,11 @@ case $operation in
             oci vault secret update-base64 \
                 --secret-id $vsid \
                 --secret-content-content "$content_payload"
-            
-            named_exit "Uploaded new version"
+            if [ $? -eq 0 ]; then
+              named_exit "Uploaded new version" 
+            else
+              named_exit "OCI reported error" 
+            fi
         else
             named_exit "The same version already exist in vault"
         fi
@@ -184,8 +187,11 @@ case $operation in
       else
         oci secrets secret-bundle get --secret-id $vsid | tr - _ | jq -r '.data.secret_bundle_content.content' | base64 -d > $key_file
       fi
-      
-      named_exit "Key found and retrieved" 
+      if [ $? -eq 0 ]; then
+        named_exit "Key found and retrieved" 
+      else
+        named_exit "OCI reported error" 
+      fi
     fi
     ;;
   *)
