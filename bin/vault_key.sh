@@ -14,7 +14,7 @@ set_exit_code_variable "Script bin directory unknown." 1
 set_exit_code_variable "Required tools not available." 2
 set_exit_code_variable "Wrong ocid entered." 3
 set_exit_code_variable "Wrong operation specified." 4
-set_exit_code_variable "Missing required paramters." 5
+set_exit_code_variable "Missing required parameters." 5
 set_exit_code_variable "No such key found." 6
 set_exit_code_variable "OCI reported error."  7
 
@@ -109,7 +109,7 @@ key_file=$1; shift
 
 if [ -z $operation ] || [ -z $environment ] || [ -z $partner ] || [ -z $service ] || [ -z $username ]; then
   usage
-  named_exit "Missing required paramters."
+  named_exit "Missing required parameters."
 fi
 
 # set id for the key
@@ -123,7 +123,7 @@ case $operation in
   store)
     if [ -z $key_file ]; then
       usage
-      named_exit "Missing required paramters." key_file
+      named_exit "Missing required parameters." key_file
     fi
 
     content_payload=$(base64 --wrap 0 $key_file)
@@ -146,8 +146,7 @@ case $operation in
             named_exit "OCI reported error." $?
           fi
     else
-        current_payload_hash=$(oci secrets secret-bundle get --secret-id $vsid | tr - _ |
-            jq -r '.data.secret_bundle_content.content' | base64 -d | sha384sum | cut -f1 -d ' ')
+        current_payload_hash=$(oci secrets secret-bundle get --secret-id $vsid | tr - _ | jq -r '.data.secret_bundle_content.content' | base64 -d | sha384sum | cut -f1 -d ' ')
         new_payload_hash=$(echo $content_payload | base64 -d | sha384sum | cut -f1 -d ' ')
 
         if [ "$new_payload_hash" != "$current_payload_hash" ]; then
