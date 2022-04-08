@@ -78,9 +78,9 @@ done
 #
 # config file identifier may be specified in cmd line. When not set default name of the script is used.
 
-script_bin=/mwlogs/tools/oci-tools/bin
 source $script_bin/config.sh
 
+echo $cfg_id
 if [ ! -z "$cfg_id" ]; then
   script_cfg=$cfg_id
 fi
