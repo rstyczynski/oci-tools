@@ -22,6 +22,7 @@ set_exit_code_variable "Script bin directory unknown." 1
 set_exit_code_variable "Required tools not available." 2
 set_exit_code_variable "Query execuion error." 3
 set_exit_code_variable "OCI client execution faled." 4
+set_exit_code_variable "No data to fetch." 5
 
 #
 # Check environment
@@ -149,7 +150,7 @@ else
   search_query_full="${search_query_prefix} | ${search_query} | ${search_query_suffix}"
 fi
 
-echo $$search_query_full
+echo $search_query_full
 oci logging-search search-logs --search-query "$search_query_full" --time-end $time_end --time-start $time_start
 
 total_records=$(oci logging-search search-logs --search-query "$search_query_full" --time-end $time_end --time-start $time_start | jq -r '.data.results[0].data.count')
@@ -160,8 +161,13 @@ fi
 
 if [ -z "$total_records" ]; then
 
-  named_exit "Query execuion error."
+  named_exit "Query execution error."
 fi
+
+if [ $total_records -eq 0 ]; then
+  named_exit "No data to fetch."
+fi
+
 
 ## get data
 search_query_suffix="sort by datetime asc"
