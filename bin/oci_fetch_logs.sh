@@ -51,12 +51,12 @@ test ! -z "$missing_tools" && named_exit "Required tools not available." "$missi
 # Parameters are reflected in shell varaibles which are set with parameter value. 
 # No value parameters are set to 'set' if exist in cmd line arguents
 
-echo getopt --longoptions "$script_args,$script_args_persist,$script_args_system" -- $@
+echo getopt --longoptions "$script_args,$script_args_persist,$script_args_system" --options "" --name "$script_name" -- $@
 unset OPTIND
-getopt --longoptions "$script_args,$script_args_persist,$script_args_system" -- $@
+getopt --longoptions "$script_args,$script_args_persist,$script_args_system" --options "" --name "$script_name" -- $@
 
 unset OPTIND
-valid_opts=$(getopt --longoptions "$script_args,$script_args_persist,$script_args_system" -- $@)
+valid_opts=$(getopt --longoptions "$script_args,$script_args_persist,$script_args_system" --options "" --name "$script_name" -- $@)
 eval set --"$valid_opts"
 
 while [[ $# -gt 0 ]]; do
