@@ -162,6 +162,8 @@ if [ $OCI_exit_code -ne 0 ]; then
   named_exit "OCI client execution faled."
 fi
 
+echo Total records: $total_records
+
 if [ -z "$total_records" ]; then
   named_exit "Query execution error."
 fi
