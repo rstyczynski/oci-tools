@@ -168,7 +168,7 @@ if [ -z "$total_records" ]; then
   named_exit "Query execution error."
 fi
 
-if [ "$total_records" -eq 0 ] || [ "$total_records" = null ]; then
+if [ "$total_records" == null ] || [ "$total_records" -eq 0 ]; then
   named_exit "No data to fetch."
 fi
 
