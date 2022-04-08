@@ -10,6 +10,7 @@ script_params="store|retrieve environment partner service username [key_file]"
 script_cfg='vault_key'
 script_tools='oci jq curl base64 sha384sum cut tr'
 
+# exit codes
 set_exit_code_variable "Script bin directory unknown." 1
 set_exit_code_variable "Required tools not available." 2
 set_exit_code_variable "Wrong ocid entered." 3
