@@ -161,10 +161,14 @@ if [ -z "$total_records" ]; then
 fi
 
 ## get data
-search_query_suffix="| sort by datetime asc"
+search_query_suffix="sort by datetime asc"
 
 page_size=1000
 page_max=$(( ($total_records/$page_size) + ( $total_records % $page_size > 0 ) ))
+
+echo $total_records
+echo $page_size
+echo $page_max
 
 page_no=1
 page=first
