@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -x
+echo $@
 
 #
 # script information
@@ -52,6 +52,9 @@ test ! -z "$missing_tools" && named_exit "Required tools not available." "$missi
 
 # Parameters are reflected in shell varaibles which are set with parameter value. 
 # No value parameters are set to 'set' if exist in cmd line arguents
+
+unset OPTIND
+getopt --long "data_dir,tmp_dir,time_start:,time_end:,search_query:,compartment_ocid:,loggroup_ocid:,log_ocid:,cfg_id:" -- "--cfg_id oci_fetch_logs1"
 
 valid_opts=$(getopt --longoptions "$script_args,$script_args_persist,$script_args_system" -- "$@")
 eval set --"$valid_opts"
