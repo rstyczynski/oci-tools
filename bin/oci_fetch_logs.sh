@@ -138,11 +138,18 @@ rm -f $data_dir/marker
 # invoke OCI API
 # 
 
-search_query_prefix="search \"$compartment_ocid/$loggroup_ocid/$log_ocid\" | "
+search_query_prefix="search \"$compartment_ocid/$loggroup_ocid/$log_ocid\""
 
 ## get record count
-search_query_suffix="| count"
-total_records=$(oci logging-search search-logs --search-query "$search_query_prefix$search_query$search_query_suffix" --time-end $time_end --time-start $time_start | jq -r '.data.results[0].data.count')
+search_query_suffix="count"
+
+if [ -z "$search_query "]; then
+  search_query_full="${search_query_prefix} | ${search_query_suffix}"
+else
+  search_query_full="${search_query_prefix} | ${search_query} | ${search_query_suffix}"
+fi
+
+total_records=$(oci logging-search search-logs --search-query "$search_query_full" --time-end $time_end --time-start $time_start | jq -r '.data.results[0].data.count')
 OCI_exit_code=${PIPESTATUS[0]}
 if [ $OCI_exit_code -ne 0 ]; then
   named_exit "OCI client execution faled."
@@ -173,7 +180,7 @@ until [ "$page" == null ]; do
  case $page in
  first)
     echo Fetching first page of $page_max into $tmp_file...
-    oci logging-search search-logs --search-query "$search_query_prefix$search_query$search_query_suffix" --time-end $time_end --time-start $time_start --limit $page_size > $tmp_file
+    oci logging-search search-logs --search-query "$search_query_full" --time-end $time_end --time-start $time_start --limit $page_size > $tmp_file
     page=$(jq -r '."opc-next-page"' $tmp_file)
     page_ts=$(jq -r '.data.results[0].data.datetime' $tmp_file)
 
@@ -184,7 +191,7 @@ until [ "$page" == null ]; do
  *)
     data_file=$data_dir/${page_ts}_${page_no}of${page_max}.json
     echo Fetching page $page_no of $page_max into $data_file...
-    oci logging-search search-logs --search-query "$search_query_prefix$search_query$search_query_suffix" --time-end $time_end --time-start $time_start --limit $page_size --page $page > $data_file
+    oci logging-search search-logs --search-query "$search_query_full" --time-end $time_end --time-start $time_start --limit $page_size --page $page > $data_file
     page=$(jq -r '."opc-next-page"' $data_file)
     ;;
  esac
