@@ -138,7 +138,7 @@ rm -f $data_dir/marker
 # invoke OCI API
 # 
 
-search_query_prefix="search \"${compartment_ocid}/${loggroup_ocid}/{$log_ocid}\""
+search_query_prefix="search \"${compartment_ocid}/${loggroup_ocid}/${log_ocid}\""
 
 ## get record count
 search_query_suffix="count"
@@ -148,8 +148,6 @@ if [ -z "$search_query" ]; then
 else
   search_query_full="${search_query_prefix} | ${search_query} | ${search_query_suffix}"
 fi
-
-echo oci logging-search search-logs --search-query "$search_query_full" --time-end $time_end --time-start $time_start
 
 total_records=$(oci logging-search search-logs --search-query "$search_query_full" --time-end $time_end --time-start $time_start | jq -r '.data.results[0].data.count')
 OCI_exit_code=${PIPESTATUS[0]}
