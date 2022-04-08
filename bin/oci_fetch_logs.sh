@@ -155,6 +155,7 @@ else
   search_query_full="${search_query_prefix} | ${search_query} | ${search_query_suffix}"
 fi
 
+echo $search_query_full
 total_records=$(oci logging-search search-logs --search-query "$search_query_full" --time-end $time_end --time-start $time_start | jq -r '.data.results[0].data.count')
 OCI_exit_code=${PIPESTATUS[0]}
 if [ $OCI_exit_code -ne 0 ]; then
@@ -174,6 +175,14 @@ fi
 ## get data
 search_query_suffix="sort by datetime asc"
 
+if [ -z "$search_query" ]; then
+  search_query_full="${search_query_prefix}"
+else
+  search_query_full="${search_query_prefix} | ${search_query}"
+fi
+
+echo $search_query_full
+
 page_size=1000
 page_max=$(( ($total_records/$page_size) + ( $total_records % $page_size > 0 ) ))
 
@@ -186,12 +195,6 @@ until [ "$page" == null ]; do
   fi 
 
   tmp_file=$tmp_dir/$$\_$(date +%s).json
-
-  if [ -z "$search_query" ]; then
-    search_query_full="${search_query_prefix}"
-  else
-    search_query_full="${search_query_prefix} | ${search_query}"
-  fi
 
   case $page in
   first)
