@@ -20,6 +20,7 @@ source $(dirname "$0")/named_exit.sh
 
 set_exit_code_variable "Script bin directory unknown." 1
 set_exit_code_variable "Required tools not available." 2
+set_exit_code_variable "Query execuion error." 3
 
 #
 # Check environment
@@ -137,7 +138,10 @@ search_query_prefix="search \"$compartment_ocid/$loggroup_ocid/$log_ocid\" | "
 ## get record count
 search_query_suffix="| count"
 total_records=$(oci logging-search search-logs --search-query "$search_query_prefix$search_query$search_query_suffix" --time-end $time_end --time-start $time_start | jq -r '.data.results[0].data.count')
-echo $total_records
+if [ -z "$total_records" ]; then
+
+  named_exit "Query execuion error."
+fi
 
 ## get data
 search_query_suffix="| sort by datetime asc"
