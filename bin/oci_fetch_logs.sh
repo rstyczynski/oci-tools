@@ -112,7 +112,7 @@ done
 #
 
 #
-# check resources
+# check parameters
 #
 : ${tmp_dir:=~/tmp}
 : ${data_dir:=.}
@@ -130,6 +130,9 @@ if ! touch $data_dir/marker; then
 fi
 rm -f $data_dir/marker
 
+# default - last hour
+: ${time_start:=$(date +%Y-%m-%d\T%H:%M:%S.000Z -u -d "1 hour ago")}
+: ${time_end:=$(date +%Y-%m-%d\T%H:%M:%S.000Z -u)}
 
 #
 # invoke OCI API
