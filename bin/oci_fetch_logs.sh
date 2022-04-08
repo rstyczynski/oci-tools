@@ -54,7 +54,7 @@ test ! -z "$missing_tools" && named_exit "Required tools not available." "$missi
 # No value parameters are set to 'set' if exist in cmd line arguents
 
 valid_opts=$(getopt --longoptions "$script_args,$script_args_persist,$script_args_system" -- "$@")
-eval set -- "$valid_opts"
+eval set --"$valid_opts"
 
 while [[ $# -gt 0 ]]; do
   if [ $1 == '--' ]; then
@@ -80,7 +80,8 @@ done
 
 source $script_bin/config.sh
 
-echo $cfg_id
+echo cfg+id:$cfg_id
+
 if [ ! -z "$cfg_id" ]; then
   script_cfg=$cfg_id
 fi
