@@ -143,7 +143,7 @@ search_query_prefix="search \"$compartment_ocid/$loggroup_ocid/$log_ocid\""
 ## get record count
 search_query_suffix="count"
 
-if [ -z "$search_query "]; then
+if [ -z "$search_query " ]; then
   search_query_full="${search_query_prefix} | ${search_query_suffix}"
 else
   search_query_full="${search_query_prefix} | ${search_query} | ${search_query_suffix}"
