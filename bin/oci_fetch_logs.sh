@@ -78,8 +78,6 @@ done
 
 source $script_bin/config.sh
 
-echo cfg+id:$cfg_id
-
 if [ ! -z "$cfg_id" ]; then
   script_cfg=$cfg_id
 fi
