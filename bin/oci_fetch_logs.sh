@@ -21,6 +21,7 @@ source $(dirname "$0")/named_exit.sh
 set_exit_code_variable "Script bin directory unknown." 1
 set_exit_code_variable "Required tools not available." 2
 set_exit_code_variable "Query execuion error." 3
+set_exit_code_variable "OCI client execution faled." 4
 
 #
 # Check environment
@@ -138,6 +139,11 @@ search_query_prefix="search \"$compartment_ocid/$loggroup_ocid/$log_ocid\" | "
 ## get record count
 search_query_suffix="| count"
 total_records=$(oci logging-search search-logs --search-query "$search_query_prefix$search_query$search_query_suffix" --time-end $time_end --time-start $time_start | jq -r '.data.results[0].data.count')
+OCI_exit_code=${PIPESTATUS[0]}
+if [ $OCI_exit_code -ne 0 ]; then
+  named_exit "OCI client execution faled."
+fi
+
 if [ -z "$total_records" ]; then
 
   named_exit "Query execuion error."
