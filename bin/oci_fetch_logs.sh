@@ -1,7 +1,5 @@
 #!/bin/bash
 
-set -x
-
 #
 # script information
 #
@@ -53,6 +51,11 @@ test ! -z "$missing_tools" && named_exit "Required tools not available." "$missi
 
 # Parameters are reflected in shell varaibles which are set with parameter value. 
 # No value parameters are set to 'set' if exist in cmd line arguents
+
+# clean params to avoid exported ones
+for cfg_param in $(echo "$script_args_persist,$script_args_system,$script_args" | tr , ' ' | tr -d :); do
+  unset $cfg_param
+done
 
 valid_opts=$(getopt --longoptions "$script_args,$script_args_persist,$script_args_system" --options "" --name "$script_name" -- $@)
 eval set --"$valid_opts"
