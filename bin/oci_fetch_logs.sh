@@ -79,7 +79,9 @@ done
 script_bin=/mwlogs/tools/oci-tools/bin
 source $script_bin/config.sh
 
-: ${cfg_id:=$script_cfg}
+if [ ! -z "$cfg_id" ]; then
+  script_cfg=$cfg_id
+fi
 
 # read parameters from cfg file
 for cfg_param in $(echo $script_args_persist | tr , ' ' | tr -d :); do
