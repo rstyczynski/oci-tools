@@ -170,31 +170,37 @@ page_no=1
 page=first
 until [ "$page" == null ]; do
 
- if [ $page_no -gt $page_max ]; then
-  echo "Error. Trying to fetch more pages than expected. Stopping data fetch."
-  break
- fi 
+  if [ $page_no -gt $page_max ]; then
+    echo "Error. Trying to fetch more pages than expected. Stopping data fetch."
+    break
+  fi 
 
- tmp_file=$tmp_dir/$$\_$(date +%s).json
+  tmp_file=$tmp_dir/$$\_$(date +%s).json
 
- case $page in
- first)
-    echo Fetching first page of $page_max into $tmp_file...
-    oci logging-search search-logs --search-query "$search_query_full" --time-end $time_end --time-start $time_start --limit $page_size > $tmp_file
-    page=$(jq -r '."opc-next-page"' $tmp_file)
-    page_ts=$(jq -r '.data.results[0].data.datetime' $tmp_file)
+  if [ -z "$search_query" ]; then
+    search_query_full="${search_query_prefix}"
+  else
+    search_query_full="${search_query_prefix} | ${search_query}"
+  fi
 
-    data_file=$data_dir/${page_ts}_${page_no}of${page_max}.json
-    echo Moving first page of $page_max into $data_file...
-    mv $tmp_file $data_file
-    ;;
- *)
-    data_file=$data_dir/${page_ts}_${page_no}of${page_max}.json
-    echo Fetching page $page_no of $page_max into $data_file...
-    oci logging-search search-logs --search-query "$search_query_full" --time-end $time_end --time-start $time_start --limit $page_size --page $page > $data_file
-    page=$(jq -r '."opc-next-page"' $data_file)
-    ;;
- esac
- page_no=$(($page_no+1))
+  case $page in
+  first)
+      echo Fetching first page of $page_max into $tmp_file...
+      oci logging-search search-logs --search-query "$search_query_full" --time-end $time_end --time-start $time_start --limit $page_size > $tmp_file
+      page=$(jq -r '."opc-next-page"' $tmp_file)
+      page_ts=$(jq -r '.data.results[0].data.datetime' $tmp_file)
+
+      data_file=$data_dir/${page_ts}_${page_no}of${page_max}.json
+      echo Moving first page of $page_max into $data_file...
+      mv $tmp_file $data_file
+      ;;
+  *)
+      data_file=$data_dir/${page_ts}_${page_no}of${page_max}.json
+      echo Fetching page $page_no of $page_max into $data_file...
+      oci logging-search search-logs --search-query "$search_query_full" --time-end $time_end --time-start $time_start --limit $page_size --page $page > $data_file
+      page=$(jq -r '."opc-next-page"' $data_file)
+      ;;
+  esac
+  page_no=$(($page_no+1))
 done
 
