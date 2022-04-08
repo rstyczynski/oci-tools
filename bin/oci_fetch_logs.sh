@@ -137,6 +137,7 @@ search_query_prefix="search \"$compartment_ocid/$loggroup_ocid/$log_ocid\" | "
 ## get record count
 search_query_suffix="| count"
 total_records=$(oci logging-search search-logs --search-query "$search_query_prefix$search_query$search_query_suffix" --time-end $time_end --time-start $time_start | jq -r '.data.results[0].data.count')
+echo $total_records
 
 ## get data
 search_query_suffix="| sort by datetime asc"
