@@ -182,8 +182,7 @@ page=first
 until [ "$page" == null ]; do
 
   if [ $page_no -gt $page_max ]; then
-    echo "Error. Trying to fetch more pages than expected. Stopping data fetch. page: $page"
-    break
+    echo "Warning. Fetching more pages than expected..."
   fi 
 
   tmp_file=$tmp_dir/$$\_$(date +%s).json
