@@ -217,7 +217,7 @@ until [ "$page" == null ]; do
       echo Moving first page of $page_max into $data_file...
       mv $tmp_file $data_file
 
-      echo -n "Start timestamp:"; jq -r '.data.results[-1].data.datetime'  $data_file
+      start_timestamp=$(jq -r '.data.results[-1].data.datetime'  $data_file)
       ;;
   *)
       data_file=$data_dir/${page_ts}_${page_no}of${page_max}.json
@@ -229,4 +229,9 @@ until [ "$page" == null ]; do
   page_no=$(($page_no+1))
 done
 
-echo -n "End timestamp:"; jq -r '.data.results[-1].data.datetime'  $data_file
+end_timestamp=$(jq -r '.data.results[-1].data.datetime'  $data_file)
+
+echo "Done."
+echo "First timestamp: $start_timestamp"
+echo "Last timestamp: $end_timestamp"
+
