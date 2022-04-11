@@ -272,6 +272,12 @@ until [ "$page" == null ]; do
       page=$(jq -r '."opc-next-page"' $tmp_file)
       page_ts=$(jq -r '.data.results[0].data.datetime' $tmp_file)
 
+      # Sometimes count returns data, but atal query not. OCI transaction problem?
+      if [ "$page_ts" == null ]; then
+        rm -f $tmp_file
+        named_exit "No data to fetch."
+      fi
+
       data_file=$data_dir/${script_cfg}_${page_ts}_${page_no}of${page_max}.json
       echo Moving first page of $page_max into $data_file...
       mv $tmp_file $data_file
