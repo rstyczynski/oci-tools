@@ -265,6 +265,7 @@ time_end=$time_end
 search_query='$search_query'
 search_string='$search_query_full'
 page_size=$page_size
+total_records=$total_records
 files=$(($page_no-1))
 timestamp_start=$start_timestamp
 timestamp_end=$end_timestamp
