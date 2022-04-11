@@ -21,9 +21,13 @@ source $(dirname "$0")/named_exit.sh
 
 set_exit_code_variable "Script bin directory unknown." 1
 set_exit_code_variable "Required tools not available." 2
+
 set_exit_code_variable "Query execuion error." 3
 set_exit_code_variable "OCI client execution faled." 4
-set_exit_code_variable "No data to fetch." 5
+set_exit_code_variable "Trying to fetch 10+ pages than expected." 5
+set_exit_code_variable "Directory not writable." 6
+
+set_exit_code_variable "No data to fetch." 0
 
 #
 # Check environment
@@ -126,14 +130,12 @@ done
 mkdir -p $tmp_dir $data_dir
 
 if ! touch $tmp_dir/marker; then
-  echo "Error. tmp directory not writable. Exiting"
-  return 1
+  named_exit "Directory not writable." $tmp_dir
 fi
 rm -f $tmp_dir/marker
 
 if ! touch $data_dir/marker; then
-  echo "Error. Data directory not writable. Exiting"
-  return 1
+  named_exit "Directory not writable." $data_dir
 fi
 rm -f $data_dir/marker
 
@@ -198,6 +200,10 @@ until [ "$page" == null ]; do
     echo "Warning. Fetching more pages than expected..."
   fi 
 
+  if [ $page_no -gt $(( $page_max + 10 )) ]; then
+    named_exit "Trying to fetch 10+ pages than expected."
+  fi 
+
   tmp_file=$tmp_dir/$$\_$(date +%s).json
 
   case $page in
@@ -210,6 +216,8 @@ until [ "$page" == null ]; do
       data_file=$data_dir/${page_ts}_${page_no}of${page_max}.json
       echo Moving first page of $page_max into $data_file...
       mv $tmp_file $data_file
+
+      echo -n "Start timestamp:"; jq -r '.data.results[-1].data.datetime'  $data_file
       ;;
   *)
       data_file=$data_dir/${page_ts}_${page_no}of${page_max}.json
@@ -221,3 +229,4 @@ until [ "$page" == null ]; do
   page_no=$(($page_no+1))
 done
 
+echo -n "End timestamp:"; jq -r '.data.results[-1].data.datetime'  $data_file
