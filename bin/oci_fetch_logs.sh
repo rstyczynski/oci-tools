@@ -252,7 +252,7 @@ done
 
 end_timestamp=$(jq -r '.data.results[-1].data.datetime'  $data_file)
 
-echo "Done."
+
 echo "First timestamp: $start_timestamp"
 echo "Last timestamp: $end_timestamp"
-
+echo "Done."
