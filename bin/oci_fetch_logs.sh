@@ -8,7 +8,7 @@ script_name='oci_fetch_logs'
 script_version='1.0'
 script_by='ryszard.styczynski@oracle.com'
 
-script_args='data_dir,tmp_dir,time_start:,time_end:,timestamp_start:,timestamp_end:,search_query:'
+script_args='data_dir:,tmp_dir:,recent_dir:,time_start:,time_end:,timestamp_start:,timestamp_end:,continue,search_query:'
 script_args_persist='compartment_ocid:,loggroup_ocid:,log_ocid:'
 script_args_system='cfg_id:,debug,help'
 
@@ -147,6 +147,13 @@ done
 # process parameters
 #
 
+: ${$recent_dir:=$data_dir}
+
+if [ "$continue" == set ]; then
+  timestamp_start=$(cat $recent_dir/${script_cfg}.info | grep "^timestamp_next=" | tail -1 | cut -d= -f2)
+  echo "Info. timestamp_start overriten by continue procedure."
+fi
+
 if [ ! -z "$timestamp_start" ]; then
   seconds_start=$(( $timestamp_start / 1000 ))
   millsecs_start=$(($timestamp_start - ${seconds_start}000 ))
@@ -274,10 +281,11 @@ done
 
 end_timestamp=$(jq -r '.data.results[-1].data.datetime'  $data_file)
 
-info_file=$data_dir/${script_cfg}_${page_ts}.info
+session_file=$data_dir/${script_cfg}_${page_ts}.info
+info_file=$data_dir/${script_cfg}.info
 
-echo "Writing session details into $info_file..."
-cat > $info_file <<EOF
+echo "Writing session details into $session_file..."
+cat > $session_file <<EOF
 cfg_id=$script_cfg
 compartment_ocid=$compartment_ocid
 loggroup_ocid=$loggroup_ocid
@@ -293,6 +301,6 @@ timestamp_start=$start_timestamp
 timestamp_end=$end_timestamp
 timestamp_next=$(( $end_timestamp + 1 ))
 EOF
-cp $info_file $data_dir/${script_cfg}.info
+cp $session_file $info_file
 
 echo "Done."
