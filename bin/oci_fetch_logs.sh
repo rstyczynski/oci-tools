@@ -260,10 +260,9 @@ cfg_id=$script_cfg
 compartment_ocid=$compartment_ocid
 loggroup_ocid=$loggroup_ocid
 log_ocid=$log_ocid
-time_start=$start_timestamp
-time_end=$end_timestamp
+time_start=$time_start
+time_end=$time_end
 search_query=$search_query
-
 search_string=$search_query_full
 page_size=$page_size
 files=$(($page_no-1))
