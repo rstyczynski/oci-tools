@@ -254,6 +254,7 @@ end_timestamp=$(jq -r '.data.results[-1].data.datetime'  $data_file)
 
 info_file=$data_dir/${script_cfg}_${page_ts}.info
 
+echo "Writing session details into $info_file..."
 echo > $info_file <<EOF
 cfg_id=$script_cfg
 compartment_ocid=$compartment_ocid
