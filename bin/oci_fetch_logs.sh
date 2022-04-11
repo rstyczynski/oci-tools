@@ -6,10 +6,11 @@
 
 script_name='oci_fetch_logs'
 script_version='1.0'
+script_by='ryszard.styczynski@oracle.com'
 
 script_args='data_dir,tmp_dir,time_start:,time_end:,search_query:'
 script_args_persist='compartment_ocid:,loggroup_ocid:,log_ocid:'
-script_args_system='cfg_id:'
+script_args_system='cfg_id:,debug'
 
 script_cfg='oci_fetch_logs'
 
@@ -155,14 +156,15 @@ else
   search_query_full="${search_query_prefix} | ${search_query} | ${search_query_suffix}"
 fi
 
-echo $search_query_full
+test "$debug" == set && echo "Search query: $search_query_full"
+
 total_records=$(oci logging-search search-logs --search-query "$search_query_full" --time-end $time_end --time-start $time_start | jq -r '.data.results[0].data.count')
 OCI_exit_code=${PIPESTATUS[0]}
 if [ $OCI_exit_code -ne 0 ]; then
   named_exit "OCI client execution faled."
 fi
 
-echo Total records: $total_records
+test "$debug" == set && echo Total records: $total_records
 
 if [ -z "$total_records" ]; then
   named_exit "Query execution error."
@@ -182,7 +184,8 @@ else
   search_query_full="${search_query_prefix} | ${search_query}"
 fi
 
-echo $search_query_full
+
+test "$debug" == set && echo "Search query: $search_query_full"
 
 page_size=1000
 page_max=$(( ($total_records/$page_size) + ( $total_records % $page_size > 0 ) ))
