@@ -291,6 +291,8 @@ total_records=$total_records
 files=$(($page_no-1))
 timestamp_start=$start_timestamp
 timestamp_end=$end_timestamp
+timestamp_next=$(( $end_timestamp + 1 ))
 EOF
+cp $info_file $data_dir/${script_cfg}.info
 
 echo "Done."
