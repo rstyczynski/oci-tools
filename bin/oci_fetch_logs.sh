@@ -8,7 +8,7 @@ script_name='oci_fetch_logs'
 script_version='1.0'
 script_by='ryszard.styczynski@oracle.com'
 
-script_args='data_dir,tmp_dir,time_start:,time_end:,search_query:'
+script_args='data_dir,tmp_dir,time_start:,time_end:,timestamp_start:,timestamp_end:,search_query:'
 script_args_persist='compartment_ocid:,loggroup_ocid:,log_ocid:'
 script_args_system='cfg_id:,debug,help'
 
@@ -142,6 +142,28 @@ for cfg_param in $(echo $script_args_persist | tr , ' ' | tr -d :); do
     setcfg $script_cfg $cfg_param ${!cfg_param} force
   fi
 done
+
+#
+# process parameters
+#
+
+if [ ! -z "$timestamp_start" ]; then
+  seconds_start=$(( $timestamp_start / 1000 ))
+  millsecs_start=$(($timestamp_start - ${seconds_start}000 ))
+
+  time_start=$(date -d @$seconds_start -u +%Y-%m-%d\T%H:%M:%S)
+  time_start=${time_start}.${millsecs_start}Z
+  echo "Info. time_start overriten by timestamp_start"
+fi
+
+if [ ! -z "$timestamp_end" ]; then
+  seconds_end=$(( $timestamp_end / 1000 ))
+  millsecs_end=$(($timestamp_end - ${seconds_end}000 ))
+
+  time_end=$(date -d @$seconds_end -u +%Y-%m-%d\T%H:%M:%S)
+  time_end=${time_end}.${millsecs_end}Z
+  echo "Info. time_end overriten by timestamp_end"
+fi
 
 #
 # check parameters
