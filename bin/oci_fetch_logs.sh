@@ -166,6 +166,7 @@ rm -f $data_dir/marker
 # recent session data
 : ${recent_dir:=$data_dir}
 test "$debug" == set && echo "Recent dir: $recent_dir"
+test "$debug" == set && echo "Recent info: $recent_dir/${script_cfg}.info"
 
 if [ "$continue" == set ]; then
   timestamp_start=$(cat $recent_dir/${script_cfg}.info | grep "^timestamp_next=" | tail -1 | cut -d= -f2)
