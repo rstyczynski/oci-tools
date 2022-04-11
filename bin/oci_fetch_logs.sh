@@ -10,7 +10,7 @@ script_by='ryszard.styczynski@oracle.com'
 
 script_args='data_dir,tmp_dir,time_start:,time_end:,search_query:'
 script_args_persist='compartment_ocid:,loggroup_ocid:,log_ocid:'
-script_args_system='cfg_id:,debug'
+script_args_system='cfg_id:,debug,help'
 
 script_cfg='oci_fetch_logs'
 
@@ -28,6 +28,7 @@ set_exit_code_variable "Trying to fetch 10+ pages than expected." 5
 set_exit_code_variable "Directory not writable." 6
 
 set_exit_code_variable "No data to fetch." 0
+set_exit_code_variable "Help presented." 0
 
 #
 # Check environment
@@ -76,6 +77,31 @@ while [[ $# -gt 0 ]]; do
     eval $var_name="set"; shift 1
   fi
 done
+
+#
+# script info
+#
+function about() {
+  echo "$script_name, $script_version by $script_by"
+}
+
+function usage() {
+  echo -n "$script_name" 
+  for param in $(echo "$script_args_persist,$script_args_system,$script_args" | tr , ' ' | tr -d :); do
+    echo -n " --$param"
+  done
+  echo
+}
+
+#
+# start
+#
+about
+
+if [ "$help" == set ]; then
+  usage
+  named_exit "Help presented."
+fi
 
 #
 # persist parameters
