@@ -28,6 +28,7 @@ set_exit_code_variable "Trying to fetch 10+ pages than expected." 5
 set_exit_code_variable "Directory not writable." 6
 
 set_exit_code_variable "No data to fetch." 0
+set_exit_code_variable "Data expected, but no data to fetch." 0
 
 #
 # Check environment
@@ -275,7 +276,7 @@ until [ "$page" == null ]; do
       # Sometimes count returns data, but atal query not. OCI transaction problem?
       if [ "$page_ts" == null ]; then
         rm -f $tmp_file
-        named_exit "No data to fetch."
+        named_exit "Data expected, but no data to fetch."
       fi
 
       data_file=$data_dir/${script_cfg}_${page_ts}_${page_no}of${page_max}.json
