@@ -252,7 +252,22 @@ done
 
 end_timestamp=$(jq -r '.data.results[-1].data.datetime'  $data_file)
 
+info_file=$data_dir/${script_cfg}_${page_ts}.info
 
-echo "First timestamp: $start_timestamp"
-echo "Last timestamp: $end_timestamp"
+echo > $info_file <<EOF
+cfg_id=$script_cfg
+compartment_ocid=$compartment_ocid
+loggroup_ocid=$loggroup_ocid
+log_ocid=$log_ocid
+time_start=$start_timestamp
+time_end=$end_timestamp
+search_query=$search_query
+
+search_string=$search_query_full
+page_size=$page_size
+files=$(($page_no-1))
+timestamp_start=$start_timestamp
+timestamp_end=$end_timestamp
+EOF
+
 echo "Done."
