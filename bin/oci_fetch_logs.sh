@@ -165,15 +165,19 @@ rm -f $data_dir/marker
 
 # recent session data
 : ${recent_dir:=$data_dir}
+test "$debug" == set && echo "Recent dir: $recent_dir"
 
 if [ "$continue" == set ]; then
   timestamp_start=$(cat $recent_dir/${script_cfg}.info | grep "^timestamp_next=" | tail -1 | cut -d= -f2)
   echo "Info. timestamp_start overriten by continue procedure."
 fi
+test "$debug" == set && echo "timestamp_start: $timestamp_start"
 
 # default - last hour
 : ${time_start:=$(date +%Y-%m-%d\T%H:%M:%S.000Z -u -d "1 hour ago")}
 : ${time_end:=$(date +%Y-%m-%d\T%H:%M:%S.000Z -u)}
+test "$debug" == set && echo "time_start: $time_start"
+test "$debug" == set && echo "time_end: $time_end"
 
 # timestamp start, end
 if [ ! -z "$timestamp_start" ]; then
@@ -184,6 +188,7 @@ if [ ! -z "$timestamp_start" ]; then
   time_start=${time_start}.${millsecs_start}Z
   echo "Info. time_start overriten by timestamp_start"
 fi
+test "$debug" == set && echo "time_start: $time_start"
 
 if [ ! -z "$timestamp_end" ]; then
   seconds_end=$(( $timestamp_end / 1000 ))
@@ -193,6 +198,7 @@ if [ ! -z "$timestamp_end" ]; then
   time_end=${time_end}.${millsecs_end}Z
   echo "Info. time_end overriten by timestamp_end"
 fi
+test "$debug" == set && echo "time_end: $time_end"
 
 
 #
