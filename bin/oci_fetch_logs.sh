@@ -143,10 +143,27 @@ for cfg_param in $(echo $script_args_persist | tr , ' ' | tr -d :); do
   fi
 done
 
+
 #
-# process parameters
+# proccess parameters
 #
 
+# data and temp directories
+: ${tmp_dir:=~/tmp}
+: ${data_dir:=.}
+mkdir -p $tmp_dir $data_dir
+
+if ! touch $tmp_dir/marker; then
+  named_exit "Directory not writable." $tmp_dir
+fi
+rm -f $tmp_dir/marker
+
+if ! touch $data_dir/marker; then
+  named_exit "Directory not writable." $data_dir
+fi
+rm -f $data_dir/marker
+
+# recent session data
 : ${recent_dir:=$data_dir}
 
 if [ "$continue" == set ]; then
@@ -154,6 +171,11 @@ if [ "$continue" == set ]; then
   echo "Info. timestamp_start overriten by continue procedure."
 fi
 
+# default - last hour
+: ${time_start:=$(date +%Y-%m-%d\T%H:%M:%S.000Z -u -d "1 hour ago")}
+: ${time_end:=$(date +%Y-%m-%d\T%H:%M:%S.000Z -u)}
+
+# timestamp start, end
 if [ ! -z "$timestamp_start" ]; then
   seconds_start=$(( $timestamp_start / 1000 ))
   millsecs_start=$(($timestamp_start - ${seconds_start}000 ))
@@ -172,26 +194,6 @@ if [ ! -z "$timestamp_end" ]; then
   echo "Info. time_end overriten by timestamp_end"
 fi
 
-#
-# check parameters
-#
-: ${tmp_dir:=~/tmp}
-: ${data_dir:=.}
-mkdir -p $tmp_dir $data_dir
-
-if ! touch $tmp_dir/marker; then
-  named_exit "Directory not writable." $tmp_dir
-fi
-rm -f $tmp_dir/marker
-
-if ! touch $data_dir/marker; then
-  named_exit "Directory not writable." $data_dir
-fi
-rm -f $data_dir/marker
-
-# default - last hour
-: ${time_start:=$(date +%Y-%m-%d\T%H:%M:%S.000Z -u -d "1 hour ago")}
-: ${time_end:=$(date +%Y-%m-%d\T%H:%M:%S.000Z -u)}
 
 #
 # invoke OCI API
