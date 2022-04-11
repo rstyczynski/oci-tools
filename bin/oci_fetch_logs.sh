@@ -147,7 +147,7 @@ done
 # process parameters
 #
 
-: ${$recent_dir:=$data_dir}
+: ${recent_dir:=$data_dir}
 
 if [ "$continue" == set ]; then
   timestamp_start=$(cat $recent_dir/${script_cfg}.info | grep "^timestamp_next=" | tail -1 | cut -d= -f2)
