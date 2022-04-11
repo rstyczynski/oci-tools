@@ -28,7 +28,6 @@ set_exit_code_variable "Trying to fetch 10+ pages than expected." 5
 set_exit_code_variable "Directory not writable." 6
 
 set_exit_code_variable "No data to fetch." 0
-set_exit_code_variable "Help presented." 0
 
 #
 # Check environment
@@ -100,7 +99,7 @@ about
 
 if [ "$help" == set ]; then
   usage
-  named_exit "Help presented."
+  exit 0
 fi
 
 #
@@ -143,10 +142,6 @@ for cfg_param in $(echo $script_args_persist | tr , ' ' | tr -d :); do
     setcfg $script_cfg $cfg_param ${!cfg_param} force
   fi
 done
-
-#
-#
-#
 
 #
 # check parameters
@@ -239,14 +234,14 @@ until [ "$page" == null ]; do
       page=$(jq -r '."opc-next-page"' $tmp_file)
       page_ts=$(jq -r '.data.results[0].data.datetime' $tmp_file)
 
-      data_file=$data_dir/${page_ts}_${page_no}of${page_max}.json
+      data_file=$data_dir/${script_cfg}_${page_ts}_${page_no}of${page_max}.json
       echo Moving first page of $page_max into $data_file...
       mv $tmp_file $data_file
 
       start_timestamp=$(jq -r '.data.results[-1].data.datetime'  $data_file)
       ;;
   *)
-      data_file=$data_dir/${page_ts}_${page_no}of${page_max}.json
+      data_file=$data_dir/${script_cfg}_${page_ts}_${page_no}of${page_max}.json
       echo Fetching page $page_no of $page_max into $data_file...
       oci logging-search search-logs --search-query "$search_query_full" --time-end $time_end --time-start $time_start --limit $page_size --page $page > $data_file
       page=$(jq -r '."opc-next-page"' $data_file)
