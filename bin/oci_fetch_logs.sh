@@ -8,7 +8,7 @@ script_name='oci_fetch_logs'
 script_version='1.0'
 script_by='ryszard.styczynski@oracle.com'
 
-script_args='data_dir:,tmp_dir:,recent_dir:,time_start:,time_end:,timestamp_start:,timestamp_end:,continue,search_query:'
+script_args='data_dir:,tmp_dir:,recent_dir:,date_dir,time_start:,time_end:,timestamp_start:,timestamp_end:,continue,search_query:'
 script_args_persist='compartment_ocid:,loggroup_ocid:,log_ocid:'
 script_args_system='cfg_id:,debug,help'
 
@@ -151,14 +151,22 @@ done
 
 # data and temp directories
 : ${tmp_dir:=~/tmp}
-: ${data_dir:=.}
-mkdir -p $tmp_dir $data_dir
+mkdir -p $tmp_dir
 
 if ! touch $tmp_dir/marker; then
   named_exit "Directory not writable." $tmp_dir
 fi
 rm -f $tmp_dir/marker
 
+# data dir
+: ${data_dir:=.}
+
+# add date to directory?
+if [ "$date_dir" == set ]; then
+  data_dir=$data_dir/$(date -I)
+fi
+
+mkdir -p $data_dir
 if ! touch $data_dir/marker; then
   named_exit "Directory not writable." $data_dir
 fi
@@ -166,6 +174,14 @@ rm -f $data_dir/marker
 
 # recent session data
 : ${recent_dir:=$data_dir}
+
+if [ "$date_dir" == set ]; then
+  if [ ! -f  $recent_dir/${script_cfg}.info ]; then
+    recent_dir=$recent_dir/../$(date -I -d "1 day ago")
+    echo "Info. Info not found here. Changing to day before."
+  fi
+fi
+
 test "$debug" == set && echo "Recent dir: $recent_dir"
 test "$debug" == set && echo "Recent info: $recent_dir/${script_cfg}.info"
 
