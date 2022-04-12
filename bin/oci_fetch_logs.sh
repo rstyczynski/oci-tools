@@ -178,7 +178,7 @@ rm -f $data_dir/marker
 if [ "$date_dir" == set ]; then
   if [ ! -f  $recent_dir/${script_cfg}.info ]; then
     recent_dir=$recent_dir/../$(date -I -d "1 day ago")
-    echo "Info. Info not found here. Changing to day before."
+    echo "Info. Recent data not found here. Changing to day before."
   fi
 fi
 
@@ -186,8 +186,12 @@ test "$debug" == set && echo "Recent dir: $recent_dir"
 test "$debug" == set && echo "Recent info: $recent_dir/${script_cfg}.info"
 
 if [ "$continue" == set ]; then
-  timestamp_start=$(cat $recent_dir/${script_cfg}.info | grep "^timestamp_next=" | tail -1 | cut -d= -f2)
-  echo "Info. timestamp_start overriten by continue procedure."
+  if [ -f $recent_dir/${script_cfg}.info ]; then
+    timestamp_start=$(cat $recent_dir/${script_cfg}.info | grep "^timestamp_next=" | tail -1 | cut -d= -f2)
+    echo "Info. timestamp_start overriten by continue procedure."
+  else
+    echo "Info. Continue requested, but not recent data found."
+  fi
 fi
 test "$debug" == set && echo "timestamp_start: $timestamp_start"
 
