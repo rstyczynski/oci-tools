@@ -196,9 +196,16 @@ fi
 test "$debug" == set && echo "timestamp_start: $timestamp_start"
 
 # default - last hour
-: ${time_start:=$(date +%Y-%m-%d\T%H:%M:%S.000Z -u -d "1 hour ago")}
-: ${time_end:=$(date +%Y-%m-%d\T%H:%M:%S.000Z -u)}
+if [ -z "$time_start" ]; then
+  time_start=$(date +%Y-%m-%d\T%H:%M:%S.000Z -u -d "1 hour ago")
+  echo "Info. time_start not specified. Using defaut of 1 hour ago."
+fi
 test "$debug" == set && echo "time_start: $time_start"
+
+if [ -z "$time_end" ]; then
+  time_end=$(date +%Y-%m-%d\T%H:%M:%S.000Z -u)
+  echo "Info. time_end not specified. Using defaut of now."
+fi
 test "$debug" == set && echo "time_end: $time_end"
 
 # timestamp start, end
