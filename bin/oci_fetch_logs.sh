@@ -23,7 +23,7 @@ set_exit_code_variable "Script bin directory unknown." 1
 set_exit_code_variable "Required tools not available." 2
 
 set_exit_code_variable "Query execuion error." 3
-set_exit_code_variable "OCI client execution faled." 4
+set_exit_code_variable "OCI client execution failed." 4
 set_exit_code_variable "Trying to fetch 10+ pages than expected." 5
 set_exit_code_variable "Directory not writable." 6
 
@@ -250,7 +250,7 @@ test "$debug" == set && echo "Search query: $search_query_full"
 total_records=$(oci logging-search search-logs --search-query "$search_query_full" --time-end $time_end --time-start $time_start | jq -r '.data.results[0].data.count')
 OCI_exit_code=${PIPESTATUS[0]}
 if [ $OCI_exit_code -ne 0 ]; then
-  named_exit "OCI client execution faled."
+  named_exit "OCI client execution failed."
 fi
 
 test "$debug" == set && echo Total records: $total_records
@@ -297,6 +297,11 @@ until [ "$page" == null ]; do
   first)
       echo Fetching first page of $page_max into $tmp_file...
       oci logging-search search-logs --search-query "$search_query_full" --time-end $time_end --time-start $time_start --limit $page_size > $tmp_file
+      OCI_exit_code=${PIPESTATUS[0]}
+      if [ $OCI_exit_code -ne 0 ]; then
+        named_exit "OCI client execution failed."
+      fi
+
       page=$(jq -r '."opc-next-page"' $tmp_file)
       page_ts=$(jq -r '.data.results[0].data.datetime' $tmp_file)
 
@@ -316,6 +321,11 @@ until [ "$page" == null ]; do
       data_file=$data_dir/${script_cfg}_${page_ts}_${page_no}of${page_max}.json
       echo Fetching page $page_no of $page_max into $data_file...
       oci logging-search search-logs --search-query "$search_query_full" --time-end $time_end --time-start $time_start --limit $page_size --page $page > $data_file
+      OCI_exit_code=${PIPESTATUS[0]}
+      if [ $OCI_exit_code -ne 0 ]; then
+        named_exit "OCI client execution failed."
+      fi
+
       page=$(jq -r '."opc-next-page"' $data_file)
       ;;
   esac
