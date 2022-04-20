@@ -143,7 +143,7 @@ function get_data_stats() {
     data=$(
       cat $data_file | 
       python3 $umcRoot/bin/csv_rewrite --columns=$column 2> /dev/null | 
-      sed -n "/$date $hour_start:/,/$date $hour_stop:/p" | 
+      sed -n "/$date_start $hour_start:/,/$date $hour_stop:/p" | 
       cut -d, -f6 | 
       grep -v $column
     )
@@ -248,9 +248,7 @@ function print_counter_data() {
       get_data_stats $data_file $column $precision $multipliction
       delta=$(( $max - $min ))
       minutes=$(( $get_last_hours * 60  ))
-
       dvdt=$(echo "scale=2; $delta/$minutes" | bc)
-
       sayatcell -n "$max | $dvdt /min" 30
     fi
   done
@@ -305,6 +303,17 @@ function print_ceiling() {
 # reports
 #
 
+unset build_data_file_os
+function build_data_file_os() {
+  data_dir=$xray_root/$env_code/$component/diag/$software_category/$host/$metric_type
+  src_file=$metric_source.log
+  data_file=$xray_reports_tmp/$src_file
+  rm -f $data_file
+  for file in $(get_data_files $data_dir $src_file $date_start $date);do
+    cat $file >> $data_file
+  done
+}
+
 unset report_OCI_instances
 function report_OCI_instances() {
   env_code=$1
@@ -313,30 +322,36 @@ function report_OCI_instances() {
 
   : ${xray_root:=/mwlogs/x-ray}
 
-  date=$(date -I)
-  hour_stop=$(date "+%H")
-  hour_start=$(date -d "$get_last_hours hours ago" "+%H")
+  date=$(date -u -I)
+  hour_stop=$(date -u "+%H")
+  hour_start=$(date -u -d "$get_last_hours hours ago" "+%H")
+  date_start=$(date -u -d "$get_last_hours hours ago" -I)
 
-  date_start=$(date -d "$get_last_hours hours ago" -I)
-  if [ $date_start != $date ]; then
-    echo "Report will be computed fromm $date 00:00:00"
-    hour_start=00
-  fi
+  # if [ $date_start != $date ]; then
+  #   echo "Report will be computed from $date 00:00:00"
+  #   hour_start=00
+  # fi
 
+  # create tmp directory
+  xray_reports_tmp=~/tmp/x-ray_reports
+  mkdir -p $xray_reports_tmp
+
+  # 
   software_category=hosts
   metric_type=os
 
   header1 "Compute instances" 
-  echo "Time window from $date $hour_start:00:00 UTC to $date $hour_stop:00:00 UTC"
+  echo "Time window from $date_start $hour_start:00:00 UTC to $date $hour_stop:00:00 UTC"
 
   hosts=$(ls $xray_root/$env_code/$component/diag/hosts)
 
   header2 "Load average"
   metric_source=system-uptime
+
   columns=_host,load1min,load5min,load15min
   echo; print_header $columns
   for host in $hosts; do
-      data_file=$xray_root/$env_code/$component/diag/$software_category/$host/$metric_type/$date/$metric_source.log
+      build_data_file_os
       print_current_data $data_file $columns %0.2f
   done
 
@@ -346,21 +361,24 @@ function report_OCI_instances() {
   columns=_host,CPUuser,CPUsystem,CPUidle,CPUwaitIO,CPUVMStolenTime
   echo; print_header $columns
   for host in $hosts; do
-      data_file=$xray_root/$env_code/$component/diag/$software_category/$host/$metric_type/$date/$metric_source.log
+      #data_file=$xray_root/$env_code/$component/diag/$software_category/$host/$metric_type/$date/$metric_source.log
+      build_data_file_os
       print_current_data $data_file $columns
   done
       
   columns=_host,ProcessRunQueue,ProcessBlocked
   echo; print_header $columns
   for host in $hosts; do
-      data_file=$xray_root/$env_code/$component/diag/$software_category/$host/$metric_type/$date/$metric_source.log
+      #data_file=$xray_root/$env_code/$component/diag/$software_category/$host/$metric_type/$date/$metric_source.log
+      build_data_file_os
       print_current_data $data_file $columns
   done
 
   columns=_host,Interrupts,ContextSwitches
   echo; print_header $columns
   for host in $hosts; do
-      data_file=$xray_root/$env_code/$component/diag/$software_category/$host/$metric_type/$date/$metric_source.log
+      #data_file=$xray_root/$env_code/$component/diag/$software_category/$host/$metric_type/$date/$metric_source.log
+      build_data_file_os
       print_current_data $data_file $columns
   done
 
@@ -370,7 +388,8 @@ function report_OCI_instances() {
   columns=_host,MemFree,MemBuff,MemCache
   echo; print_header $columns
   for host in $hosts; do
-      data_file=$xray_root/$env_code/$component/diag/$software_category/$host/$metric_type/$date/$metric_source.log
+      #data_file=$xray_root/$env_code/$component/diag/$software_category/$host/$metric_type/$date/$metric_source.log
+      build_data_file_os
       print_current_data $data_file $columns
   done
 
@@ -379,7 +398,8 @@ function report_OCI_instances() {
   columns=_host,MemSwpd,SwapReadBlocks,SwapWriteBlocks
   echo; print_header $columns
   for host in $hosts; do
-      data_file=$xray_root/$env_code/$component/diag/$software_category/$host/$metric_type/$date/$metric_source.log
+      #data_file=$xray_root/$env_code/$component/diag/$software_category/$host/$metric_type/$date/$metric_source.log
+      build_data_file_os
       print_current_data $data_file $columns
   done
 
@@ -388,7 +408,8 @@ function report_OCI_instances() {
   columns=_host,IOReadBlocks,IOWriteBlocks
   echo; print_header $columns
   for host in $hosts; do
-      data_file=$xray_root/$env_code/$component/diag/$software_category/$host/$metric_type/$date/$metric_source.log
+      #data_file=$xray_root/$env_code/$component/diag/$software_category/$host/$metric_type/$date/$metric_source.log
+      build_data_file_os
       print_current_data $data_file $columns
   done
 
@@ -399,10 +420,24 @@ function report_OCI_instances() {
   columns=_host,capacity
   echo; print_header $columns
   for host in $hosts; do
-      data_file=$xray_root/$env_code/$component/diag/$software_category/$host/$metric_type/$date/$metric_source.log
+      #data_file=$xray_root/$env_code/$component/diag/$software_category/$host/$metric_type/$date/$metric_source.log
+      build_data_file_os
       print_current_data $data_file $columns
   done
 
+  # delete tmp dir
+  rm -fr $xray_reports_tmp
+}
+
+unset build_data_file_wls
+function build_data_file_wls() {
+  data_dir=$xray_root/$env_code/$component/diag/wls/dms/$domain
+  src_file=$metric_source.log
+  data_file=$xray_reports_tmp/$src_file
+  rm -f $data_file
+  for file in $(get_data_files $data_dir $src_file $date_start $date);do
+    cat $file >> $data_file
+  done
 }
 
 unset report_WLS
@@ -413,18 +448,23 @@ function report_WLS() {
 
   : ${xray_root:=/mwlogs/x-ray}
   
-  date=$(date -I)
-  hour_stop=$(date "+%H")
-  hour_start=$(date -d "$get_last_hours hours ago" "+%H")
+  date=$(date -u -I)
+  hour_stop=$(date -u "+%H")
+  hour_start=$(date -u -d "$get_last_hours hours ago" "+%H")
 
-  date_start=$(date -d "$get_last_hours hours ago" -I)
-  if [ $date_start != $date ]; then
-    echo "Report will be computed fromm $date 00:00:00"
-    hour_start=00
-  fi
+  date_start=$(date -u -d "$get_last_hours hours ago" -I)
+  # if [ $date_start != $date ]; then
+  #   echo "Report will be computed fromm $date 00:00:00"
+  #   hour_start=00
+  # fi
 
+  # create tmp directory
+  xray_reports_tmp=~/tmp/x-ray_reports
+  mkdir -p $xray_reports_tmp
+
+  #
   header1 "WebLogic domains"
-  echo "Time window from $date $hour_start:00:00 UTC to $date $hour_stop:00:00 UTC"
+  echo "Time window from $date_start $hour_start:00:00 UTC to $date $hour_stop:00:00 UTC"
 
   echo
   header2 "General"
@@ -435,7 +475,9 @@ function report_WLS() {
   for domain in $domains; do
     servers=$(ls $xray_root/$env_code/$component/diag/wls/log/$domain)
     for server in $servers; do
-      data_file=$xray_root/$env_code/$component/diag/wls/dms/$domain/$date/wls_general_$domain\_$server.log
+      #data_file=$xray_root/$env_code/$component/diag/wls/dms/$domain/$date/wls_general_$domain\_$server.log
+      metric_source=wls_general_$domain\_$server
+      build_data_file_wls
       if [ -f $data_file ]; then
         print_current_data $data_file $columns
       else
@@ -450,7 +492,9 @@ function report_WLS() {
   for domain in $domains; do
     servers=$(ls $xray_root/$env_code/$component/diag/wls/log/$domain)
     for server in $servers; do
-      data_file=$xray_root/$env_code/$component/diag/wls/dms/$domain/$date/wls_general_$domain\_$server.log
+      #data_file=$xray_root/$env_code/$component/diag/wls/dms/$domain/$date/wls_general_$domain\_$server.log
+      metric_source=wls_general_$domain\_$server
+      build_data_file_wls
       if [ -f $data_file ]; then
         print_current_data $data_file $columns
       else
@@ -465,7 +509,9 @@ function report_WLS() {
   for domain in $domains; do
     servers=$(ls $xray_root/$env_code/$component/diag/wls/log/$domain)
     for server in $servers; do
-      data_file=$xray_root/$env_code/$component/diag/wls/dms/$domain/$date/wls_general_$domain\_$server.log
+      #data_file=$xray_root/$env_code/$component/diag/wls/dms/$domain/$date/wls_general_$domain\_$server.log
+      metric_source=wls_general_$domain\_$server
+      build_data_file_wls
       if [ -f $data_file ]; then
         print_current_data $data_file $columns
       else
@@ -480,7 +526,9 @@ function report_WLS() {
   for domain in $domains; do
     servers=$(ls $xray_root/$env_code/$component/diag/wls/log/$domain)
     for server in $servers; do
-      data_file=$xray_root/$env_code/$component/diag/wls/dms/$domain/$date/wls_general_$domain\_$server.log
+      #data_file=$xray_root/$env_code/$component/diag/wls/dms/$domain/$date/wls_general_$domain\_$server.log
+      metric_source=wls_general_$domain\_$server
+      build_data_file_wls
       if [ -f $data_file ]; then
         print_counter_data $data_file $columns
       else
@@ -495,7 +543,9 @@ function report_WLS() {
   for domain in $domains; do
     servers=$(ls $xray_root/$env_code/$component/diag/wls/log/$domain)
     for server in $servers; do
-      data_file=$xray_root/$env_code/$component/diag/wls/dms/$domain/$date/wls_general_$domain\_$server.log
+      #data_file=$xray_root/$env_code/$component/diag/wls/dms/$domain/$date/wls_general_$domain\_$server.log
+      metric_source=wls_general_$domain\_$server
+      build_data_file_wls
       if [ -f $data_file ]; then
         print_current_data $data_file $columns
       else
@@ -528,7 +578,10 @@ function report_WLS() {
 
         servers=$(ls $xray_root/$env_code/$component/diag/wls/log/$domain)
 
-          data_file=$xray_root/$env_code/$component/diag/wls/dms/$domain/$date/wls_channel_$domain\_$server\_$channel.log 
+          #data_file=$xray_root/$env_code/$component/diag/wls/dms/$domain/$date/wls_channel_$domain\_$server\_$channel.log 
+          metric_source=wls_channel_$domain\_$server\_$channel
+          build_data_file_wls
+
           if [ -f $data_file ]; then
             print_current_data $data_file $columns
           else
@@ -557,7 +610,9 @@ function report_WLS() {
 
         servers=$(ls $xray_root/$env_code/$component/diag/wls/log/$domain)
 
-          data_file=$xray_root/$env_code/$component/diag/wls/dms/$domain/$date/wls_channel_$domain\_$server\_$channel.log 
+          #data_file=$xray_root/$env_code/$component/diag/wls/dms/$domain/$date/wls_channel_$domain\_$server\_$channel.log 
+          metric_source=wls_channel_$domain\_$server\_$channel
+          build_data_file_wls
           if [ -f $data_file ]; then
             print_counter_data $data_file $columns
           else
@@ -586,7 +641,9 @@ function report_WLS() {
 
         servers=$(ls $xray_root/$env_code/$component/diag/wls/log/$domain)
 
-          data_file=$xray_root/$env_code/$component/diag/wls/dms/$domain/$date/wls_channel_$domain\_$server\_$channel.log 
+          #data_file=$xray_root/$env_code/$component/diag/wls/dms/$domain/$date/wls_channel_$domain\_$server\_$channel.log
+          metric_source=wls_channel_$domain\_$server\_$channel
+          build_data_file_wls
           if [ -f $data_file ]; then
             print_current_data $data_file $columns
           else
@@ -615,7 +672,9 @@ function report_WLS() {
 
         servers=$(ls $xray_root/$env_code/$component/diag/wls/log/$domain)
 
-          data_file=$xray_root/$env_code/$component/diag/wls/dms/$domain/$date/wls_channel_$domain\_$server\_$channel.log 
+          #data_file=$xray_root/$env_code/$component/diag/wls/dms/$domain/$date/wls_channel_$domain\_$server\_$channel.log 
+          metric_source=wls_channel_$domain\_$server\_$channel
+          build_data_file_wls
           if [ -f $data_file ]; then
             print_current_data $data_file $columns
           else
@@ -645,7 +704,9 @@ function report_WLS() {
         cd - >/dev/null
       )
       for data_source in $data_sources; do
-          data_file=$xray_root/$env_code/$component/diag/wls/dms/$domain/$date/wls_datasource_$domain\_$server\_$data_source.log
+          #data_file=$xray_root/$env_code/$component/diag/wls/dms/$domain/$date/wls_datasource_$domain\_$server\_$data_source.log
+          metric_source=wls_datasource_$domain\_$server\_$data_source
+          build_data_file_wls
           if [ -f $data_file ]; then
             print_current_data $data_file $columns
           else
@@ -670,7 +731,9 @@ function report_WLS() {
         cd - >/dev/null
       )
       for data_source in $data_sources; do
-          data_file=$xray_root/$env_code/$component/diag/wls/dms/$domain/$date/wls_datasource_$domain\_$server\_$data_source.log
+          #data_file=$xray_root/$env_code/$component/diag/wls/dms/$domain/$date/wls_datasource_$domain\_$server\_$data_source.log
+          metric_source=wls_datasource_$domain\_$server\_$data_source
+          build_data_file_wls
           if [ -f $data_file ]; then
             print_counter_data $data_file $columns
           else
@@ -700,7 +763,9 @@ function report_WLS() {
         cd - >/dev/null
       )
       for jms_server in $jms_servers; do
-          data_file=$xray_root/$env_code/$component/diag/wls/dms/$domain/$date/wls_jmsserver_$domain\_$server\_$jms_server.log
+          #data_file=$xray_root/$env_code/$component/diag/wls/dms/$domain/$date/wls_jmsserver_$domain\_$server\_$jms_server.log
+          metric_source=wls_jmsserver_$domain\_$server\_$jms_server
+          build_data_file_wls
           if [ -f $data_file ]; then
             print_current_data $data_file $columns
           else
@@ -726,7 +791,9 @@ function report_WLS() {
         cd - >/dev/null
       )
       for jms_server in $jms_servers; do
-          data_file=$xray_root/$env_code/$component/diag/wls/dms/$domain/$date/wls_jmsserver_$domain\_$server\_$jms_server.log
+          #data_file=$xray_root/$env_code/$component/diag/wls/dms/$domain/$date/wls_jmsserver_$domain\_$server\_$jms_server.log
+          metric_source=wls_jmsserver_$domain\_$server\_$jms_server
+          build_data_file_wls
           if [ -f $data_file ]; then
             print_current_data $data_file $columns
           else
@@ -752,7 +819,9 @@ function report_WLS() {
         cd - >/dev/null
       )
       for jms_server in $jms_servers; do
-          data_file=$xray_root/$env_code/$component/diag/wls/dms/$domain/$date/wls_jmsserver_$domain\_$server\_$jms_server.log
+          #data_file=$xray_root/$env_code/$component/diag/wls/dms/$domain/$date/wls_jmsserver_$domain\_$server\_$jms_server.log
+          metric_source=wls_jmsserver_$domain\_$server\_$jms_server
+          build_data_file_wls
           if [ -f $data_file ]; then
             print_current_data $data_file $columns
           else
@@ -779,7 +848,9 @@ function report_WLS() {
         cd - >/dev/null
       )
       for jms_server in $jms_servers; do
-          data_file=$xray_root/$env_code/$component/diag/wls/dms/$domain/$date/wls_jmsserver_$domain\_$server\_$jms_server.log
+          #data_file=$xray_root/$env_code/$component/diag/wls/dms/$domain/$date/wls_jmsserver_$domain\_$server\_$jms_server.log
+          metric_source=wls_jmsserver_$domain\_$server\_$jms_server
+          build_data_file_wls
           if [ -f $data_file ]; then
             print_current_data $data_file $columns
           else
@@ -812,7 +883,9 @@ function report_WLS() {
 
         for jms_runtime in $jms_runtimes; do
 
-            data_file=$xray_root/$env_code/$component/diag/wls/dms/$domain/$date/wls_jmsruntime_$domain\_$server\_$jms_runtime.log
+            #data_file=$xray_root/$env_code/$component/diag/wls/dms/$domain/$date/wls_jmsruntime_$domain\_$server\_$jms_runtime.log
+            metric_source=wls_jmsruntime_$domain\_$server\_$jms_runtime
+            build_data_file_wls
             if [ -f $data_file ]; then
               print_current_data $data_file $columns
             else
@@ -841,7 +914,9 @@ function report_WLS() {
 
         for jms_runtime in $jms_runtimes; do
 
-            data_file=$xray_root/$env_code/$component/diag/wls/dms/$domain/$date/wls_jmsruntime_$domain\_$server\_$jms_runtime.log
+            #data_file=$xray_root/$env_code/$component/diag/wls/dms/$domain/$date/wls_jmsruntime_$domain\_$server\_$jms_runtime.log
+            metric_source=wls_jmsruntime_$domain\_$server\_$jms_runtime
+            build_data_file_wls
             if [ -f $data_file ]; then
               print_ceiling_data $data_file $columns
             else
@@ -870,7 +945,9 @@ function report_WLS() {
 
         for jms_runtime in $jms_runtimes; do
 
-            data_file=$xray_root/$env_code/$component/diag/wls/dms/$domain/$date/wls_jmsruntime_$domain\_$server\_$jms_runtime.log
+            #data_file=$xray_root/$env_code/$component/diag/wls/dms/$domain/$date/wls_jmsruntime_$domain\_$server\_$jms_runtime.log
+            metric_source=wls_jmsruntime_$domain\_$server\_$jms_runtime
+            build_data_file_wls
             if [ -f $data_file ]; then
               print_counter_data $data_file $columns
             else
@@ -880,6 +957,8 @@ function report_WLS() {
     done
   done
 
+  #cleanup on exit
+  rm -fr $xray_reports_tmp
 }
 
 #
