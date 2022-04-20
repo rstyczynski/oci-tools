@@ -298,6 +298,63 @@ function print_ceiling() {
   print_ceiling_data $@
 }
 
+#
+# dates aggregation
+#
+
+
+function get_date_list() {
+  date_start=$1
+  date_end=$2
+
+  date_start_timestamp=$(date -d $date_start +%s)
+  if [ $? -ne 0 ]; then
+    >&2 echo "Error. Date start format not recognized." 
+    return 1
+  fi
+
+  date_end_timestamp=$(date -d $date_end +%s)
+  if [ $? -ne 0 ]; then
+    >&2 echo "Error. Date end format not recognized." 
+    return 1
+  fi
+  
+  if [ "$date_start_timestamp" -gt "$date_end_timestamp" ]; then
+      date_start_arg=$date_start
+      date_start=$date_end
+      date_end=$date_start_arg
+  fi  
+
+  unset date_list
+
+  mid_date=$date_start
+  until [ "$mid_date" == "$date_end" ]; do
+    date_list="$date_list $mid_date"
+    mid_date=$(date -d "$mid_date +24 hours" -I)
+  done
+  date_list="$date_list $date_end"
+  echo $date_list
+}
+
+
+function get_data_files() {
+  base_dir=$1
+  data_filename=$2
+  date_start=$3
+  date_end=$4
+
+  dates=$(get_date_list $date_start $date_end)
+
+  for date in $dates; do
+
+    if [ -f $base_dir/$date/$data_filename ]; then
+      echo $base_dir/$date/$data_filename
+    else
+      : #>&2 echo "Warning. File not found: $base_dir/$date/$data_filename"
+    fi
+  done
+}
+
 
 #
 # reports
