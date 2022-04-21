@@ -404,8 +404,16 @@ EOF_purge_final
         # cleanup
         #
         rm diag_sync.cron
+
+        echo "=========================================="
+        echo "Running in DEPLOY mode. Crontab  updated."
+        echo "=========================================="
     else
         cat diag_sync.cron
+
+        echo "=========================================="
+        echo "Running in TEST mode. Crontab not updated."
+        echo "=========================================="
     fi
 }
 
