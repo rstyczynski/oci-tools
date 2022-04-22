@@ -156,8 +156,7 @@ function get_data_stats() {
       hour_start_try=$(($hour_start_try - 1))
       if [ $hour_start_try -lt 10 ]; then
         if [ $hour_start_try -lt 0 ]; then
-          echo "Error. No data for $date_start! Can't continue"
-          exit 1
+          >&2 echo "Warning. No data for $date_start! Can't continue"
         else
           # 01, 03, 03, 04, ..., 09
           hour_start_try=0$hour_start_try
