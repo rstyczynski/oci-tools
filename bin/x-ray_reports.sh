@@ -154,6 +154,15 @@ function get_data_stats() {
         grep -v $column
       )
       hour_start_try=$(($hour_start_try - 1))
+      if [ $hour_start_try -lt 10];
+        if [ $hour_start_try -lt 0]
+          echo "Error. No data for $date_start! Can't continue"
+          exit 1
+        else
+          # 01, 03, 03, 04, ..., 09
+          hour_start_try=0$hour_start_try
+        fi
+      fi
     done
 
     count=$(echo $data | tr ' ' '\n' | wc -l)
