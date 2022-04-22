@@ -157,7 +157,15 @@ function get_data_stats() {
       if [ $hour_start_try -lt 10 ]; then
         if [ $hour_start_try -lt 0 ]; then
           >&2 echo "Warning. No data for $date_start! Can't continue"
-          return 1
+
+          data='n/a'
+          count='n/a'
+          avg='n/a'
+          stddev='n/a'
+          min='n/a'
+          max='n/a'
+
+          return
         else
           # 01, 03, 03, 04, ..., 09
           hour_start_try=0$hour_start_try
