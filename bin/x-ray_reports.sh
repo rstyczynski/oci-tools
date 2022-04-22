@@ -154,8 +154,8 @@ function get_data_stats() {
         grep -v $column
       )
       hour_start_try=$(($hour_start_try - 1))
-      if [ $hour_start_try -lt 10];
-        if [ $hour_start_try -lt 0]
+      if [ $hour_start_try -lt 10]; then
+        if [ $hour_start_try -lt 0]; then
           echo "Error. No data for $date_start! Can't continue"
           exit 1
         else
