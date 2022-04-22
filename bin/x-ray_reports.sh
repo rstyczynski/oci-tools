@@ -156,7 +156,7 @@ function get_data_stats() {
       hour_start_try=$(($hour_start_try - 1))
       if [ $hour_start_try -lt 10 ]; then
         if [ $hour_start_try -lt 0 ]; then
-          >&2 echo "Warning. No data for $date_start! Can't continue"
+          >&2 echo "Warning. No data for $date_start! Can't continue. "
 
           data='n/a'
           count='n/a'
@@ -390,6 +390,15 @@ unset build_data_file_os
 function build_data_file_os() {
   data_dir=$xray_root/$env_code/$component/diag/$software_category/$host/$metric_type
   src_file=$metric_source.log
+  
+  #
+  # one day report
+  #
+  #data_file=$data_dir/$date/$src_file
+
+  #
+  # multiple days
+  #
   data_file=$xray_reports_tmp/$src_file
   rm -f $data_file.tmp
   for file in $(get_data_files $data_dir $src_file $date_start $date);do
@@ -403,7 +412,6 @@ function build_data_file_os() {
   columns_cnt=$(cat $data_file.tmp | $umcRoot/bin/csv_rewrite | head -1 | awk -F, '{print NF}')
   cat $data_file.tmp | awk -F, -v columns_cnt=$columns_cnt  '{ if (NF == columns_cnt) {print $0} else { print "Ignoring malformed line:"$0 > "/dev/stderr"} }' > $data_file
   rm -f $data_file.tmp
-
 }
 
 unset report_OCI_instances
