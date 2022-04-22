@@ -140,13 +140,22 @@ function get_data_stats() {
   fi
 
   if [ -f "$data_file" ]; then
-    data=$(
-      cat $data_file | 
-      python3 $umcRoot/bin/csv_rewrite --columns=$column 2> /dev/null | 
-      sed -n "/$date_start $hour_start:/,/$date $hour_stop:/p" | 
-      cut -d, -f6 | 
-      grep -v $column
-    )
+    
+    hour_start_try=$hour_start
+
+    unset data
+    until [ ! -z "$data" ]; do
+      >&2 echo "Trying $date_start $hour_start_try..."
+      data=$(
+        cat $data_file | 
+        python3 $umcRoot/bin/csv_rewrite --columns=$column 2> /dev/null | 
+        sed -n "/$date_start $hour_start_try:/,/$date $hour_stop:/p" | 
+        cut -d, -f6 | 
+        grep -v $column
+      )
+      hour_start_try=$(($hour_start_try - 1))
+    done
+
     count=$(echo $data | tr ' ' '\n' | wc -l)
     avg=$(echo $data | tr ' ' '\n' | awk "{ total += \$1 } END { printf \"$precision\", total/NR * $multipliction  }")
     stddev=$(echo $data | tr ' ' '\n'  | 
@@ -510,7 +519,8 @@ function build_data_file_wls() {
   #
   # Note: csv_rewrite puts header in first row, even if is later in the file 
   columns_cnt=$(cat $data_file.tmp | $umcRoot/bin/csv_rewrite | head -1 | awk -F, '{print NF}')
-  cat $data_file.tmp | awk -F, -v columns_cnt=$columns_cnt  '{ if (NF == columns_cnt) {print $0} else { print "Ignoring malformed line:"$0 > "/dev/stderr"} }' > $data_file
+  # Hack: NF == (columns_cnt+1)  because of possble value in column http,Default[http]
+  cat $data_file.tmp | awk -F, -v columns_cnt=$columns_cnt  '{ if (NF == columns_cnt || NF == (columns_cnt+1) ) {print $0} else { print "Ignoring malformed line:"$0 > "/dev/stderr"} }' > $data_file
   rm -f $data_file.tmp
 
 }
