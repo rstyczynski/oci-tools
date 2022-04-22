@@ -365,10 +365,19 @@ function build_data_file_os() {
   data_dir=$xray_root/$env_code/$component/diag/$software_category/$host/$metric_type
   src_file=$metric_source.log
   data_file=$xray_reports_tmp/$src_file
-  rm -f $data_file
+  rm -f $data_file.tmp
   for file in $(get_data_files $data_dir $src_file $date_start $date);do
-    cat $file >> $data_file
+    cat $file >> $data_file.tmp
   done
+
+  #
+  # remove malformed lines
+  #
+  # Note: csv_rewrite puts header in first row, even if is later in the file 
+  columns_cnt=$(cat $data_file.tmp | $umcRoot/bin/csv_rewrite | head -1 | awk -F, '{print NF}')
+  cat $data_file.tmp | awk -F, -v columns_cnt=$columns_cnt  '{ if (NF == columns_cnt) {print $0} else { print "Ignoring malformed line:"$0 > "/dev/stderr"} }' > $data_file
+  rm -f $data_file.tmp
+
 }
 
 unset report_OCI_instances
@@ -491,10 +500,19 @@ function build_data_file_wls() {
   data_dir=$xray_root/$env_code/$component/diag/wls/dms/$domain
   src_file=$metric_source.log
   data_file=$xray_reports_tmp/$src_file
-  rm -f $data_file
-  for file in $(get_data_files $data_dir $src_file $date_start $date);do
-    cat $file >> $data_file
+  rm -f $data_file.tmp
+  for file in $(get_data_files $data_dir $src_file $date_start $date); do
+    cat $file >> $data_file.tmp
   done
+
+  #
+  # remove malformed lines
+  #
+  # Note: csv_rewrite puts header in first row, even if is later in the file 
+  columns_cnt=$(cat $data_file.tmp | $umcRoot/bin/csv_rewrite | head -1 | awk -F, '{print NF}')
+  cat $data_file.tmp | awk -F, -v columns_cnt=$columns_cnt  '{ if (NF == columns_cnt) {print $0} else { print "Ignoring malformed line:"$0 > "/dev/stderr"} }' > $data_file
+  rm -f $data_file.tmp
+
 }
 
 unset report_WLS
