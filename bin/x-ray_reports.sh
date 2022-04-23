@@ -140,65 +140,98 @@ function get_data_stats() {
   fi
 
   if [ -f "$data_file" ]; then
+
+    #
+    # Problem: too naive logic
+
+    # hour_start_try=$hour_start
+    # if [ $hour_start_try -lt 10 ]; then
+    #   hour_start_search=0$hour_start_try
+    # else 
+    #   hour_start_search=$hour_start_try
+    # fi
     
-    hour_start_try=$hour_start
-    if [ $hour_start_try -lt 10 ]; then
-      hour_start_search=0$hour_start_try
-    else 
-      hour_start_search=$hour_start_try
+
+    # unset data
+    # until [ ! -z "$data" ]; do
+    #   >&2 echo "Trying $date_start $hour_start_try..."
+    #   data=$(
+    #     cat $data_file | 
+    #     python3 $umcRoot/bin/csv_rewrite --columns=$column 2> /dev/null | 
+    #     sed -n "/$date_start $hour_start_search:/,/$date $hour_stop:/p" | 
+    #     cut -d, -f6 | 
+    #     grep -v $column
+    #   )
+    #   hour_start_try=$(($hour_start_try - 1))
+    #   if [ $hour_start_try -lt 10 ]; then
+    #     if [ $hour_start_try -lt 0 ]; then
+    #       >&2 echo "Warning. No data for $date_start! Can't continue. "
+
+    #       data='n/a'
+    #       count='n/a'
+    #       avg='n/a'
+    #       stddev='n/a'
+    #       min='n/a'
+    #       max='n/a'
+
+    #       return
+    #     else
+    #       # 01, 03, 03, 04, ..., 09
+    #       if [ $hour_start_try -lt 10 ]; then
+    #         hour_start_search=0$hour_start_try
+    #       else 
+    #         hour_start_search=$hour_start_try
+    #       fi
+    #     fi
+    #   fi
+    # done
+
+    #
+    # Solution: row search based on timestamp
+
+    timestamp_start=$(date -u -d "$date_start $hour_start:00:00" +%s)
+    timestamp_stop=$(date -u -d "$date $hour_stop:00:00" +%s)
+
+    data=$(
+      cat $data_file | 
+      python3 $umcRoot/bin/csv_rewrite --columns=$column 2> /dev/null | 
+      awk -F, \
+      -v timestamp_start=$timestamp_start \
+      -v timestamp_stop=$timestamp_stop  '{
+          if ($3 >= timestamp_start && $3 <= timestamp_stop ) {
+            print $0
+          }
+        }'  |
+      cut -d, -f6 | 
+      grep -v $column
+    )
+
+    if [ ! -z "$data" ]; then
+      # compute stats
+      count=$(echo $data | tr ' ' '\n' | wc -l)
+      avg=$(echo $data | tr ' ' '\n' | awk "{ total += \$1 } END { printf \"$precision\", total/NR * $multipliction  }")
+      stddev=$(echo $data | tr ' ' '\n'  | 
+              awk "
+                  {for(i=1;i<=NF;i++) { sum[i] += \$i; sumsq[i] += (\$i)^2}} 
+                  END {for (i=1;i<=NF;i++) { 
+                    val=(sumsq[i]-sum[i]^2/NR)/NR
+                    if (val>0)
+                      val=0
+                    printf \"$precision\", sqrt(val) * $multipliction };
+                  }
+                  "
+              )
+      : ${stddev:=0}
+      min=$(echo $data | tr ' ' '\n' | awk "BEGIN {min=2^52} {if (\$1<0+min) min=\$1} END {printf \"$precision\", min * $multipliction}")
+      max=$(echo $data | tr ' ' '\n' | awk "BEGIN {max=0} {if (\$1>0+max) max=\$1} END {printf \"$precision\", max * $multipliction }")
+    else
+      data='n/a'
+      count='n/a'
+      avg='n/a'
+      stddev='n/a'
+      min='n/a'
+      max='n/a'
     fi
-    
-
-    unset data
-    until [ ! -z "$data" ]; do
-      >&2 echo "Trying $date_start $hour_start_try..."
-      data=$(
-        cat $data_file | 
-        python3 $umcRoot/bin/csv_rewrite --columns=$column 2> /dev/null | 
-        sed -n "/$date_start $hour_start_search:/,/$date $hour_stop:/p" | 
-        cut -d, -f6 | 
-        grep -v $column
-      )
-      hour_start_try=$(($hour_start_try - 1))
-      if [ $hour_start_try -lt 10 ]; then
-        if [ $hour_start_try -lt 0 ]; then
-          >&2 echo "Warning. No data for $date_start! Can't continue. "
-
-          data='n/a'
-          count='n/a'
-          avg='n/a'
-          stddev='n/a'
-          min='n/a'
-          max='n/a'
-
-          return
-        else
-          # 01, 03, 03, 04, ..., 09
-          if [ $hour_start_try -lt 10 ]; then
-            hour_start_search=0$hour_start_try
-          else 
-            hour_start_search=$hour_start_try
-          fi
-        fi
-      fi
-    done
-
-    count=$(echo $data | tr ' ' '\n' | wc -l)
-    avg=$(echo $data | tr ' ' '\n' | awk "{ total += \$1 } END { printf \"$precision\", total/NR * $multipliction  }")
-    stddev=$(echo $data | tr ' ' '\n'  | 
-            awk "
-                {for(i=1;i<=NF;i++) { sum[i] += \$i; sumsq[i] += (\$i)^2}} 
-                END {for (i=1;i<=NF;i++) { 
-                  val=(sumsq[i]-sum[i]^2/NR)/NR
-                  if (val>0)
-                    val=0
-                  printf \"$precision\", sqrt(val) * $multipliction };
-                }
-                "
-            )
-    : ${stddev:=0}
-    min=$(echo $data | tr ' ' '\n' | awk "BEGIN {min=2^52} {if (\$1<0+min) min=\$1} END {printf \"$precision\", min * $multipliction}")
-    max=$(echo $data | tr ' ' '\n' | awk "BEGIN {max=0} {if (\$1>0+max) max=\$1} END {printf \"$precision\", max * $multipliction }")
   else
     data='n/a'
     count='n/a'
@@ -410,19 +443,22 @@ function build_data_file_os() {
   # multiple days
   #
   data_file=$xray_reports_tmp/$src_file
+  rm -f $data_file
   rm -f $data_file.tmp
   for file in $(get_data_files $data_dir $src_file $date_start $date);do
     cat $file >> $data_file.tmp
     echo >> $data_file.tmp
   done
 
-  #
-  # remove malformed lines
-  #
-  # Note: csv_rewrite puts header in first row, even if is later in the file 
-  columns_cnt=$(cat $data_file.tmp | $umcRoot/bin/csv_rewrite | head -1 | awk -F, '{print NF}')
-  cat $data_file.tmp | awk -F, -v columns_cnt=$columns_cnt  '{ if (NF == columns_cnt) {print $0} else { print "Ignoring malformed line:"$0 > "/dev/stderr"} }' > $data_file
-  rm -f $data_file.tmp
+  if [ -f $data_file.tmp ]; then
+    #
+    # remove malformed lines
+    #
+    # Note: csv_rewrite puts header in first row, even if is later in the file 
+    columns_cnt=$(cat $data_file.tmp | $umcRoot/bin/csv_rewrite | head -1 | awk -F, '{print NF}')
+    cat $data_file.tmp | awk -F, -v columns_cnt=$columns_cnt  '{ if (NF == columns_cnt) {print $0} else { print "Ignoring malformed line:"$0 > "/dev/stderr"} }' > $data_file
+    rm -f $data_file.tmp
+  fi
 }
 
 unset report_OCI_instances
