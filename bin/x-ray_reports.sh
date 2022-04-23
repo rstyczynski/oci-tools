@@ -142,6 +142,12 @@ function get_data_stats() {
   if [ -f "$data_file" ]; then
     
     hour_start_try=$hour_start
+    if [ $hour_start_try -lt 10 ]; then
+      hour_start_search=0$hour_start_try
+    else 
+      hour_start_search=$hour_start_try
+    fi
+    
 
     unset data
     until [ ! -z "$data" ]; do
@@ -149,7 +155,7 @@ function get_data_stats() {
       data=$(
         cat $data_file | 
         python3 $umcRoot/bin/csv_rewrite --columns=$column 2> /dev/null | 
-        sed -n "/$date_start $hour_start_try:/,/$date $hour_stop:/p" | 
+        sed -n "/$date_start $hour_start_search:/,/$date $hour_stop:/p" | 
         cut -d, -f6 | 
         grep -v $column
       )
@@ -168,7 +174,11 @@ function get_data_stats() {
           return
         else
           # 01, 03, 03, 04, ..., 09
-          hour_start_try=0$hour_start_try
+          if [ $hour_start_try -lt 10 ]; then
+            hour_start_search=0$hour_start_try
+          else 
+            hour_start_search=$hour_start_try
+          fi
         fi
       fi
     done
