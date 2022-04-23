@@ -413,6 +413,7 @@ function build_data_file_os() {
   rm -f $data_file.tmp
   for file in $(get_data_files $data_dir $src_file $date_start $date);do
     cat $file >> $data_file.tmp
+    echo >> $data_file.tmp
   done
 
   #
@@ -547,6 +548,7 @@ function build_data_file_wls() {
   rm -f $data_file.tmp
   for file in $(get_data_files $data_dir $src_file $date_start $date); do
     cat $file >> $data_file.tmp
+    echo >> $data_file.tmp
   done
 
   #
