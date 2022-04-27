@@ -87,7 +87,10 @@ function mkdir_force() {
   mkdir -p $dst_dir 2>/dev/null
   if [ $? -ne 0 ]; then
     parent_dir=$(dirname $dst_dir)
-    sudo chmod 777 $parent_dir
+    
+    # removed sudo
+    # sudo chmod 777 $parent_dir
+    chmod 777 $parent_dir
   fi
 
   mkdir -p $dst_dir
