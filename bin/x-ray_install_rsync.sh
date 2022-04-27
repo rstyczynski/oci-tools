@@ -80,8 +80,11 @@ if [ $apics == no ]; then
 step "20. Deploy log sync configuration files for WebLogic Admin servers"
 for srvNo in ${!wls_admin[@]}; do
   export wls_server=$(getWLSjvmAttr ${wls_admin[$srvNo]} -Dweblogic.Name)
-  export domain_home=$(getWLSjvmAttr ${wls_admin[$srvNo]} -Ddomain.home)
-  export domain_name=$(basename $domain_home)
+
+  export domain_home=$(getDomainHome)
+  export domain_name=$(getDomainName)
+  #export domain_home=$(getWLSjvmAttr ${wls_admin[$srvNo]} -Ddomain.home)
+  #export domain_name=$(basename $domain_home)
 
   echo "Processing: $domain_name/$wls_server at $domain_home"
 
@@ -92,8 +95,11 @@ step "21. Deploy log sync configuration files for WebLogic Managed servers"
 
 for srvNo in ${!wls_managed[@]}; do
   export wls_server=$(getWLSjvmAttr ${wls_managed[$srvNo]} -Dweblogic.Name)
-  export domain_home=$(getWLSjvmAttr ${wls_managed[$srvNo]} -Ddomain.home)
-  export domain_name=$(basename $domain_home)
+
+  export domain_home=$(getDomainHome)
+  export domain_name=$(getDomainName)
+#   export domain_home=$(getWLSjvmAttr ${wls_managed[$srvNo]} -Ddomain.home)
+#   export domain_name=$(basename $domain_home)
 
   echo "Processing: $domain_name/$wls_server at $domain_home"
 
@@ -129,8 +135,10 @@ step '60. Deploy sync configuration files for ODI logs'
 
 for srvNo in ${!wls_managed[@]}; do
     export wls_server=$(getWLSjvmAttr ${wls_managed[$srvNo]} -Dweblogic.Name)
-    export domain_home=$(getWLSjvmAttr ${wls_managed[$srvNo]} -Ddomain.home)
-    export domain_name=$(basename $domain_home)
+    export domain_home=$(getDomainHome)
+    export domain_name=$(getDomainName)
+    # export domain_home=$(getWLSjvmAttr ${wls_managed[$srvNo]} -Ddomain.home)
+    # export domain_name=$(basename $domain_home)
 
     if [ -d $domain_home/servers/$wls_server/logs/oracledi ]; then
         echo "ODI detected. Processing: $domain_name/$wls_server at $domain_home"
