@@ -91,7 +91,7 @@ function cache.evict() {
   cache_ttl=$(cat $cache_dir/$cache_group/.info 2>/dev/null | grep '^cache_ttl=' | cut -f2 -d=)
   : ${cache_ttl:=60}
 
-  cache.debug "Deleting responses older than $cache_ttl minutes."
+  cache.debug "Deleting responses older than $cache_ttl minute(s)."
   find $cache_dir/$cache_group -type f -mmin +$cache_ttl -delete 2>/dev/null
   # delete dirs if empty
   find $cache_dir -type d -empty -delete 2>/dev/null
