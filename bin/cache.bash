@@ -121,7 +121,7 @@ function cache.invoke() {
     (
       # https://dmorgan.info/posts/linux-lock-files/
       flock -xn 200 2>/dev/null; lock_state=$?
-      trap 'rm $cache_dir/$cache_group/.lock' 0
+      trap "rm $cache_dir/$cache_group/.lock" 0
 
       if [ $lock_state -eq 0 ]; then
         cache.evict $cmd
@@ -145,7 +145,7 @@ function cache.invoke() {
   # check if cached data exist
   if [ ! -f $cache_dir/$cache_group/$cache_key ]; then
     cache.debug "No previous answer. Executing $cmd"
-    $cmd > $cache_dir/$cache_group/$cache_key
+    eval $cmd > $cache_dir/$cache_group/$cache_key
 
     cat > $cache_dir/$cache_group/$cache_key.info <<EOF
 datetime=$(date +%Y-%m-%dT%H:%M:%S%z)
@@ -171,7 +171,7 @@ EOF
     cache.warning "Expected, but previous answer not found. Executing $cmd"
     
     mkdir -p $cache_dir/$cache_group
-    $cmd > $cache_dir/$cache_group/$cache_key
+    eval $cmd > $cache_dir/$cache_group/$cache_key
 
     cat > $cache_dir/$cache_group/$cache_key.info <<EOF
 datetime=$(date +%Y-%m-%dT%H:%M:%S%z)
