@@ -91,13 +91,10 @@ function cache.evict() {
   cache_ttl=$(cat $cache_dir/$cache_group/.info 2>/dev/null | grep '^cache_ttl=' | cut -f2 -d=)
   : ${cache_ttl:=60}
 
-  cache.debug "Deleting responses older than $cache_ttl minute(s)."
+  cache.debug "Deleting responses older than $cache__ttl minute(s)."
   find $cache_dir/$cache_group -type f -mmin +$cache_ttl -delete 2>/dev/null
   # delete dirs if empty
   find $cache_dir -type d -empty -delete 2>/dev/null
-
-  unset cache_group
-  unset cache_key
 }
 
 function cache.invoke() {
@@ -110,14 +107,14 @@ function cache.invoke() {
   : ${cache_dir:=$HOME/.cache/cache_answer}
   : ${cache_ttl:=60}
 
+  # delete old data
+  cache.evict $cmd
+
   # command fingerprint
   : ${cache_key:=$(echo $cmd | sha512sum | cut -f1 -d' ')}
   
   # data group
   : ${cache_group:=$(echo $cache_key | cut -b1-4)}
-
-  # delete old data
-  cache.evict $cmd
 
   # execute
   cache.debug "cache_dir=$cache_dir"
