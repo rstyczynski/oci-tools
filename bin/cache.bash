@@ -117,19 +117,7 @@ function cache.invoke() {
   : ${cache_group:=$(echo $cache_key | cut -b1-4)}
 
   # delete old data
-  if [ -d $cache_dir/$cache_group ]; then
-    (
-      # https://dmorgan.info/posts/linux-lock-files/
-      flock -xn 200 2>/dev/null; lock_state=$?
-      trap "rm $cache_dir/$cache_group/.lock" 0
-
-      if [ $lock_state -eq 0 ]; then
-        cache.evict $cmd
-      else
-        cache.warning "Warning. Old cache data not deleted. Missing flock, or other process evicts cache now. Evict manually by cache.evict cmd." 
-      fi
-    ) 200>$cache_dir/$cache_group/.lock
-  fi
+  cache.evict $cmd
 
   # execute
   cache.debug "cache_dir=$cache_dir"
