@@ -240,15 +240,6 @@ function get_data_stats() {
     min='n/a'
     max='n/a'
   fi
-
-  # metrics[$env_code.$component.$software_category.$host.$metric_type.$metric_source.$column.count]=$count
-  # metrics[$env_code.$component.$software_category.$host.$metric_type.$metric_source.$column.avg]=$avg
-  # metrics[$env_code.$component.$software_category.$host.$metric_type.$metric_source.$column.stddev]=$stddev
-  # metrics[$env_code.$component.$software_category.$host.$metric_type.$metric_source.$column.min]=$min
-  # metrics[$env_code.$component.$software_category.$host.$metric_type.$metric_source.$column.max]=$max
-
-  #echo DEBUG: $env_code.$component.$software_category.$host.$metric_type.$metric_source.$column, $count, $avg, $stddev, $min, $max
-  
 }
 
 #
@@ -278,8 +269,6 @@ function print_current_data() {
       var_name=$( echo $column | sed 's/^_//' )
       var_value=${!var_name}
       sayatcell -n "$var_value" 30
-
-      #echo DEBUG: $var_name, $var_value
     else
       get_data_stats $data_file $column $precision $multipliction
       sayatcell -n "$avg" 30
@@ -291,13 +280,11 @@ function print_current_data() {
       # $software_category=hosts
       # $metric_type=os
       # $metric_source=system-uptime
-      # metrics[$env_code.$component.$software_category.$host.$metric_type.$metric_source.$column.count]=$count
-      # metrics[$env_code.$component.$software_category.$host.$metric_type.$metric_source.$column.avg]=$avg
-      # metrics[$env_code.$component.$software_category.$host.$metric_type.$metric_source.$column.stddev]=$stddev
-      # metrics[$env_code.$component.$software_category.$host.$metric_type.$metric_source.$column.min]=$min
-      # metrics[$env_code.$component.$software_category.$host.$metric_type.$metric_source.$column.max]=$max
-
-      #echo DEBUG: $env_code.$component.$software_category.$host.$metric_type.$metric_source.$column, $count, $avg, $stddev, $min, $max
+      metrics[$env_code.$component.$software_category.$host.$metric_type.$metric_source.$column.count]=$count
+      metrics[$env_code.$component.$software_category.$host.$metric_type.$metric_source.$column.avg]=$avg
+      metrics[$env_code.$component.$software_category.$host.$metric_type.$metric_source.$column.stddev]=$stddev
+      metrics[$env_code.$component.$software_category.$host.$metric_type.$metric_source.$column.min]=$min
+      metrics[$env_code.$component.$software_category.$host.$metric_type.$metric_source.$column.max]=$max
     fi
   done
   echo
