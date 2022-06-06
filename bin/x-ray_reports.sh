@@ -1289,12 +1289,12 @@ function dump() {
 
   case $what in
   variables)
-    for var in echo ${!variables[@]}; do
+    for var in ${!variables[@]}; do
       echo $var = ${variables[$var]}
     done
     ;;
   metrics)
-    for metric in echo ${!metrics[@]}; do
+    for metric in ${!metrics[@]}; do
       echo $metric = ${metrics[$metric]}
     done
     ;;
