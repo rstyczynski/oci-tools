@@ -368,7 +368,7 @@ function print_ceiling_data() {
       metrics[$env_code.$component.$software_category.$host.$metric_type.$metric_source.$column.stddev]=$stddev
       metrics[$env_code.$component.$software_category.$host.$metric_type.$metric_source.$column.min]=$min
       metrics[$env_code.$component.$software_category.$host.$metric_type.$metric_source.$column.max]=$max
-      
+
     fi
   done
   echo
@@ -590,6 +590,10 @@ function report_OCI_instances() {
       build_data_file_os
       print_current_data $data_file $columns
   done
+
+  : ${report_dir:=.}
+  declare -p metrics > $report_dir/report_OCI_instances_${env_code}_${component}.data
+  echo "Metric data written to $report_dir/report_OCI_instances_${env_code}_${component}.data"
 
   # delete tmp dir
   rm -fr $xray_reports_tmp
@@ -1136,6 +1140,11 @@ function report_WLS() {
           done
     done
   done
+
+  # write data
+  : ${report_dir:=.}
+  declare -p metrics > $report_dir/report_WLS${env_code}_${component}.data
+  echo "Metric data written to $report_dir/report_WLS${env_code}_${component}.data"
 
   #cleanup on exit
   rm -fr $xray_reports_tmp
