@@ -266,6 +266,7 @@ function print_current_data() {
 
   for column in $(echo $columns | tr , ' '); do
     if [[ $column == _* ]]; then
+      # write row name e.g. hostame
       var_name=$( echo $column | sed 's/^_//' )
       var_value=${!var_name}
       sayatcell -n "$var_value" 30
@@ -318,6 +319,17 @@ function print_counter_data() {
       delta=$(( $max - $min ))
       minutes=$(( $get_last_hours * 60  ))
       dvdt=$(echo "scale=2; $delta/$minutes" | bc)
+
+      metrics[$env_code.$component.$software_category.$host.$metric_type.$metric_source.$column.count]=$count
+      metrics[$env_code.$component.$software_category.$host.$metric_type.$metric_source.$column.avg]=$avg
+      metrics[$env_code.$component.$software_category.$host.$metric_type.$metric_source.$column.stddev]=$stddev
+      metrics[$env_code.$component.$software_category.$host.$metric_type.$metric_source.$column.min]=$min
+      metrics[$env_code.$component.$software_category.$host.$metric_type.$metric_source.$column.max]=$max
+
+      metrics[$env_code.$component.$software_category.$host.$metric_type.$metric_source.$column.dv]=$delta
+      metrics[$env_code.$component.$software_category.$host.$metric_type.$metric_source.$column.dvdt]=$dvdt
+      metrics[$env_code.$component.$software_category.$host.$metric_type.$metric_source.$column.minutes]=$minutes
+
       sayatcell -n "$max | $dvdt /min" 30
     fi
   done
@@ -350,6 +362,13 @@ function print_ceiling_data() {
     else
       get_data_stats $data_file $column $precision $multipliction
       sayatcell -n "$max" 30
+
+      metrics[$env_code.$component.$software_category.$host.$metric_type.$metric_source.$column.count]=$count
+      metrics[$env_code.$component.$software_category.$host.$metric_type.$metric_source.$column.avg]=$avg
+      metrics[$env_code.$component.$software_category.$host.$metric_type.$metric_source.$column.stddev]=$stddev
+      metrics[$env_code.$component.$software_category.$host.$metric_type.$metric_source.$column.min]=$min
+      metrics[$env_code.$component.$software_category.$host.$metric_type.$metric_source.$column.max]=$max
+      
     fi
   done
   echo
@@ -619,6 +638,9 @@ function report_WLS() {
   # create tmp directory
   xray_reports_tmp=~/tmp/x-ray_reports
   mkdir -p $xray_reports_tmp
+
+  software_category=hosts
+  metric_type=wls
 
   #
   header1 "WebLogic domains"
