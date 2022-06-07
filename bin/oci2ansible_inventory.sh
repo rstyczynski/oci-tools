@@ -135,9 +135,9 @@ function usage() {
 
   echo 
   echo Argument formats:
-  if [ ${#script_args_format[@]} -gt 0 ];then
-    for variable in ${!script_args_format[@]}; do
-      echo " \-$variable: ${script_args_format[$variable]}"
+  if [ ${#script_args_validator[@]} -gt 0 ];then
+    for variable in ${!script_args_validator[@]}; do
+      echo " \-$variable: ${script_args_validator[$variable]}"
     done
   else
     echo '(none)'
