@@ -173,7 +173,7 @@ function validators_validate() {
       validate_codes[$validator_cnt]=127
       break
     fi
-    $validator ${!var_name}
+    validator_$validator ${!var_name}
     validator_exit_code=$?
 
     test $validator_exit_code -eq 0 && validate_result=PASSED || validate_result=FAILED
