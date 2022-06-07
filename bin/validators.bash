@@ -64,6 +64,14 @@ function validator_labels() {
   fi
 }
 
+function validator_flag() {
+  value=$1
+
+  test -z "$value" && exit 0
+  test "$value" == set && exit 0
+  exit 1
+}
+
 function validator_directory_writable() {
   dir=$1
 
