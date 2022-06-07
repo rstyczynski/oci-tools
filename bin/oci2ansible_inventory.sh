@@ -155,7 +155,7 @@ function usage() {
 
   if [ ${#script_args_default[@]} -gt 0 ];then
     echo
-    echo Persisted values:
+    echo Persisted values (config: $script_cfg):
     persistent=none
     for variable in $(echo $script_args_persist | tr , ' ' | tr -d :); do
       var_value=$(getcfg $script_cfg $variable)
