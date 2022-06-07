@@ -121,7 +121,7 @@ function usage() {
     echo
     echo Persisted values:
     persistent=none
-    for variable in $script_args_persist; do
+    for variable in $(echo $script_args_persist | tr , ' ' | tr -d :); do
       var_value=$(getcfg $script_cfg $variable)
       if [ ! -z "$var_value" ]; then
         echo $variable: $var_value
