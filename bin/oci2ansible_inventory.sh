@@ -1,16 +1,23 @@
 #!/bin/bash
 
+# TODO
+# 1. parametrize TTL for each entity
+# 2. parametrize env ssh key 
+# 
+
+
 script_name='oci2ansible_inventory'
 script_version='1.0'
 script_by='ryszard.styczynski@oracle.com'
 
-script_args='list,host:'
+script_args='list,host:,progress_spinner'
 script_args_persist='tag_ns:,tag_env_list_key:,regions:,cache_ttl_tag2values:,envs:'
 script_args_system='cfg_id:,temp_dir:,debug,help'
 
 declare -A script_args_defaults
 script_args_defaults[cache_ttl_tag2values]=43200
 script_args_defaults[temp_dir]=~/tmp
+script_args_defaults[progress_spinner]=set
 
 script_cfg='oci2ansible_inventory'
 
@@ -196,6 +203,9 @@ if ! touch $temp_dir/marker; then
 fi
 rm -f $temp_dir/marker
 
+if [ $progress_spinner == set ]; then
+  cache_progress=yes
+fi
 
 #
 # actual script code starts here
