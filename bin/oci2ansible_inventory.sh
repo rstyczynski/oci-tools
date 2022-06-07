@@ -1,13 +1,16 @@
 #!/bin/bash
 
-
 script_name='oci2ansible_inventory'
 script_version='1.0'
 script_by='ryszard.styczynski@oracle.com'
 
 script_args='list,host:'
-script_args_persist='tag_ns:,tag_env_list_key:,regions,cache_ttl_tag2values:'
-script_args_system='cfg_id:,tmp:debug,help'
+script_args_persist='tag_ns:,tag_env_list_key:,regions:,cache_ttl_tag2values:,envs:'
+script_args_system='cfg_id:,tmp:,debug,help'
+
+declare -A script_args_defaults
+script_args_defaults[cache_ttl_tag2values]=43200
+script_args_defaults[tmp]=~/tmp
 
 script_cfg='oci2ansible_inventory'
 
@@ -24,14 +27,6 @@ source $(dirname "$0")/named_exit.sh
 
 set_exit_code_variable "Script bin directory unknown." 1
 set_exit_code_variable "Required tools not available." 2
-
-set_exit_code_variable "Query execuion error." 3
-set_exit_code_variable "OCI client execution failed." 4
-set_exit_code_variable "Trying to fetch 10+ pages than expected." 5
-set_exit_code_variable "Directory not writeable." 6
-
-set_exit_code_variable "No data to fetch." 0
-set_exit_code_variable "Data expected, but no data to fetch." 0
 
 #
 # Check environment
@@ -62,6 +57,14 @@ test ! -z "$missing_tools" && named_exit "Required tools not available." "$missi
 #
 for script_lib in $script_libs; do
   source $script_bin/$script_lib
+done
+
+#
+# set default values
+#
+
+for variable in ${!script_args_defaults[@]}; do
+  eval $variable=${script_args_defaults[$variable]}
 done
 
 #
@@ -104,6 +107,12 @@ function usage() {
     echo -n " --$param"
   done
   echo
+  if [ ${#script_args_defaults[@]} -gt 0 ];then
+      echo Default values:
+    for variable in ${!script_args_defaults[@]}; do
+      echo $variable: ${script_args_defaults[$variable]}
+    done
+  fi
 }
 
 #
@@ -155,7 +164,6 @@ for cfg_param in $(echo $script_args_persist | tr , ' ' | tr -d :); do
   fi
 done
 
-
 #
 # proccess parameters
 #
@@ -168,8 +176,6 @@ if ! touch $tmp_dir/marker; then
   named_exit "Directory not writeable." $tmp_dir
 fi
 rm -f $tmp_dir/marker
-
-
 
 
 #
@@ -330,8 +336,6 @@ function get_host_variables() {
 #
 #
 
-
-
 #verify region
 for region in $regions; do
   cache_ttl=1440
@@ -359,14 +363,6 @@ fi
 envs=$(cache.invoke oci iam tag get --tag-name $tag_env_list_key --tag-namespace-id $tag_ns | 
 jq .data.validator.values | tr -d '[]" ,' | grep -v '^$')
 
-echo $list
-echo $host
-
-case $1 in
---list)
-  get_ansible_inventory $envs | jq
-  ;;
---host)
-  get_host_variables $2 | jq ".\"$2\""
-  ;;
-esac
+# execute ansible required tasks
+test ! -z "$list" && get_ansible_inventory $envs | jq
+test ! -z "$host" && get_host_variables $host | jq ".\"$host\""
