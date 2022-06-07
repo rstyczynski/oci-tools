@@ -3,6 +3,7 @@
 # TODO
 # 2. parametrize env ssh key 
 # 3. handle envs discovery / envs parameter
+# 4. check if resource is an instance
 
 script_name='oci2ansible_inventory'
 script_version='1.0'
@@ -240,12 +241,14 @@ function populate_instances() {
           cache.invoke " \
           oci search resource structured-search \
           --region $region \
-          --query-text \"query all instances where \
+          --query-text \"query all resources where \
           (definedTags.namespace = '$tag_ns' && definedTags.key = 'ENV' && definedTags.value = '$env')\"
           " | 
           jq -r '.data.items[]."identifier"')
 
         for ocid in $ocids; do
+          # TODO: check if resource is an instance
+
           # get private ip    
           cache_ttl=$cache_ttl_ocid2vnics
           cache_group=ocid2vnics
