@@ -100,7 +100,7 @@ done
 # script info
 #
 function about() {
-  echo "$script_name, $script_version by $script_by"
+  echo "$script_name, $script_version by $script_by" 
 }
 
 function usage() {
@@ -140,10 +140,10 @@ function usage() {
 #
 # start
 #
-about
+about >&2
 
 if [ "$help" == set ]; then
-  usage
+  usage >&2
   exit 0
 fi
 
@@ -276,7 +276,6 @@ function populate_instance_variables() {
   # get tags
   cache_group=ip2instance
   cache_key=$private_ip
-
 
   # get tags
   cache_ttl=1440

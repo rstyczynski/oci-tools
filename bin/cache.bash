@@ -38,7 +38,7 @@ function cache.ensure_environment() {
     fi
   done
 
-  # TODO: how to exit from using generic way?
+  # TODO: how to exit using generic way?
   if [ ! -z "$missing_tools" ]; then
 
     cache_environment_faulure_cause="Required tools not available. Missing tools:$missing_tools"
@@ -61,6 +61,16 @@ cache_dir=
 cache_debug=
 cache_warning=yes
 
+cache_progress=yes
+cache_spinner_cnt=1
+cache_spinner="/-\|"
+
+function cache._progress() {
+  if [ "$cache_progress" == yes ]; then
+    printf "\b${cache_spinner:cache_spinner_cnt++%${#cache_spinner}:1}" >&2
+  fi
+}
+
 function cache.debug() {
   if [ "$cache_debug" == yes ]; then
     echo $@ >&2
@@ -75,6 +85,8 @@ function cache.warning() {
 
 function cache.evict() {
   cmd=$@
+
+  cache._progress
 
   if [ -z "$cmd" ]; then
     : ${cache_group:=.}
@@ -98,6 +110,8 @@ function cache.evict() {
 }
 
 function cache._invoke() {
+
+    cache._progress
 
     eval $cmd > $cmd_stdout 2>$cmd_stderr
     cmd_exit_code=$?
