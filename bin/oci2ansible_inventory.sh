@@ -102,7 +102,8 @@ function about() {
 }
 
 function usage() {
-  echo -n "$script_name" 
+  echo
+  echo -n "Usage: $script_name" 
   for param in $(echo "$script_args_persist,$script_args_system,$script_args" | tr , ' ' | tr -d :); do
     echo -n " --$param"
   done
