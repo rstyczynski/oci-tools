@@ -119,6 +119,15 @@ while [[ $# -gt 0 ]]; do
 done
 
 #
+# set config source
+#
+
+if [ ! -z "$cfg_id" ]; then
+  script_cfg=$cfg_id
+fi
+
+
+#
 # script info
 #
 function about() {
@@ -184,10 +193,6 @@ fi
 #
 # read parameters from config file
 #
-
-if [ ! -z "$cfg_id" ]; then
-  script_cfg=$cfg_id
-fi
 
 # read parameters from cfg file
 for cfg_param in $(echo $script_args_persist | tr , ' ' | tr -d :); do
