@@ -4,12 +4,12 @@
 # script information
 #
 
-script_name='JSON.bash'
-script_version='1.0'
-script_by='ryszard.styczynski@oracle.com'
+lib_name='JSON.bash'
+lib_version='1.0'
+lib_by='ryszard.styczynski@oracle.com'
 
-script_tools='jq'
-script_cfg=''
+lib_tools='jq'
+lib_cfg=''
 
 #
 # Check environment
@@ -23,11 +23,11 @@ function JSON.ensure_environment() {
   unset missing_tools
   unset JSON_environment_faulure_cause
 
-  if [ ! -z "$script_cfg" ]; then
-    test ! -f $script_bin/config.sh && missing_tools="config.sh,$missing_tools"
+  if [ ! -z "$lib_cfg" ]; then
+    test ! -f $lib_bin/config.sh && missing_tools="config.sh,$missing_tools"
   fi
 
-  for cli_tool in $script_tools; do
+  for cli_tool in $lib_tools; do
     which $cli_tool > /dev/null 2>/dev/null
     if [ $? -eq 1 ]; then
       if [ -z "$missing_tools" ]; then
@@ -84,8 +84,8 @@ function JSON.init(){
 "_error": {
   "datetime": "$(date +"%Y-%m-%dT%H:%M:%S%z")",
   "timestamp": "$(date +%s)",
-  "script_name": "$script_name",
-  "script_version": "$script_version", 
+  "lib_name": "$lib_name",
+  "lib_version": "$lib_version", 
   "hostname": "$(hostname)",
   "whoami": "$(whoami)",
   "error": "Environment verification failed",
@@ -292,7 +292,7 @@ function JSON.test1() {
 
 function JSON.help() {
   cat <<EOF
-Bash JSON library $script_version
+Bash JSON library $lib_version
 
 Set of functions to facilitate building JSON data structure.
 

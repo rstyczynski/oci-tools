@@ -4,12 +4,12 @@
 # script information
 #
 
-script_name='cache.bash'
-script_version='1.0'
-script_by='ryszard.styczynski@oracle.com'
+lib_name='cache.bash'
+lib_version='1.0'
+lib_by='ryszard.styczynski@oracle.com'
 
-script_tools='flock'
-script_cfg=''
+lib_tools=''
+lib_cfg=''
 
 #
 # Check environment
@@ -23,11 +23,11 @@ function cache.ensure_environment() {
   unset missing_tools
   unset cache_environment_faulure_cause
 
-  if [ ! -z "$script_cfg" ]; then
-    test ! -f $script_bin/config.sh && missing_tools="config.sh,$missing_tools"
+  if [ ! -z "$lib_cfg" ]; then
+    test ! -f $lib_bin/config.sh && missing_tools="config.sh,$missing_tools"
   fi
 
-  for cli_tool in $script_tools; do
+  for cli_tool in $lib_tools; do
     which $cli_tool > /dev/null 2>/dev/null
     if [ $? -eq 1 ]; then
       if [ -z "$missing_tools" ]; then
@@ -91,10 +91,46 @@ function cache.evict() {
   cache_ttl=$(cat $cache_dir/$cache_group/.info 2>/dev/null | grep '^cache_ttl=' | cut -f2 -d=)
   : ${cache_ttl:=60}
 
-  cache.debug "Deleting responses older than $cache__ttl minute(s)."
+  cache.debug "Deleting responses older than $cache_ttl minute(s)."
   find $cache_dir/$cache_group -type f -mmin +$cache_ttl -delete 2>/dev/null
   # delete dirs if empty
   find $cache_dir -type d -empty -delete 2>/dev/null
+}
+
+function cache._invoke() {
+
+    eval $cmd > $cmd_stdout 2>$cmd_stderr
+    cmd_exit_code=$?
+    if [ $cmd_exit_code -ne 0 ]; then
+      mv $cmd_stdout $cmd_stdout.err
+      cmd_stdout_data=$cmd_stdout.err
+    else 
+      cmd_stdout_data=$cmd_stdout
+    fi
+
+    cat > $cache_dir/$cache_group/$cache_key.info <<EOF
+datetime=$(date +%Y-%m-%dT%H:%M:%S%z)
+timestamp=$(date +%s)
+lib_name=$lib_name
+lib_version=$lib_version
+hostname=$(hostname)
+whoami=$(whoami)
+cmd=$cmd
+cmd_exit_code=$cmd_exit_code
+cmd_stdout=$cmd_stdout_data
+cmd_stderr=$cmd_stderr
+cache_ttl=$cache_ttl
+cache_key=$cache_key
+cache_group=$cache_group
+cache_dir=$cache_dir
+EOF
+
+    # exit if answer failed
+    if [ $cmd_exit_code -ne 0 ]; then
+      cat $cmd_stdout.err
+      cache.warning "cache.bash: Exiting as command invocation returned error. More info: $cache_dir/$cache_group/$cache_key.info"
+      return $cmd_exit_code
+    fi
 }
 
 function cache.invoke() {
@@ -107,14 +143,18 @@ function cache.invoke() {
   : ${cache_dir:=$HOME/.cache/cache_answer}
   : ${cache_ttl:=60}
 
-  # delete old data
-  cache.evict $cmd
-
   # command fingerprint
   : ${cache_key:=$(echo $cmd | sha512sum | cut -f1 -d' ')}
   
   # data group
   : ${cache_group:=$(echo $cache_key | cut -b1-4)}
+
+  # fles with reponse data
+  cmd_stdout=$cache_dir/$cache_group/$cache_key.stdout
+  cmd_stderr=$cache_dir/$cache_group/$cache_key.stderr
+
+  # delete old data
+  cache.evict $cmd
 
   # execute
   cache.debug "cache_dir=$cache_dir"
@@ -128,62 +168,34 @@ function cache.invoke() {
   echo "cache_ttl=$cache_ttl" > $cache_dir/$cache_group/.info
 
   # check if cached data exist
-  if [ ! -f $cache_dir/$cache_group/$cache_key ]; then
+  if [ ! -f $cache_dir/$cache_group/$cache_key.stdout ]; then
     cache.debug "No previous answer. Executing $cmd"
-    eval $cmd > $cache_dir/$cache_group/$cache_key
+    cache._invoke
 
-    cat > $cache_dir/$cache_group/$cache_key.info <<EOF
-datetime=$(date +%Y-%m-%dT%H:%M:%S%z)
-timestamp=$(date +%s)
-script_name=$script_name
-script_version=$script_version
-hostname=$(hostname)
-whoami=$(whoami)
-cmd=$cmd
-cache_ttl=$cache_ttl
-cache_key=$cache_key
-cache_group=$cache_group
-cache_dir=$cache_dir
-EOF
   fi
 
-  # return answer
-  if [ -d $cache_dir/$cache_group ] && [ -f $cache_dir/$cache_group/$cache_key ]; then
-    cat $cache_dir/$cache_group/$cache_key
+  # return answer from cache
+  if [ -d $cache_dir/$cache_group ] && [ -f $cmd_stdout ]; then
+    cat $cmd_stdout
   else
-    # it's possible that between "check if cached data exist" and "return answer"  
+    # it's possible that between "check if cached data exist" and "return answer from cache"  
     # another process flushed cache. No worries. Just execute cmd again
     cache.warning "Expected, but previous answer not found. Executing $cmd"
-    
     mkdir -p $cache_dir/$cache_group
-    eval $cmd > $cache_dir/$cache_group/$cache_key
-
-    cat > $cache_dir/$cache_group/$cache_key.info <<EOF
-datetime=$(date +%Y-%m-%dT%H:%M:%S%z)
-timestamp=$(date +%s)
-script_name=$script_name
-script_version=$script_version
-hostname=$(hostname)
-whoami=$(whoami)
-cmd=$cmd
-cache_ttl=$cache_ttl
-cache_key=$cache_key
-cache_group=$cache_group
-cache_dir=$cache_dir
-EOF
-
-    cat $cache_dir/$cache_group/$cache_key
+    cache._invoke
   fi
-
+  
+  # unsetting cache_group, cache_ky not to infuence next invocations of cache.invoke
   unset cache_group
   unset cache_key
+  return $cmd_exit_code
 }
 
 function cache.help() {
   cat <<EOF
-Bash cache library $script_version
+Bash cache library $lib_version
 
-cache.invoke cmd              - use to invoke command cmd
+cache.invoke cmd              - use to invoke command cmd. Exit code comes from cmd
 cache.evict cmd               - remove old respose; controled by ttl
 cache_group=group cache.evict - remove all old data of given group
 cache.evict                   - remove all old data
