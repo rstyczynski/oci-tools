@@ -133,7 +133,6 @@ function usage() {
       echo '(none)'
     fi
   fi
-
 }
 
 #
@@ -190,13 +189,10 @@ done
 #
 
 # data and temp directories
-: ${tmp_dir:=~/tmp}
-mkdir -p $tmp_dir
-
-if ! touch $tmp_dir/marker; then
-  named_exit "Directory not writeable." $tmp_dir
+if ! touch $tmp/marker; then
+  named_exit "Directory not writeable." $tmp
 fi
-rm -f $tmp_dir/marker
+rm -f $tmp/marker
 
 
 #
