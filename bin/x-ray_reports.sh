@@ -1482,13 +1482,14 @@ function access_OCI_instances() {
   source $metric_data
 
   frame_char='='
-  title=" $env / $product "
-  printf "${frame_char}%.0s" {1..60}; echo
-  printf "${frame_char}%.0s" {1..60}; echo
-  printf "${frame_char}%.0s" {1..20}; echo "$title"
-  printf "${frame_char}%.0s" {1..60}; echo
-  printf "${frame_char}%.0s" {1..60}; echo
-  echo "Metric data: $metric_data"
+  printf "${frame_char}%.0s" {1..100}; echo
+  printf "${frame_char}%.0s" {1..100}; echo
+  printf "${frame_char}%.0s" {1..10}; echo " environment: $env"
+  printf "${frame_char}%.0s" {1..10}; echo " product:     $product"
+  printf "${frame_char}%.0s" {1..10}; echo " metric data: $metric_data"
+  printf "${frame_char}%.0s" {1..100}; echo
+  printf "${frame_char}%.0s" {1..100}; echo
+  echo ""
 
   hosts=$(dump metrics | grep "prod\.$product\.hosts\..*\.os\." | cut -d. -f4 | sort -u)
 
@@ -1516,7 +1517,8 @@ function access_OCI_instances() {
     frame_char=${state_char[$state]}
     : ${frame_char:='?'}
     printf "${frame_char}%.0s" {1..30}; echo
-    printf "${frame_char}%.0s" {1..10}; echo " $state: $host"
+    printf "${frame_char}%.0s" {1..10}; echo " host:  $host "
+    printf "${frame_char}%.0s" {1..10}; echo " state: $state"
     printf "${frame_char}%.0s" {1..30}; echo
     echo
     for status_line in "${status_lines[@]}"; do
