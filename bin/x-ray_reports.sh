@@ -1228,7 +1228,7 @@ function process_control_line() {
       case $operation in
 
       lt)
-        if [ ${metrics[$check_metric]} -lt $right_value ]; then
+        if (( $(echo "${metrics[$check_metric]} < $right_value" | bc -l) )); then
           case $right_src in
           int)
             [ $SCRIPT_DEBUG -eq 1 ] && echo "$check_metric with value ${metrics[$check_metric]} < $right_value." >&2
@@ -1250,7 +1250,7 @@ function process_control_line() {
         fi
         ;;
       gt)
-        if [ ${metrics[$check_metric]} -gt $right_value ]; then
+        if (( $(echo "${metrics[$check_metric]} > $right_value" | bc -l) )); then
           case $right_src in
           int)
             [ $SCRIPT_DEBUG -eq 1 ] && echo "$check_metric with value ${metrics[$check_metric]} > $right_value." >&2
@@ -1272,7 +1272,7 @@ function process_control_line() {
         fi
         ;;
       '==')
-        if [ ${metrics[$check_metric]} -eq $right_value ]; then
+        if (( $(echo "${metrics[$check_metric]} == $right_value" | bc -l) )); then
           case $right_src in
           int)
             [ $SCRIPT_DEBUG -eq 1 ] && echo "$check_metric with value ${metrics[$check_metric]} == $right_value." >&2
@@ -1354,15 +1354,25 @@ function get() {
     case $left_src in
     metric)
       check_metrics=$(echo "${!metrics[@]}" | tr ' ' '\n'  | grep -Ei $left)
-      for check_metric in $check_metrics; do
-        echo ${metrics[$check_metric]}
-      done
+      if [ ! -z $check_metrics ]; then
+        for check_metric in $check_metrics; do
+          echo ${metrics[$check_metric]}
+        done
+      else
+        echo "No such metric." >&2 
+        return 1
+      fi
       ;;
     variable)
       check_variables=$(echo "${!variables[@]}" | tr ' ' '\n'  | grep -Ei $left)
-      for check_variable in $check_variables; do
-        echo ${variables[$check_metric]}
-      done
+      if [ ! -z $check_variables ]; then
+        for check_variable in $check_variables; do
+          echo ${variables[$check_metric]}
+        done
+      else
+        echo "No such variable." >&2 
+        return 1
+      fi
       ;;
     esac
     ;;
@@ -1376,4 +1386,144 @@ function get() {
     echo "Error. Unknown operation."
     ;;
   esac
+}
+
+#
+#
+#
+
+
+
+declare -A state_char
+state_char[ok]='+'
+state_char[warning]='!'
+state_char[critical]='X'
+
+function _asses_metric() {
+  metric_name=$1
+  metric=$2
+  test_operator=$3
+  test_value=$4
+  target_state=$5
+
+    _state=ok
+    status_line="$metric_name is ok"
+    value=$(get value $metric 2>/dev/null) 
+    # get value may return n/a or empty string
+    if [ "$value" == 'n/a' ] || [ -z "$value" ]; then
+      status_line="$metric_name metric not available"
+      _state=critical 
+    else
+      if check when $metric $test_operator $test_value; then
+        _state=$target_state
+        case $test_operator in
+          lt) status_line="$metric_name is less than $test_value";;
+          gt) status_line="$metric_name is more than $test_value";;
+          ==) status_line="$metric_name equal to $test_value";;
+        esac
+      fi
+    fi
+}
+
+function update_state() {
+  partial_state=$1
+
+  case $state in
+  ok)
+    state=$partial_state
+    ;;
+  warning)
+    case $partial_state in
+    critical)
+      state=critical
+      ;;
+    esac
+    ;;
+  critical)
+    ;;
+  esac
+}
+
+function asses_metric() {
+  metric_name=$1
+  metric=$2
+  test_operator=$3
+  test_value=$4
+  target_state=$5
+  test_value2=$6
+  target_state2=$7
+
+  if [ ! -z "$test_value2" ]; then
+    _asses_metric "$1" "$2" "$3" "$4" "$5"
+    if [ "$_state" != "$target_state" ]; then
+      _asses_metric "$1" "$2" "$3" "$6" "$7"
+    fi
+  else
+    _asses_metric "$1" "$2" "$3" "$4" "$5"
+  fi
+  status_lines+=("$status_line")
+  update_state $_state
+}
+
+
+function access_OCI_instances() {
+  env=$1 
+  product=$2
+
+  unset metrics
+
+  metric_data=$report_dir/report_OCI_instances_${env}_${product}.data
+
+  if [ ! -f $metric_data ]; then
+    echo "Metric data not available in expected location of $metric_data. Did you run report_OCI_instances?"
+    return 1
+  fi
+  
+  source $metric_data
+
+  frame_char='='
+  title=" $env / $product "
+  printf "${frame_char}%.0s" {1..60}; echo
+  printf "${frame_char}%.0s" {1..60}; echo
+  printf "${frame_char}%.0s" {1..20}; echo "$title"
+  printf "${frame_char}%.0s" {1..60}; echo
+  printf "${frame_char}%.0s" {1..60}; echo
+  echo "Metric data: $metric_data"
+
+  hosts=$(dump metrics | grep "prod\.$product\.hosts\..*\.os\." | cut -d. -f4 | sort -u)
+
+  if [ -z "$hosts" ]; then
+    echo "Critical. No hosts reported state for $product."
+    return 1
+  fi
+
+  for host in $hosts; do
+
+    state=ok
+    status_lines=()
+
+    asses_metric "Load average" $env.$product.hosts.$host.os.system-uptime.load15min.avg gt 20 warning
+    asses_metric "CPU utilisation" $env.$product.hosts.$host.os.system-vmstat.CPUidle.avg lt 10 critical 50 warning
+    asses_metric "CPU process queue" $env.$product.hosts.$host.os.system-vmstat.ProcessRunQueue.avg gt 20 warning
+    asses_metric "Process blocked" $env.$product.hosts.$host.os.system-vmstat.ProcessBlocked.avg gt 0 warning
+    asses_metric "Swap usage" $env.$product.hosts.$host.os.system-vmstat.MemSwpd.avg gt 1024000 warning
+    asses_metric "Boot volume usage" $env.$product.hosts.$host.os.disk-space-mount1.capacity.avg gt 90 critical 70 warning
+
+    #
+    # host report
+    #
+    echo
+    frame_char=${state_char[$state]}
+    : ${frame_char:='?'}
+    printf "${frame_char}%.0s" {1..30}; echo
+    printf "${frame_char}%.0s" {1..10}; echo " $state: $host"
+    printf "${frame_char}%.0s" {1..30}; echo
+    echo
+    for status_line in "${status_lines[@]}"; do
+        echo $status_line
+    done
+    echo 
+
+  done
+
 }
