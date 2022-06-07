@@ -65,6 +65,7 @@ cache_progress=yes
 cache_spinner_cnt=1
 cache_spinner="/-\|"
 
+# https://stackoverflow.com/questions/238073/how-to-add-a-progress-bar-to-a-shell-script
 function cache._progress() {
   if [ "$cache_progress" == yes ]; then
     printf "\b${cache_spinner:cache_spinner_cnt++%${#cache_spinner}:1}" >&2
@@ -167,7 +168,11 @@ function cache.invoke() {
   cmd_stdout=$cache_dir/$cache_group/$cache_key.stdout
   cmd_stderr=$cache_dir/$cache_group/$cache_key.stderr
 
-  # delete old data
+  # store ttl information
+  mkdir -p $cache_dir/$cache_group
+  echo "cache_ttl=$cache_ttl" > $cache_dir/$cache_group/.info
+
+  # delete old data. Note: evict is after setting TTL, so updated TTL will be effective imadiately
   cache.evict $cmd
 
   # execute
@@ -176,10 +181,6 @@ function cache.invoke() {
   cache.debug "cache_key=$cache_key"
   cache.debug "cache_ttl=$cache_ttl"
   cache.debug "info=$cache_dir/$cache_group/$cache_key.info"
-
-  # store ttl information
-  mkdir -p $cache_dir/$cache_group
-  echo "cache_ttl=$cache_ttl" > $cache_dir/$cache_group/.info
 
   # check if cached data exist
   if [ ! -f $cache_dir/$cache_group/$cache_key.stdout ]; then

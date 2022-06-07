@@ -3,8 +3,7 @@
 # TODO
 # 1. parametrize TTL for each entity
 # 2. parametrize env ssh key 
-# 
-
+# 3. handle envs discovery / envs parameter
 
 script_name='oci2ansible_inventory'
 script_version='1.0'
@@ -35,6 +34,9 @@ source $(dirname "$0")/named_exit.sh
 set_exit_code_variable "Script bin directory unknown." 1
 set_exit_code_variable "Required tools not available." 2
 set_exit_code_variable "Directory not writeable." 3
+
+set_exit_code_variable "Instance w/o private ip adress." 4
+set_exit_code_variable "Instance selector not recognised." 5
 
 #
 # Check environment
@@ -227,43 +229,32 @@ function populate_instances() {
 
     for region in $regions; do
 
-          cache_ttl=1440
-          cache_group=search_instances
-          cache_key=${region}_${env}
+        cache_ttl=1440
+        cache_group=search_instances
+        cache_key=${region}_${env}
 
+        ocids=$(
           cache.invoke " \
-      oci search resource structured-search \
-      --region $region \
-      --query-text \"query all resources where \
-      (definedTags.namespace = '$tag_ns' && definedTags.key = 'ENV' && definedTags.value = '$env')\"
-          " > $temp_dir/oci_search.tmp
-
-        ocids=$(cat $temp_dir/oci_search.tmp | jq -r '.data.items[]."identifier"')
-
-        rm $temp_dir/oci_search.tmp
+          oci search resource structured-search \
+          --region $region \
+          --query-text \"query all resources where \
+          (definedTags.namespace = '$tag_ns' && definedTags.key = 'ENV' && definedTags.value = '$env')\"
+          " | 
+          jq -r '.data.items[]."identifier"')
 
         for ocid in $ocids; do
           # get private ip    
           cache_group=ocid2vnics
           cache_key=$ocid
 
-          cache.invoke oci compute instance list-vnics \
+          private_ip=$(cache.invoke oci compute instance list-vnics \
           --region $region --instance-id $ocid | 
-          jq -r '.data[]."private-ip"' > $temp_dir/oci_instance.ip
-
-          #TODO: handle it properly
-          if [ ! -s $temp_dir/oci_instance.ip ]; then
-            echo "Error. answer from OCI search cache empty."
-          fi
-
-          private_ip=$(cat $temp_dir/oci_instance.ip)
-
-          #TODO: handle it properly
+          jq -r '.data[]."private-ip"')
+          
           if [ -z "$private_ip" ]; then
-            echo "Error. private ip empty."
+            echo "Error. private ip empty. Can't continue."
+            named_exit "Instance w/o private ip adress." $ocid
           fi
-
-          rm $temp_dir/oci_instance.ip
 
           instances+=($private_ip)
 
@@ -272,7 +263,7 @@ function populate_instances() {
 
     ;;
   *)
-    echo "Error. instance selector not recognised. Cause: $select_by"
+    named_exit "Instance selector not recognised." $select_by
     ;;
   esac
 }
