@@ -221,7 +221,7 @@ if [ $validate_params == yes ]; then
   for param in $(echo "$script_args_persist,$script_args_system,$script_args" | tr , ' ' | tr -d :); do
       validators_validate $param
       if [ $? -ne 0 ]; then
-        named_exit "Parameter validation failed." $param
+        named_exit "Parameter validation failed." ${!param}
       fi 
   done
 fi
