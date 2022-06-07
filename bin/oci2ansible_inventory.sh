@@ -346,7 +346,7 @@ done
 # discover ENV names via OCI ENUM tag 
 cache_ttl=$cache_ttl_tag2values
 cache_group=tag2values
-cache_key=${tag_ns}_${tag_key}
+cache_key=${tag_ns}_${tag_env_list_key}
 
 tag_type=$(cache.invoke oci iam tag get --tag-name $tag_env_list_key --tag-namespace-id $tag_ns | 
 jq -r '.data.validator."validator-type"')
@@ -358,6 +358,9 @@ fi
 
 envs=$(cache.invoke oci iam tag get --tag-name $tag_env_list_key --tag-namespace-id $tag_ns | 
 jq .data.validator.values | tr -d '[]" ,' | grep -v '^$')
+
+echo $list
+echo $host
 
 case $1 in
 --list)
