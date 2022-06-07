@@ -9,22 +9,29 @@ script_name='oci2ansible_inventory'
 script_version='1.0'
 script_by='ryszard.styczynski@oracle.com'
 
-script_args='list,host:,progress_spinner'
+script_args='list,host:,progress_spinner:'
 script_args_persist='tag_ns:,tag_env_list_key:,regions:,envs:,cache_ttl_tag2values:,cache_ttl_search_instances:,cache_ttl_ocid2vnics:,cache_ttl_ip2instance:,cache_ttl_region:'
 script_args_system='cfg_id:,temp_dir:,debug,help'
 
-declare -A script_args_defaults
-script_args_defaults[cache_ttl_region]=43200          # month
-script_args_defaults[cache_ttl_tag2values]=43200      # month
-script_args_defaults[cache_ttl_search_instances]=1440 # day
-script_args_defaults[cache_ttl_ocid2vnics]=5184000    # 10 years
-script_args_defaults[cache_ttl_ip2instance]=5184000   # 10 years
-script_args_defaults[temp_dir]=~/tmp
-script_args_defaults[progress_spinner]=set
+declare -A script_args_default
+script_args_default[cache_ttl_region]=43200          # month
+script_args_default[cache_ttl_tag2values]=43200      # month
+script_args_default[cache_ttl_search_instances]=1440 # day
+script_args_default[cache_ttl_ocid2vnics]=5184000    # 10 years
+script_args_default[cache_ttl_ip2instance]=5184000   # 10 years
+script_args_default[temp_dir]=~/tmp
+script_args_default[progress_spinner]=yes
+
+declare -A script_args_validator
+script_args_validator[progress_spinner]=yesno
+script_args_validator[cache_ttl_region]=integer
+script_args_validator[cache_ttl_search_instances]=integer
+script_args_validator[cache_ttl_ocid2vnics]=integer
+script_args_validator[cache_ttl_ip2instance]=integer
 
 script_cfg='oci2ansible_inventory'
 
-script_libs='config.sh cache.bash JSON.bash'
+script_libs='config.sh cache.bash JSON.bash validators.bash'
 script_tools='oci cat cut tr grep jq'
 
 # exit codes
@@ -41,6 +48,7 @@ set_exit_code_variable "Directory not writeable." 3
 
 set_exit_code_variable "Instance w/o private ip adress." 4
 set_exit_code_variable "Instance selector not recognised." 5
+set_exit_code_variable "Parameter validation failed."  6
 
 #
 # Check environment
@@ -89,10 +97,9 @@ done
 # set default values
 #
 
-for variable in ${!script_args_defaults[@]}; do
-  eval $variable=${script_args_defaults[$variable]}
+for variable in ${!script_args_default[@]}; do
+  eval $variable=${script_args_default[$variable]}
 done
-
 
 valid_opts=$(getopt --longoptions "$script_args,$script_args_persist,$script_args_system" --options "" --name "$script_name" -- $@)
 eval set --"$valid_opts"
@@ -123,17 +130,28 @@ function usage() {
     echo -n " --$param"
   done
   echo
+
   echo 
-  echo Default values:
-  if [ ${#script_args_defaults[@]} -gt 0 ];then
-    for variable in ${!script_args_defaults[@]}; do
-      echo " \-$variable: ${script_args_defaults[$variable]}"
+  echo Argument formats:
+  if [ ${#script_args_format[@]} -gt 0 ];then
+    for variable in ${!script_args_format[@]}; do
+      echo " \-$variable: ${script_args_format[$variable]}"
     done
   else
     echo '(none)'
   fi
 
-  if [ ${#script_args_defaults[@]} -gt 0 ];then
+  echo 
+  echo Default values:
+  if [ ${#script_args_default[@]} -gt 0 ];then
+    for variable in ${!script_args_default[@]}; do
+      echo " \-$variable: ${script_args_default[$variable]}"
+    done
+  else
+    echo '(none)'
+  fi
+
+  if [ ${#script_args_default[@]} -gt 0 ];then
     echo
     echo Persisted values:
     persistent=none
@@ -159,6 +177,17 @@ if [ "$help" == set ]; then
   usage >&2
   exit 0
 fi
+
+#
+# validate
+#
+
+for param in $(echo "$script_args_persist,$script_args_system,$script_args" | tr , ' ' | tr -d :); do
+    validators_validate $cfg_param
+    if [ $? -ne 0 ]; then
+      named_exit "Parameter validation failed." $cfg_param
+    fi 
+done
 
 #
 # persist parameters
@@ -187,11 +216,17 @@ for cfg_param in $(echo $script_args_persist | tr , ' ' | tr -d :); do
     echo
     echo "Warning. Required configurable $cfg_param unknown."
     read -p "Enter value for $cfg_param:" $cfg_param
+    
+    validators_validate $cfg_param
+    if [ $? -ne 0 ]; then
+      named_exit "Parameter validation failed." $cfg_param
+    fi 
+
     setcfg $script_cfg $cfg_param ${!cfg_param} force
   fi
 done
 
-# persist when not persisted
+# persist when not persisted. All data is already validated.
 for cfg_param in $(echo $script_args_persist | tr , ' ' | tr -d :); do
   value=$(getcfg $script_cfg $cfg_param)
   if [ -z "$value" ]; then
@@ -209,9 +244,8 @@ if ! touch $temp_dir/marker; then
 fi
 rm -f $temp_dir/marker
 
-if [ $progress_spinner == set ]; then
-  cache_progress=yes
-fi
+
+cache_progress=$progress_spinner
 
 #
 # actual script code starts here
