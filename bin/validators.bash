@@ -166,7 +166,7 @@ function validators_validate() {
   IFS=,
   for validator in ${script_args_validator[$var_name]}; do
 
-    type validator_$validator | head -1 | grep "^$validator is a function$" >/dev/null
+    type validator_$validator | head -1 | grep "^validator_$validator is a function$" >/dev/null
     if [ $? -ne 0 ]; then
       echo "Error. Validator must be a function."
       validator_passed=1
