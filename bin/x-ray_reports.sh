@@ -1466,7 +1466,7 @@ function asses_metric() {
 }
 
 
-function access_OCI_instances() {
+function assess_OCI_instances() {
   env=$1 
   product=$2
 
