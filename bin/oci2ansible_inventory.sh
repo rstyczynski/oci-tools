@@ -5,6 +5,9 @@
 # 3. handle envs discovery / envs parameter
 # 4. check if resource is an instance
 
+# DONE
+# 1. validate parameters
+
 script_name='oci2ansible_inventory'
 script_version='1.0'
 script_by='ryszard.styczynski@oracle.com'
