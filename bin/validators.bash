@@ -48,7 +48,7 @@ function validator_words() {
 function validator_label() {
   value=$1
 
-  re='^[a-zA-Z0-9_-]+$'
+  re='^[a-zA-Z0-9_\-]+$'
   if ! [[ $value =~ $re ]] ; then
     return 1
   fi
@@ -57,7 +57,7 @@ function validator_label() {
 function validator_labels() {
   value=$1
 
-  re='^[a-zA-Z0-9_- ]+$'
+  re='^[a-zA-Z0-9_\- ]+$'
   if ! [[ $value =~ $re ]] ; then
     return 1
   fi
