@@ -166,7 +166,7 @@ function validators_validate() {
   IFS=,
   for validator in ${script_args_validator[$var_name]}; do
 
-    type $validator | head -1 | grep "^$validator is a function$" >/dev/null
+    type validator_$validator | head -1 | grep "^$validator is a function$" >/dev/null
     if [ $? -ne 0 ]; then
       echo "Error. Validator must be a function."
       validator_passed=1
@@ -194,7 +194,7 @@ function validators_test() {
   declare -A script_args_validator
 
   # srv_address=1.1.1.1
-  script_args_validator[srv_address]="validator_ip_address,validator_ip_address_reachable"
+  script_args_validator[srv_address]="ip_address,ip_address_reachable"
 
   # test srv_address
   validator_ip_address_reachable_timeout=1
@@ -209,7 +209,7 @@ function validators_test() {
   echo "${validate_codes[@]}"
 
   # svc_address=1.1.1.1:25
-  script_args_validator[svc_address]="validator_tcp_service_reachable"
+  script_args_validator[svc_address]="tcp_service_reachable"
 
   svc_address=1.1.1.1:53
   validators_validate svc_address
@@ -242,7 +242,7 @@ function validators_test() {
   # compartment verification
   compartment_ocid=ocid1.compartment.oc1..aaaaaaaai3ynjnzj5v4wizepnfosvcd4ntv2jgctqh4wpymhcn3odhuw6luq
 
-  script_args_validator[compartment_ocid]="validator_oci_format_ocid_compartment"
+  script_args_validator[compartment_ocid]="oci_format_ocid_compartment"
 
   validators_validate compartment_ocid
   echo $?
@@ -250,7 +250,7 @@ function validators_test() {
   echo ${validator_oci_format_ocid_error[@]}
 
   # any resource verification
-  script_args_validator[resource_ocid]="validator_oci_format_ocid,validator_oci_lookup_ocid"
+  script_args_validator[resource_ocid]="oci_format_ocid,oci_lookup_ocid"
 
   resource_ocid=ocid1.vault.oc1.eu-frankfurt-1.bfpz743daaaao.abtheljs3m4qeip5fm7rgr42kxtxhnn2xkwipuhi5fkirh4yt5p7ax2t2xxx
 
