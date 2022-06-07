@@ -178,26 +178,10 @@ if [ "$help" == set ]; then
   exit 0
 fi
 
-#
-# validate
-#
-
-for param in $(echo "$script_args_persist,$script_args_system,$script_args" | tr , ' ' | tr -d :); do
-    validators_validate $cfg_param
-    if [ $? -ne 0 ]; then
-      named_exit "Parameter validation failed." $cfg_param
-    fi 
-done
 
 #
-# persist parameters
+# read parameters from config file
 #
-
-# Persistable configurables are stored in config files. When variable is not specified on cmd level, it is loaded from file. 
-# If it's not provided in cmd line, and not available in cfg file, then operator is asked for value. 
-# Finally if value is set at cmd line, and is not in config file - it will be persisted.
-#
-# config file identifier may be specified in cmd line. When not set default name of the script is used.
 
 if [ ! -z "$cfg_id" ]; then
   script_cfg=$cfg_id
@@ -209,6 +193,28 @@ for cfg_param in $(echo $script_args_persist | tr , ' ' | tr -d :); do
     eval $cfg_param=$(getcfg $script_cfg $cfg_param)
   fi
 done
+
+#
+# validate. validate params even from config file, as it's possible thet it was edited manually
+#
+
+for param in $(echo "$script_args_persist,$script_args_system,$script_args" | tr , ' ' | tr -d :); do
+    validators_validate $cfg_param
+    if [ $? -ne 0 ]; then
+      named_exit "Parameter validation failed." $cfg_param
+    fi 
+done
+
+
+#
+# persist parameters
+#
+
+# Persistable configurables are stored in config files. When variable is not specified on cmd level, it is loaded from file. 
+# If it's not provided in cmd line, and not available in cfg file, then operator is asked for value. 
+# Finally if value is set at cmd line, and is not in config file - it will be persisted.
+#
+# config file identifier may be specified in cmd line. When not set default name of the script is used.
 
 # set parameters when not set
 for cfg_param in $(echo $script_args_persist | tr , ' ' | tr -d :); do
