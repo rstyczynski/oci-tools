@@ -61,14 +61,6 @@ for script_lib in $script_libs; do
 done
 
 #
-# set default values
-#
-
-for variable in ${!script_args_defaults[@]}; do
-  eval $variable=${script_args_defaults[$variable]}
-done
-
-#
 # read arguments
 #
 
@@ -79,6 +71,15 @@ done
 for cfg_param in $(echo "$script_args_persist,$script_args_system,$script_args" | tr , ' ' | tr -d :); do
   unset $cfg_param
 done
+
+#
+# set default values
+#
+
+for variable in ${!script_args_defaults[@]}; do
+  eval $variable=${script_args_defaults[$variable]}
+done
+
 
 valid_opts=$(getopt --longoptions "$script_args,$script_args_persist,$script_args_system" --options "" --name "$script_name" -- $@)
 eval set --"$valid_opts"
@@ -191,7 +192,7 @@ done
 
 # data and temp directories
 if ! touch $temp_dir/marker; then
-  named_exit "Directory not writeable." $tmp
+  named_exit "Directory not writeable." $temp_dir
 fi
 rm -f $temp_dir/marker
 
