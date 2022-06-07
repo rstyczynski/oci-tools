@@ -112,7 +112,7 @@ function usage() {
   echo Default values:
   if [ ${#script_args_defaults[@]} -gt 0 ];then
     for variable in ${!script_args_defaults[@]}; do
-      echo $variable: ${script_args_defaults[$variable]}
+      echo " \-$variable: ${script_args_defaults[$variable]}"
     done
   else
     echo '(none)'
@@ -125,7 +125,7 @@ function usage() {
     for variable in $(echo $script_args_persist | tr , ' ' | tr -d :); do
       var_value=$(getcfg $script_cfg $variable)
       if [ ! -z "$var_value" ]; then
-        echo $variable: $var_value
+        echo "\-$variable: $var_value"
         persistent=$persistent,$variable
       fi
     done
