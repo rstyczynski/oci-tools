@@ -9,7 +9,7 @@ script_name='oci2ansible_inventory'
 script_version='1.0'
 script_by='ryszard.styczynski@oracle.com'
 
-script_args='list,host:,progress_spinner:'
+script_args='list,host:,progress_spinner:,validate_params:'
 script_args_persist='tag_ns:,tag_env_list_key:,regions:,envs:,cache_ttl_tag2values:,cache_ttl_search_instances:,cache_ttl_ocid2vnics:,cache_ttl_ip2instance:,cache_ttl_region:'
 script_args_system='cfg_id:,temp_dir:,debug,help'
 
@@ -21,8 +21,10 @@ script_args_default[cache_ttl_ocid2vnics]=5184000    # 10 years
 script_args_default[cache_ttl_ip2instance]=5184000   # 10 years
 script_args_default[temp_dir]=~/tmp
 script_args_default[progress_spinner]=yes
+script_args_default[validate_params]=yes
 
 declare -A script_args_validator
+script_args_validator[validate_params]=yesno
 script_args_validator[progress_spinner]=yesno
 script_args_validator[cache_ttl_region]=integer
 script_args_validator[cache_ttl_search_instances]=integer
@@ -198,12 +200,14 @@ done
 # validate. validate params even from config file, as it's possible thet it was edited manually
 #
 
-for param in $(echo "$script_args_persist,$script_args_system,$script_args" | tr , ' ' | tr -d :); do
-    validators_validate $param
-    if [ $? -ne 0 ]; then
-      named_exit "Parameter validation failed." $param
-    fi 
-done
+if [ $validate_params == yes ]; then
+  for param in $(echo "$script_args_persist,$script_args_system,$script_args" | tr , ' ' | tr -d :); do
+      validators_validate $param
+      if [ $? -ne 0 ]; then
+        named_exit "Parameter validation failed." $param
+      fi 
+  done
+fi
 
 
 #
