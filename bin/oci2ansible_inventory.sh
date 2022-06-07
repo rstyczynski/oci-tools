@@ -29,7 +29,7 @@ script_args_default[cache_ttl_ocid2vnics]=5184000    # 10 years
 script_args_default[cache_ttl_ip2instance]=5184000   # 10 years
 script_args_default[temp_dir]=~/tmp
 script_args_default[progress_spinner]=yes
-script_args_default[validate_params]=yes
+script_args_default[validate_params]=no
 script_args_default[cfg_id]=$script_cfg
 
 declare -A script_args_validator
