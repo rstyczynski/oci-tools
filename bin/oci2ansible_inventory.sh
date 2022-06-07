@@ -33,6 +33,15 @@ script_args_validator[cache_ttl_region]=integer
 script_args_validator[cache_ttl_search_instances]=integer
 script_args_validator[cache_ttl_ocid2vnics]=integer
 script_args_validator[cache_ttl_ip2instance]=integer
+script_args_validator[temp_dir]=directory_writable
+script_args_validator[tag_ns]=word
+script_args_validator[tag_env_list_key]=word
+script_args_validator[regions]=labels
+script_args_validator[cfg_id]=label
+script_args_validator[debug]=flag
+script_args_validator[help]=flag
+script_args_validator[list]=flag
+script_args_validator[host]=ip_address
 
 script_cfg='oci2ansible_inventory'
 

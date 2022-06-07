@@ -5,6 +5,7 @@ declare -A validator_info
 
 validator_info[yesno]='yes|no'
 validator_info[integer]='integer'
+#TODO extend this list
 
 function validator_yesno() {
   value=$(echo $1 | tr '[A-Z]' '[a-z]')
@@ -25,6 +26,52 @@ function validator_integer() {
     return 1
   fi
 }
+
+function validator_word() {
+  value=$1
+
+  re='^[a-zA-Z0-9_]+$'
+  if ! [[ $value =~ $re ]] ; then
+    return 1
+  fi
+}
+
+function validator_words() {
+  value=$1
+
+  re='^[a-zA-Z0-9_ ]+$'
+  if ! [[ $value =~ $re ]] ; then
+    return 1
+  fi
+}
+
+function validator_label() {
+  value=$1
+
+  re='^[a-zA-Z0-9_-]+$'
+  if ! [[ $value =~ $re ]] ; then
+    return 1
+  fi
+}
+
+function validator_labels() {
+  value=$1
+
+  re='^[a-zA-Z0-9_- ]+$'
+  if ! [[ $value =~ $re ]] ; then
+    return 1
+  fi
+}
+
+function validator_directory_writable() {
+  dir=$1
+
+  test ! -d  $dir && return 1
+  touch $dir/marker
+  test $? -ne 0  && return 1
+  rm -f $dir/marker
+}
+
 
 function validator_ip_address() {
   ip_address=$1
@@ -135,7 +182,6 @@ function validator_oci_format_ocid_tenancy() {
   validator_oci_format_ocid $1 tenancy
   return $?
 }
-
 
 function validator_oci_lookup_ocid() {
   ocid=$1
