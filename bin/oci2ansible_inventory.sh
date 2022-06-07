@@ -1,7 +1,6 @@
 #!/bin/bash
 
 # TODO
-# 1. parametrize TTL for each entity
 # 2. parametrize env ssh key 
 # 3. handle envs discovery / envs parameter
 
@@ -10,11 +9,15 @@ script_version='1.0'
 script_by='ryszard.styczynski@oracle.com'
 
 script_args='list,host:,progress_spinner'
-script_args_persist='tag_ns:,tag_env_list_key:,regions:,cache_ttl_tag2values:,envs:'
+script_args_persist='tag_ns:,tag_env_list_key:,regions:,envs:,cache_ttl_tag2values:,cache_ttl_search_instances:,cache_ttl_ocid2vnics:,cache_ttl_ip2instance:,cache_ttl_region:'
 script_args_system='cfg_id:,temp_dir:,debug,help'
 
 declare -A script_args_defaults
-script_args_defaults[cache_ttl_tag2values]=43200
+script_args_defaults[cache_ttl_region]=43200          # month
+script_args_defaults[cache_ttl_tag2values]=43200      # month
+script_args_defaults[cache_ttl_search_instances]=1440 # day
+script_args_defaults[cache_ttl_ocid2vnics]=5184000    # 10 years
+script_args_defaults[cache_ttl_ip2instance]=5184000   # 10 years
 script_args_defaults[temp_dir]=~/tmp
 script_args_defaults[progress_spinner]=set
 
@@ -229,7 +232,7 @@ function populate_instances() {
 
     for region in $regions; do
 
-        cache_ttl=1440
+        cache_ttl=$cache_ttl_search_instances
         cache_group=search_instances
         cache_key=${region}_${env}
 
@@ -237,13 +240,14 @@ function populate_instances() {
           cache.invoke " \
           oci search resource structured-search \
           --region $region \
-          --query-text \"query all resources where \
+          --query-text \"query all instances where \
           (definedTags.namespace = '$tag_ns' && definedTags.key = 'ENV' && definedTags.value = '$env')\"
           " | 
           jq -r '.data.items[]."identifier"')
 
         for ocid in $ocids; do
           # get private ip    
+          cache_ttl=$cache_ttl_ocid2vnics
           cache_group=ocid2vnics
           cache_key=$ocid
 
@@ -279,7 +283,7 @@ function populate_instance_variables() {
   cache_key=$private_ip
 
   # get tags
-  cache_ttl=1440
+  cache_ttl=$cache_ttl_ip2instance
   cache_group=ip2instance
   cache_key=$private_ip
 
@@ -357,7 +361,7 @@ function get_host_variables() {
 
 #verify region
 for region in $regions; do
-  cache_ttl=1440
+  cache_ttl=$cache_ttl_region
   cache_group=region
   cache_key=regions
   region_name=$(cache.invoke oci iam region list | jq -r ".data[] | select(.name==\"$region\") | .name")
