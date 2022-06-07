@@ -56,7 +56,7 @@ test ! -z "$missing_tools" && named_exit "Required tools not available." "$missi
 # load libraries
 #
 for script_lib in $script_libs; do
-  source $script_bin/$script_lib
+  source $script_bin/$script_lib 2>/dev/null
 done
 
 #
@@ -107,12 +107,32 @@ function usage() {
     echo -n " --$param"
   done
   echo
+  echo 
+  echo Default values:
   if [ ${#script_args_defaults[@]} -gt 0 ];then
-      echo Default values:
     for variable in ${!script_args_defaults[@]}; do
       echo $variable: ${script_args_defaults[$variable]}
     done
+  else
+    echo '(none)'
   fi
+
+  if [ ${#script_args_defaults[@]} -gt 0 ];then
+    echo
+    echo Persisted values:
+    persistent=none
+    for variable in $script_args_persist; do
+      var_value=$(getcfg $script_cfg $variable)
+      if [ ! -z "$var_value" ]; then
+        echo $variable: $var_value
+        persistent=$persistent,$variable
+      fi
+    done
+    if [ $persistent == none ]; then
+      echo '(none)'
+    fi
+  fi
+
 }
 
 #
