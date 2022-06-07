@@ -57,6 +57,7 @@ function validator_label() {
 function validator_labels() {
   value=$1
 
+  # hyphen at the end: https://stackoverflow.com/questions/55377810/bash-regex-with-hyphen-and-dot
   re='^[ a-zA-Z0-9_-]+$'
   if ! [[ $value =~ $re ]] ; then
     return 1
