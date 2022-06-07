@@ -6,11 +6,11 @@ script_by='ryszard.styczynski@oracle.com'
 
 script_args='list,host:'
 script_args_persist='tag_ns:,tag_env_list_key:,regions:,cache_ttl_tag2values:,envs:'
-script_args_system='cfg_id:,tmp:,debug,help'
+script_args_system='cfg_id:,temp_dir:,debug,help'
 
 declare -A script_args_defaults
 script_args_defaults[cache_ttl_tag2values]=43200
-script_args_defaults[tmp]=~/tmp
+script_args_defaults[temp_dir]=~/tmp
 
 script_cfg='oci2ansible_inventory'
 
@@ -27,6 +27,7 @@ source $(dirname "$0")/named_exit.sh
 
 set_exit_code_variable "Script bin directory unknown." 1
 set_exit_code_variable "Required tools not available." 2
+set_exit_code_variable "Directory not writeable." 3
 
 #
 # Check environment
@@ -125,7 +126,7 @@ function usage() {
     for variable in $(echo $script_args_persist | tr , ' ' | tr -d :); do
       var_value=$(getcfg $script_cfg $variable)
       if [ ! -z "$var_value" ]; then
-        echo "\-$variable: $var_value"
+        echo " \-$variable: $var_value"
         persistent=$persistent,$variable
       fi
     done
@@ -189,10 +190,10 @@ done
 #
 
 # data and temp directories
-if ! touch $tmp/marker; then
+if ! touch $temp_dir/marker; then
   named_exit "Directory not writeable." $tmp
 fi
-rm -f $tmp/marker
+rm -f $temp_dir/marker
 
 
 #
@@ -224,11 +225,11 @@ function populate_instances() {
       --region $region \
       --query-text \"query all resources where \
       (definedTags.namespace = '$tag_ns' && definedTags.key = 'ENV' && definedTags.value = '$env')\"
-          " > $tmp/oci_search.tmp
+          " > $temp_dir/oci_search.tmp
 
-        ocids=$(cat $tmp/oci_search.tmp | jq -r '.data.items[]."identifier"')
+        ocids=$(cat $temp_dir/oci_search.tmp | jq -r '.data.items[]."identifier"')
 
-        rm $tmp/oci_search.tmp
+        rm $temp_dir/oci_search.tmp
 
         for ocid in $ocids; do
           # get private ip    
@@ -237,21 +238,21 @@ function populate_instances() {
 
           cache.invoke oci compute instance list-vnics \
           --region $region --instance-id $ocid | 
-          jq -r '.data[]."private-ip"' > $tmp/oci_instance.ip
+          jq -r '.data[]."private-ip"' > $temp_dir/oci_instance.ip
 
           #TODO: handle it properly
-          if [ ! -s $tmp/oci_instance.ip ]; then
+          if [ ! -s $temp_dir/oci_instance.ip ]; then
             echo "Error. answer from OCI search cache empty."
           fi
 
-          private_ip=$(cat $tmp/oci_instance.ip)
+          private_ip=$(cat $temp_dir/oci_instance.ip)
 
           #TODO: handle it properly
           if [ -z "$private_ip" ]; then
             echo "Error. private ip empty."
           fi
 
-          rm $tmp/oci_instance.ip
+          rm $temp_dir/oci_instance.ip
 
           instances+=($private_ip)
 
@@ -283,16 +284,16 @@ function populate_instance_variables() {
 
   cache.invoke oci compute instance get \
   --region $region --instance-id $ocid | 
-  jq ".data.\"defined-tags\".$tag_ns" | tr -d '{}" ,' | tr ':' '=' > $tmp/oci_instance.tags
+  jq ".data.\"defined-tags\".$tag_ns" | tr -d '{}" ,' | tr ':' '=' > $temp_dir/oci_instance.tags
 
-  source $tmp/oci_instance.tags
+  source $temp_dir/oci_instance.tags
 
-  tags=$(cat $tmp/oci_instance.tags | cut -f1 -d=)
+  tags=$(cat $temp_dir/oci_instance.tags | cut -f1 -d=)
   for tag in $tags; do
     instance_variables[$tag]=${!tag}
   done
 
-  rm $tmp/oci_instance.tags
+  rm $temp_dir/oci_instance.tags
 
 }
   
