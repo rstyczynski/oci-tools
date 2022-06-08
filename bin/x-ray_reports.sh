@@ -1399,7 +1399,7 @@ state_char[ok]='+'
 state_char[warning]='!'
 state_char[critical]='X'
 
-function _asses_metric() {
+function _assess_metric() {
   metric_name=$1
   metric=$2
   test_operator=$3
@@ -1444,7 +1444,7 @@ function update_state() {
   esac
 }
 
-function asses_metric() {
+function assess_metric() {
   metric_name=$1
   metric=$2
   test_operator=$3
@@ -1454,12 +1454,12 @@ function asses_metric() {
   target_state2=$7
 
   if [ ! -z "$test_value2" ]; then
-    _asses_metric "$1" "$2" "$3" "$4" "$5"
+    _assess_metric "$1" "$2" "$3" "$4" "$5"
     if [ "$_state" != "$target_state" ]; then
-      _asses_metric "$1" "$2" "$3" "$6" "$7"
+      _assess_metric "$1" "$2" "$3" "$6" "$7"
     fi
   else
-    _asses_metric "$1" "$2" "$3" "$4" "$5"
+    _assess_metric "$1" "$2" "$3" "$4" "$5"
   fi
   status_lines+=("$status_line")
   update_state $_state
@@ -1503,12 +1503,12 @@ function assess_OCI_instances() {
     state=ok
     status_lines=()
 
-    asses_metric "Load average" $env.$product.hosts.$host.os.system-uptime.load15min.avg gt 20 warning
-    asses_metric "CPU utilisation" $env.$product.hosts.$host.os.system-vmstat.CPUidle.avg lt 10 critical 50 warning
-    asses_metric "CPU process queue" $env.$product.hosts.$host.os.system-vmstat.ProcessRunQueue.avg gt 20 warning
-    asses_metric "Process blocked" $env.$product.hosts.$host.os.system-vmstat.ProcessBlocked.avg gt 0 warning
-    asses_metric "Swap usage" $env.$product.hosts.$host.os.system-vmstat.MemSwpd.avg gt 1024000 warning
-    asses_metric "Boot volume usage" $env.$product.hosts.$host.os.disk-space-mount1.capacity.avg gt 90 critical 70 warning
+    assess_metric "Load average" $env.$product.hosts.$host.os.system-uptime.load15min.avg gt 20 warning
+    assess_metric "CPU utilisation" $env.$product.hosts.$host.os.system-vmstat.CPUidle.avg lt 10 critical 50 warning
+    assess_metric "CPU process queue" $env.$product.hosts.$host.os.system-vmstat.ProcessRunQueue.avg gt 20 warning
+    assess_metric "Process blocked" $env.$product.hosts.$host.os.system-vmstat.ProcessBlocked.avg gt 0 warning
+    assess_metric "Swap usage" $env.$product.hosts.$host.os.system-vmstat.MemSwpd.avg gt 1024000 warning
+    assess_metric "Boot volume usage" $env.$product.hosts.$host.os.disk-space-mount1.capacity.avg gt 90 critical 70 warning
 
     #
     # host report
