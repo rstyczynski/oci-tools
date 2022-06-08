@@ -1,11 +1,31 @@
 #!/bin/bash
 
+#
+# debug handler
+#
+
+function validator_DEBUG() {
+  if [ $validator_debug == set ]; then
+    return 0
+  else
+    return 1
+  fi
+}
+
+#
+# validators info
+#
+
 unset validator_info
 declare -A validator_info
 
 validator_info[yesno]='yes|no'
 validator_info[integer]='integer'
 #TODO extend this list
+
+#
+# validators
+#
 
 function validator_yesno() {
   value=$(echo $1 | tr '[A-Z]' '[a-z]')
@@ -119,7 +139,6 @@ EOF
   return $?
 }
 
-
 function validator_ip_address_reachable() {
   ip_address=$1
 
@@ -215,7 +234,7 @@ function validators_validate() {
   validator_passed=0
 
   if [ ! -z ${script_args_validator[$var_name]} ]; then
-    echo "Validates: $var_name" >&2
+    validator_DEBUG echo "Validates: $var_name" >&2
   fi
 
   IFS=,
@@ -232,7 +251,8 @@ function validators_validate() {
     validator_exit_code=$?
 
     test $validator_exit_code -eq 0 && validate_result=PASSED || validate_result=FAILED
-    echo " \-$validator:$validate_result " >&2
+    
+    validator_DEBUG && echo " \-$validator:$validate_result " >&2
 
     test $validator_exit_code -ne 0 && validator_passed=1
 

@@ -4,9 +4,11 @@
 # 2. parametrize env ssh key 
 # 3. handle envs discovery / envs parameter
 # 4. check if resource is an instance
+# 5. add mandatory parameters handler
 
 # DONE
 # 1. validate parameters
+# 6. change fags (set) to yes|no
 
 script_name='oci2ansible_inventory'
 script_version='1.0'
@@ -22,31 +24,33 @@ script_libs='config.sh cache.bash JSON.bash validators.bash'
 script_tools='oci cat cut tr grep jq'
 
 declare -A script_args_default
+script_args_default[cfg_id]=$script_cfg
+script_args_default[temp_dir]=~/tmp
+script_args_default[debug]=no
+script_args_default[validate_params]=no
+script_args_default[progress_spinner]=yes
 script_args_default[cache_ttl_region]=43200          # month
 script_args_default[cache_ttl_tag2values]=43200      # month
 script_args_default[cache_ttl_search_instances]=1440 # day
 script_args_default[cache_ttl_ocid2vnics]=5184000    # 10 years
 script_args_default[cache_ttl_ip2instance]=5184000   # 10 years
-script_args_default[temp_dir]=~/tmp
-script_args_default[progress_spinner]=yes
-script_args_default[validate_params]=no
-script_args_default[cfg_id]=$script_cfg
+
 
 declare -A script_args_validator
+script_args_validator[cfg_id]=label
+script_args_validator[debug]=yesno
+script_args_validator[help]=yesno
+script_args_validator[temp_dir]=directory_writable
 script_args_validator[validate_params]=yesno
 script_args_validator[progress_spinner]=yesno
 script_args_validator[cache_ttl_region]=integer
 script_args_validator[cache_ttl_search_instances]=integer
 script_args_validator[cache_ttl_ocid2vnics]=integer
 script_args_validator[cache_ttl_ip2instance]=integer
-script_args_validator[temp_dir]=directory_writable
 script_args_validator[tag_ns]=word
 script_args_validator[tag_env_list_key]=word
 script_args_validator[regions]=labels
-script_args_validator[cfg_id]=label
-script_args_validator[debug]=flag
-script_args_validator[help]=flag
-script_args_validator[list]=flag
+script_args_validator[list]=yesno
 script_args_validator[host]=ip_address
 
 # exit codes
@@ -130,6 +134,35 @@ while [[ $# -gt 0 ]]; do
     eval $var_name="set"; shift 1
   fi
 done
+
+# change set flag to yes|no
+for param in $(echo "$script_args_persist,$script_args_system,$script_args" | tr , '\n' | grep -v :); do
+  if [ "$param" == set ]; then
+    eval $param=yes
+  else
+    eval $param=no
+  fi
+done
+
+#
+# debug handler
+#
+if [ $debug == yes ]; then
+
+  for script_lib in $script_libs; do
+    lib_name=$(echo $script_lib | cut -f1 -d.)
+    eval ($lib_name}_debug=yes
+  done
+
+fi
+
+function DEBUG() {
+  if [ $debug == yes ]; then
+    return 0
+  else
+    return 1
+  fi
+}
 
 #
 # set config source
@@ -453,6 +486,8 @@ fi
 envs=$(cache.invoke oci iam tag get --tag-name $tag_env_list_key --tag-namespace-id $tag_ns | 
 jq .data.validator.values | tr -d '[]" ,' | grep -v '^$')
 
+#
 # execute ansible required tasks
-test ! -z "$list" && get_ansible_inventory $envs | jq
+#
+test "$list" == yes && get_ansible_inventory $envs | jq
 test ! -z "$host" && get_host_variables $host | jq ".\"$host\""
