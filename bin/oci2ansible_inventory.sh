@@ -75,6 +75,8 @@ set_exit_code_variable "Directory not writeable." 3
 set_exit_code_variable "Instance selector not recognised." 4
 set_exit_code_variable "Parameter validation failed."  5
 
+set_exit_code_variable "Configuretion saved." 0
+
 #
 # Check environment
 #
@@ -542,12 +544,15 @@ envs=$(echo $oci_tag | jq .data.validator.values | tr -d '[]" ,' | grep -v '^$')
 #
 # execute ansible required tasks
 #
-if { ! -z "$setcfg" ]; then
+if [ ! -z "$setcfg" ]; then
   key=$(echo $setcfg | cut -f1 -d=)
   value=$(echo $setcfg | cut -f2 -d=)
-  setcfg $script_cfg $key $value
+  if [ -z "$key" ] || [ -z "$value" ]; then
 
-  exit 0
+  else
+    setcfg $script_cfg $key $value
+    named_exit "Configuretion saved." $script_cfg
+  fi
 fi
 
 test "$list" == yes && get_ansible_inventory $envs | jq
