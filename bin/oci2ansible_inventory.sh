@@ -267,12 +267,15 @@ if [ $validate_params == yes ]; then
       if [ ! -z ${!param} ]; then
         validators_validate $param
         if [ $? -ne 0 ]; then
-          named_exit "Parameter validation failed." "value:${!param}"
+          validator_debug_value=$validator_debug
+          validator_debug=yes
+          validators_validate $param
+          validator_debug=$validator_debug_value
+          named_exit "Parameter validation failed." "${!param}"
         fi 
       fi
   done
 fi
-
 
 #
 # persist parameters
