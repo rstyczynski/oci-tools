@@ -430,9 +430,30 @@ function populate_instance_variables() {
 function populate_hostgroup_variables() {
   local env=$1
 
-  declare -A ansible_hostgroup
-  ansible_hostgroup[ansible_ssh_user]=$(getcfg $script_cfg  ${env}_ansible_ssh_user)
-  ansible_hostgroupr[ansible_ssh_private_key_file]=$(getcfg $script_cfg ${env}_ansible_ssh_private_key_file)
+  ansible_hostgroup=
+  declare -g -A ansible_hostgroup
+  
+  ansible_ssh_user=$(getcfg $script_cfg ${env}_ansible_ssh_user)
+  if [ -z "$ansible_ssh_user" ]; then
+    ansible_ssh_user=$(getcfg $script_cfg ansible_ssh_user)
+  fi
+  if [ -z "$ansible_ssh_private_key_file" ]; then
+    WARN "ansible_ssh_user unknown."
+    WARN "Specify gobal one (setcfg $script_cfg ansible_ssh_user USER) or per env (setcfg $script_cfg ${env}_ansible_ssh_user USER)"
+  else
+    ansible_hostgroup[ansible_ssh_user]=$ansible_ssh_user
+  fi
+
+  ansible_ssh_private_key_file=$(getcfg $script_cfg ${env}_ansible_ssh_private_key_file)
+  if [ -z "$ansible_ssh_private_key_file" ]; then
+    ansible_ssh_private_key_file=$(getcfg $script_cfg ansible_ssh_private_key_file)
+  fi
+  if [ -z "$ansible_ssh_private_key_file" ]; then
+    WARN "ansible_ssh_private_key_file unknown."
+    WARN "Specify gobal one (setcfg $script_cfg ansible_ssh_private_key_file KEYPATH) or per env (setcfg $script_cfg ${env}_ansible_ssh_private_key_file KEYPATH)"
+  else
+    ansible_hostgroupr[ansible_ssh_private_key_file]=$ansible_ssh_private_key_file
+  fi
 }
 
 #
