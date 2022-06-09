@@ -265,13 +265,13 @@ done
 if [ $validate_params == yes ]; then
   for param in $(echo "$script_args_persist,$script_args_system,$script_args" | tr , ' ' | tr -d :); do
       if [ ! -z ${!param} ]; then
-        validators_validate $param >/dev/null
+        validators_validate $param
         if [ $? -ne 0 ]; then
           validator_debug_value=$validator_debug
           validator_debug=yes
           validators_validate $param
           validator_debug=$validator_debug_value
-          named_exit "Parameter validation failed." "${!param}"
+          named_exit "Parameter validation failed."
         fi 
       fi
   done
