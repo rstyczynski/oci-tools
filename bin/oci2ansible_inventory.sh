@@ -21,7 +21,7 @@ script_by='ryszard.styczynski@oracle.com'
 
 script_args='list,host:,progress_spinner:,validate_params:'
 script_args_persist='tag_ns:,tag_env_list_key:,regions:,envs:,cache_ttl_tag:,cache_ttl_search_instances:,cache_ttl_ocid2vnics:,cache_ttl_ip2instance:,cache_ttl_compute_instance:,cache_ttl_region:'
-script_args_system='cfg_id:,temp_dir:,debug,help'
+script_args_system='cfg_id:,temp_dir:,debug,warning:,help'
 
 script_cfg='oci2ansible_inventory'
 
@@ -32,6 +32,7 @@ declare -A script_args_default
 script_args_default[cfg_id]=$script_cfg
 script_args_default[temp_dir]=~/tmp
 script_args_default[debug]=no
+script_args_default[warning]=yes
 script_args_default[validate_params]=yes
 script_args_default[progress_spinner]=yes
 script_args_default[cache_ttl_region]=43200          # month
