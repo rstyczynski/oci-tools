@@ -74,8 +74,9 @@ set_exit_code_variable "Directory not writeable." 3
 
 set_exit_code_variable "Instance selector not recognised." 4
 set_exit_code_variable "Parameter validation failed."  5
+set_exit_code_variable "Wrong invocation of setcfg." 6
 
-set_exit_code_variable "Configuretion saved." 0
+set_exit_code_variable "Configuration saved."  0
 
 #
 # Check environment
@@ -548,10 +549,10 @@ if [ ! -z "$setcfg" ]; then
   key=$(echo $setcfg | cut -f1 -d=)
   value=$(echo $setcfg | cut -f2 -d=)
   if [ -z "$key" ] || [ -z "$value" ]; then
-
+    named_exit "Wrong invocation of setcfg." $setcfg
   else
     setcfg $script_cfg $key $value
-    named_exit "Configuretion saved." $script_cfg
+    named_exit "Configuration saved." $script_cfg
   fi
 fi
 
