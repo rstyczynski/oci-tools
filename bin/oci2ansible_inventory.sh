@@ -135,11 +135,9 @@ while [[ $# -gt 0 ]]; do
   fi
 done
 
-echo $list
-
 # change set flag to yes|no
 for param in $(echo "$script_args_persist,$script_args_system,$script_args" | tr , '\n' | grep -v :); do
-  if [ "$param" == set ]; then
+  if [ "${!param}" == set ]; then
     eval $param=yes
   else
     eval $param=no
