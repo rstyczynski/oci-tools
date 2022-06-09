@@ -427,6 +427,13 @@ function populate_instance_variables() {
 
 }
   
+function populate_hostgroup_variables() {
+  local env=$1
+
+  declare -A ansible_hostgroup
+  ansible_hostgroup[ansible_ssh_user]=$(getcfg $script_cfg  ${env}_ansible_ssh_user)
+  ansible_hostgroupr[ansible_ssh_private_key_file]=$(getcfg $script_cfg ${env}_ansible_ssh_private_key_file)
+}
 
 #
 # inventory formatter
@@ -444,10 +451,8 @@ function get_ansible_inventory() {
     populate_instances env $host_group
     JSON.array.add instances hosts
 
-    declare -A ansible_user
-    ansible_user[ansible_ssh_user]=pmaker
-    ansible_user[ansible_ssh_private_key_file]=/home/pmaker/.ssh/dev_id_rsa
-    JSON.map.add ansible_user vars
+    populate_hostgroup_variables $env
+    JSON.map.add ansible_hostgroup vars
 
     JSON.object.close $host_group
   done
