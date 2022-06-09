@@ -21,7 +21,7 @@ script_by='ryszard.styczynski@oracle.com'
 
 script_args='list,host:,progress_spinner:,validate_params:'
 script_args_persist='tag_ns:,tag_env_list_key:,regions:,envs:,cache_ttl_tag:,cache_ttl_search_instances:,cache_ttl_ocid2vnics:,cache_ttl_ip2instance:,cache_ttl_compute_instance:,cache_ttl_region:'
-script_args_system='cfg_id:,temp_dir:,debug,warning:,help'
+script_args_system='cfg_id:,temp_dir:,debug,warning:,help,setcfg:'
 
 script_cfg='oci2ansible_inventory'
 
@@ -440,7 +440,7 @@ function populate_hostgroup_variables() {
   fi
   if [ -z "$ansible_ssh_private_key_file" ]; then
     WARN "ansible_ssh_user unknown."
-    WARN "Specify gobal one (setcfg $script_cfg ansible_ssh_user USER) or per env (setcfg $script_cfg ${env}_ansible_ssh_user USER)"
+    WARN "Specify per env (--setcfg ${env}_ansible_ssh_user=USER) or global one (--setcfg ansible_ssh_user=USER)"
   else
     ansible_hostgroup[ansible_ssh_user]=$ansible_ssh_user
   fi
@@ -451,7 +451,7 @@ function populate_hostgroup_variables() {
   fi
   if [ -z "$ansible_ssh_private_key_file" ]; then
     WARN "ansible_ssh_private_key_file unknown."
-    WARN "Specify gobal one (setcfg $script_cfg ansible_ssh_private_key_file KEYPATH) or per env (setcfg $script_cfg ${env}_ansible_ssh_private_key_file KEYPATH)"
+    WARN "Specify env specific (--setcfg ${env}_ansible_ssh_private_key_file=KEYPATH) or global one (--setcfg ansible_ssh_private_key_file=KEYPATH)"
   else
     ansible_hostgroupr[ansible_ssh_private_key_file]=$ansible_ssh_private_key_file
   fi
@@ -542,5 +542,13 @@ envs=$(echo $oci_tag | jq .data.validator.values | tr -d '[]" ,' | grep -v '^$')
 #
 # execute ansible required tasks
 #
+if { ! -z "$setcfg" ] then
+  key=$(echo $setcfg | cut -f1 -d=)
+  value=$(echo $setcfg | cut -f2 -d=)
+  setcfg $script_cfg $key $value
+
+  exit 0
+fi
+
 test "$list" == yes && get_ansible_inventory $envs | jq
 test ! -z "$host" && get_host_variables $host | jq ".\"$host\""
