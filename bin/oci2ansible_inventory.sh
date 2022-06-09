@@ -542,7 +542,7 @@ envs=$(echo $oci_tag | jq .data.validator.values | tr -d '[]" ,' | grep -v '^$')
 #
 # execute ansible required tasks
 #
-if { ! -z "$setcfg" ] then
+if { ! -z "$setcfg" ]; then
   key=$(echo $setcfg | cut -f1 -d=)
   value=$(echo $setcfg | cut -f2 -d=)
   setcfg $script_cfg $key $value
