@@ -435,8 +435,8 @@ function populate_hostgroup_variables() {
   local env=$1
 
   declare -g -A ansible_hostgroup
-  ansible_hostgroup[ansible_ssh_user]=''
-  ansible_hostgroup[ansible_ssh_private_key_file]=''
+  ansible_hostgroup=( "${ansible_hostgroup[@]/ansible_ssh_user}" )
+  nsible_hostgroup=( "${ansible_hostgroup[@]/ansible_ssh_private_key_file}" )
 
   ansible_ssh_user=$(getcfg $script_cfg ${env}_ansible_ssh_user)
   if [ -z "$ansible_ssh_user" ]; then
