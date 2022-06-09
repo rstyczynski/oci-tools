@@ -1,7 +1,5 @@
 #!/bin/bash
 
-set -x
-
 # TODO
 # 2. parametrize env ssh key 
 # 3. handle envs discovery / envs parameter
@@ -136,6 +134,8 @@ while [[ $# -gt 0 ]]; do
     eval $var_name="set"; shift 1
   fi
 done
+
+echo $list
 
 # change set flag to yes|no
 for param in $(echo "$script_args_persist,$script_args_system,$script_args" | tr , '\n' | grep -v :); do
