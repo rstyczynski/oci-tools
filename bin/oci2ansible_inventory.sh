@@ -546,13 +546,18 @@ envs=$(echo $oci_tag | jq .data.validator.values | tr -d '[]" ,' | grep -v '^$')
 # execute ansible required tasks
 #
 if [ ! -z "$setconfig" ]; then
-  key=$(echo $setconfig | cut -f1 -d=)
-  value=$(echo $setconfig | cut -f2 -d=)
-  if [ -z "$key" ] || [ -z "$value" ] || [ ! echo $setconfig | grep '=' >/dev/null ]; then
+  echo $setconfig | grep '=' >/dev/null ]
+  if [ $? -eq 1]; then
     named_exit "Wrong invocation of setconfig." $setcfg
   else
-    setcfg $script_cfg $key $value force
-    named_exit "Configuration saved." $script_cfg
+    key=$(echo $setconfig | cut -f1 -d=)
+    value=$(echo $setconfig | cut -f2 -d=)
+    if [ -z "$key" ] || [ -z "$value" ]; then
+      named_exit "Wrong invocation of setconfig." $setcfg
+    else
+      setcfg $script_cfg $key $value force
+      named_exit "Configuration saved." $script_cfg
+    fi
   fi
 fi
 
