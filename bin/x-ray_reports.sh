@@ -1515,12 +1515,12 @@ function assess_OCI_instances() {
     status_lines=()
 
     assess_metric "Load average" $env.$product.hosts.$host.os.system-uptime.load15min.avg gt 20 warning
-    assess_metric "CPU utilisation" $env.$product.hosts.$host.os.system-vmstat.CPUidle.avg lt 10 critical 50 warning
+    assess_metric "CPU idle" $env.$product.hosts.$host.os.system-vmstat.CPUidle.avg lt 10 critical 50 warning
     assess_metric "CPU process queue" $env.$product.hosts.$host.os.system-vmstat.ProcessRunQueue.avg gt 20 warning
     assess_metric "Process blocked" $env.$product.hosts.$host.os.system-vmstat.ProcessBlocked.avg gt 0 warning
     assess_metric "Context switches /s" $env.$product.hosts.$host.os.system-vmstat.ContextSwitches.avg gt 60000 critical 30000 warning
     assess_metric "Swap usage" $env.$product.hosts.$host.os.system-vmstat.MemSwpd.avg gt 1024000 warning
-    assess_metric "Boot volume usage" $env.$product.hosts.$host.os.disk-space-mount1.capacity.avg gt 90 critical 80 warning
+    assess_metric "Boot volume usage" $env.$product.hosts.$host.os.disk-space-mount1.capacity.avg gt 80 critical 70 warning
 
     #
     # host report
