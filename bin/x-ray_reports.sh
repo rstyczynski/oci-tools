@@ -1395,40 +1395,20 @@ function get() {
 
 
 declare -A state_char
+state_char[unknown]='?'
 state_char[ok]='+'
-state_char[warning]='!'
-state_char[critical]='X'
-
-function _assess_metric() {
-  metric_name=$1
-  metric=$2
-  test_operator=$3
-  test_value=$4
-  target_state=$5
-
-    _state=ok
-    status_line="$metric_name is ok"
-    value=$(get value $metric 2>/dev/null) 
-    # get value may return n/a or empty string
-    if [ "$value" == 'n/a' ] || [ -z "$value" ]; then
-      status_line="$metric_name metric not available"
-      _state=critical 
-    else
-      if check when $metric $test_operator $test_value; then
-        _state=$target_state
-        case $test_operator in
-          lt) status_line="$metric_name is less than $test_value";;
-          gt) status_line="$metric_name is more than $test_value";;
-          ==) status_line="$metric_name equal to $test_value";;
-        esac
-      fi
-    fi
-}
+state_char[warning]='^'
+state_char[critical]='!'
 
 function update_state() {
   partial_state=$1
 
+  : ${state:==unknown}
+
   case $state in
+  unknown)
+    state=$partial_state
+    ;;
   ok)
     state=$partial_state
     ;;
@@ -1442,6 +1422,37 @@ function update_state() {
   critical)
     ;;
   esac
+}
+
+function _assess_metric() {
+  metric_name=$1
+  metric=$2
+  test_operator=$3
+  test_value=$4
+  target_state=$5
+
+  value=$(get value $metric 2>/dev/null)
+  # get value may return n/a or empty string
+  if [ "$value" == 'n/a' ] || [ -z "$value" ]; then
+    status_line="$metric_name metric not available"
+    _state=unknown 
+  else
+    if check when $metric $test_operator $test_value; then
+      _state=$target_state
+      case $test_operator in
+        lt) status_line="$metric_name is less than $test_value, what turns $target_state";;
+        gt) status_line="$metric_name is more than $test_value, what turns $target_state";;
+        ==) status_line="$metric_name equal to $test_value, what leads to $target_state action";;
+      esac
+    else
+      _state=ok
+      case $test_operator in
+        lt) status_line="$metric_name is more than $test_value, what is ok";;
+        gt) status_line="$metric_name is less than $test_value, what is ok";;
+        ==) status_line="$metric_name equal to $test_value, what is ok";;
+      esac
+    fi
+  fi
 }
 
 function assess_metric() {
@@ -1500,7 +1511,7 @@ function assess_OCI_instances() {
 
   for host in $hosts; do
 
-    state=ok
+    state=unknown
     status_lines=()
 
     assess_metric "Load average" $env.$product.hosts.$host.os.system-uptime.load15min.avg gt 20 warning
@@ -1509,7 +1520,7 @@ function assess_OCI_instances() {
     assess_metric "Process blocked" $env.$product.hosts.$host.os.system-vmstat.ProcessBlocked.avg gt 0 warning
     assess_metric "Context switches /s" $env.$product.hosts.$host.os.system-vmstat.ContextSwitches.avg gt 60000 critical 30000 warning
     assess_metric "Swap usage" $env.$product.hosts.$host.os.system-vmstat.MemSwpd.avg gt 1024000 warning
-    assess_metric "Boot volume usage" $env.$product.hosts.$host.os.disk-space-mount1.capacity.avg gt 90 critical 70 warning
+    assess_metric "Boot volume usage" $env.$product.hosts.$host.os.disk-space-mount1.capacity.avg gt 90 critical 80 warning
 
     #
     # host report
