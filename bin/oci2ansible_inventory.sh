@@ -1,14 +1,19 @@
 #!/bin/bash
 
 # TODO
-# 2. parametrize env ssh key 
-# 3. handle envs discovery / envs parameter
-# 4. check if resource is an instance
-# 5. add mandatory parameters handler
+# HIGH parametrize env ssh key 
+# HIGH handle envs discovery / envs parameter
+# NORMAL add mandatory parameters handler
+# NORMAL move region validation to validators lib
+# LOW cache_ttl as one global parameter
+# NICE TODO script information
+# NICE named_exit verification auto scan
 
 # DONE
 # 1. validate parameters
 # 6. change fags (set) to yes|no
+# adhoc fixed way of caling oci via cache
+# 4. check if resource is an instance
 
 script_name='oci2ansible_inventory'
 script_version='1.0'
@@ -27,7 +32,7 @@ declare -A script_args_default
 script_args_default[cfg_id]=$script_cfg
 script_args_default[temp_dir]=~/tmp
 script_args_default[debug]=no
-script_args_default[validate_params]=no
+script_args_default[validate_params]=yes
 script_args_default[progress_spinner]=yes
 script_args_default[cache_ttl_region]=43200          # month
 script_args_default[cache_ttl_tag]=43200      # month
