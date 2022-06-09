@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -x
+
 # TODO
 # 2. parametrize env ssh key 
 # 3. handle envs discovery / envs parameter
@@ -55,7 +57,7 @@ script_args_validator[list]=yesno
 script_args_validator[host]=ip_address
 
 # exit codes
-if [ ! -f $(dirname "$0")/named_exit.sh ]; then
+if [ ! -f $(dirname "$0" 2>/dev/null)/named_exit.sh ]; then
   echo "$script_name: Critical error. Required library not found in script path. Can't continue."
   exit 1
 fi
