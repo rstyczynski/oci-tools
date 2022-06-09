@@ -21,7 +21,7 @@ script_by='ryszard.styczynski@oracle.com'
 
 script_args='list,host:,progress_spinner:,validate_params:'
 script_args_persist='tag_ns:,tag_env_list_key:,regions:,envs:,cache_ttl_tag:,cache_ttl_search_instances:,cache_ttl_ocid2vnics:,cache_ttl_ip2instance:,cache_ttl_compute_instance:,cache_ttl_region:'
-script_args_system='cfg_id:,temp_dir:,debug,warning:,help,setcfg:'
+script_args_system='cfg_id:,temp_dir:,debug,warning:,help,setconfig:'
 
 script_cfg='oci2ansible_inventory'
 
@@ -443,7 +443,7 @@ function populate_hostgroup_variables() {
   fi
   if [ -z "$ansible_ssh_private_key_file" ]; then
     WARN "ansible_ssh_user unknown."
-    WARN "Specify per env (--setcfg ${env}_ansible_ssh_user=USER) or global one (--setcfg ansible_ssh_user=USER)"
+    WARN "Specify per env (--setconfig ${env}_ansible_ssh_user=USER) or global one (--setconfig ansible_ssh_user=USER)"
   else
     ansible_hostgroup[ansible_ssh_user]=$ansible_ssh_user
   fi
@@ -454,7 +454,7 @@ function populate_hostgroup_variables() {
   fi
   if [ -z "$ansible_ssh_private_key_file" ]; then
     WARN "ansible_ssh_private_key_file unknown."
-    WARN "Specify env specific (--setcfg ${env}_ansible_ssh_private_key_file=KEYPATH) or global one (--setcfg ansible_ssh_private_key_file=KEYPATH)"
+    WARN "Specify env specific (--setconfig ${env}_ansible_ssh_private_key_file=KEYPATH) or global one (--setconfig ansible_ssh_private_key_file=KEYPATH)"
   else
     ansible_hostgroupr[ansible_ssh_private_key_file]=$ansible_ssh_private_key_file
   fi
@@ -545,12 +545,11 @@ envs=$(echo $oci_tag | jq .data.validator.values | tr -d '[]" ,' | grep -v '^$')
 #
 # execute ansible required tasks
 #
-set -x
-if [ ! -z "$setcfg" ]; then
-  key=$(echo $setcfg | cut -f1 -d=)
-  value=$(echo $setcfg | cut -f2 -d=)
-  if [ -z "$key" ] || [ -z "$value" ]; then
-    named_exit "Wrong invocation of setcfg." $setcfg
+if [ ! -z "$setconfig" ]; then
+  key=$(echo $setconfig | cut -f1 -d=)
+  value=$(echo $setconfig | cut -f2 -d=)
+  if [ -z "$key" ] || [ -z "$value" ] || [ ! echo $setconfig | grep '=' >/dev/null ]; then
+    named_exit "Wrong invocation of setconfig." $setcfg
   else
     setcfg $script_cfg $key $value force
     named_exit "Configuration saved." $script_cfg
