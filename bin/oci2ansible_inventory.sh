@@ -352,7 +352,7 @@ function populate_instances() {
         for ocid in $ocids; do
           # check if resource is an instance
           # tip: resource type is embeded in the oci on second position
-          resource_type=$(echo $ocid | cit -d. -f2)
+          resource_type=$(echo $ocid | cut -d. -f2)
           if [ "$resource_type" != instance ]; then
             continue
           fi
