@@ -74,7 +74,7 @@ set_exit_code_variable "Directory not writeable." 3
 
 set_exit_code_variable "Instance selector not recognised." 4
 set_exit_code_variable "Parameter validation failed."  5
-set_exit_code_variable "Wrong invocation of setcfg." 6
+set_exit_code_variable "Wrong invocation of setconfig." 6
 
 set_exit_code_variable "Configuration saved."  0
 
