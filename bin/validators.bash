@@ -6,9 +6,7 @@
 
 function validator_DEBUG() {
   if [ "$validator_debug" == yes ]; then
-    return 0
-  else
-    return 1
+    echo $@ >&2
   fi
 }
 
@@ -234,7 +232,7 @@ function validators_validate() {
   validator_passed=0
 
   if [ ! -z ${script_args_validator[$var_name]} ]; then
-    validator_DEBUG echo "Validates: $var_name" >&2
+    validator_DEBUG "Validates: $var_name"
   fi
 
   IFS=,
@@ -252,7 +250,7 @@ function validators_validate() {
 
     test $validator_exit_code -eq 0 && validate_result=PASSED || validate_result=FAILED
     
-    validator_DEBUG && echo " \-$validator:$validate_result " >&2
+    validator_DEBUG " \-$validator:$validate_result "
 
     test $validator_exit_code -ne 0 && validator_passed=1
 
