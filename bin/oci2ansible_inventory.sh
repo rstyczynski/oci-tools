@@ -347,7 +347,7 @@ function populate_instances() {
           (definedTags.namespace = '$tag_ns' && definedTags.key = 'ENV' && definedTags.value = '$env')\"
         ")
         
-        ocids=$(echo $oci_search ) | jq -r '.data.items[]."identifier"')
+        ocids=$(echo $oci_search | jq -r '.data.items[]."identifier"')
 
         for ocid in $ocids; do
           # check if resource is an instance
