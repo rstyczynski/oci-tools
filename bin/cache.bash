@@ -61,7 +61,7 @@ cache_dir=
 cache_debug=
 cache_warning=yes
 
-cache_progress=yes
+cache_progress=no
 cache_spinner_cnt=1
 cache_spinner="/-\|"
 

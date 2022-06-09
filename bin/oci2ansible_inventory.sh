@@ -15,7 +15,7 @@ script_version='1.0'
 script_by='ryszard.styczynski@oracle.com'
 
 script_args='list,host:,progress_spinner:,validate_params:'
-script_args_persist='tag_ns:,tag_env_list_key:,regions:,envs:,cache_ttl_tag2values:,cache_ttl_search_instances:,cache_ttl_ocid2vnics:,cache_ttl_ip2instance:,cache_ttl_region:'
+script_args_persist='tag_ns:,tag_env_list_key:,regions:,envs:,cache_ttl_tag:,cache_ttl_search_instances:,cache_ttl_ocid2vnics:,cache_ttl_ip2instance:,cache_ttl_compute_instance:,cache_ttl_region:'
 script_args_system='cfg_id:,temp_dir:,debug,help'
 
 script_cfg='oci2ansible_inventory'
@@ -30,11 +30,11 @@ script_args_default[debug]=no
 script_args_default[validate_params]=no
 script_args_default[progress_spinner]=yes
 script_args_default[cache_ttl_region]=43200          # month
-script_args_default[cache_ttl_tag2values]=43200      # month
+script_args_default[cache_ttl_tag]=43200      # month
 script_args_default[cache_ttl_search_instances]=1440 # day
 script_args_default[cache_ttl_ocid2vnics]=5184000    # 10 years
 script_args_default[cache_ttl_ip2instance]=5184000   # 10 years
-
+script_args_default[cache_ttl_compute_instance]=5184000   # 10 years
 
 declare -A script_args_validator
 script_args_validator[cfg_id]=label
@@ -47,6 +47,7 @@ script_args_validator[cache_ttl_region]=integer
 script_args_validator[cache_ttl_search_instances]=integer
 script_args_validator[cache_ttl_ocid2vnics]=integer
 script_args_validator[cache_ttl_ip2instance]=integer
+script_args_validator[cache_ttl_compute_instance]=integer
 script_args_validator[tag_ns]=word
 script_args_validator[tag_env_list_key]=word
 script_args_validator[regions]=labels
@@ -65,9 +66,8 @@ set_exit_code_variable "Script bin directory unknown." 1
 set_exit_code_variable "Required tools not available." 2
 set_exit_code_variable "Directory not writeable." 3
 
-set_exit_code_variable "Instance w/o private ip adress." 4
-set_exit_code_variable "Instance selector not recognised." 5
-set_exit_code_variable "Parameter validation failed."  6
+set_exit_code_variable "Instance selector not recognised." 4
+set_exit_code_variable "Parameter validation failed."  5
 
 #
 # Check environment
@@ -149,20 +149,26 @@ done
 #
 if [ $debug == yes ]; then
 
+  # enable debug for loaded libraries
   for script_lib in $script_libs; do
     lib_name=$(echo $script_lib | cut -f1 -d.)
-    eval ($lib_name}_debug=yes
+    eval ${lib_name}_debug=yes
   done
 
 fi
 
 function DEBUG() {
-  if [ $debug == yes ]; then
-    return 0
-  else
-    return 1
+  if [ "$debug" == yes ]; then
+    echo $@ >&2
   fi
 }
+
+function WARN() {
+  if [ "$warning" == yes ]; then
+    echo $@ >&2
+  fi
+}
+
 
 #
 # set config source
@@ -231,7 +237,7 @@ function usage() {
 about >&2
 
 if [ "$help" == set ]; then
-  usage >&2
+  usage
   exit 0
 fi
 
@@ -277,7 +283,7 @@ fi
 for cfg_param in $(echo $script_args_persist | tr , ' ' | tr -d :); do
   if [ -z ${!cfg_param} ]; then
     echo
-    echo "Warning. Required configurable $cfg_param unknown."
+    echo "Info. Required configurable $cfg_param unknown."
     read -p "Enter value for $cfg_param:" $cfg_param
     
     validators_validate $cfg_param
@@ -331,36 +337,46 @@ function populate_instances() {
     for region in $regions; do
 
         cache_ttl=$cache_ttl_search_instances
-        cache_group=search_instances
-        cache_key=${region}_${env}
-
-        ocids=$(
-          cache.invoke " \
+        cache_group=oci_search_instances
+        cache_key=${region}_${tag_ns}_${env}
+        oci_search=$(cache.invoke \
+        " \
           oci search resource structured-search \
           --region $region \
           --query-text \"query all resources where \
           (definedTags.namespace = '$tag_ns' && definedTags.key = 'ENV' && definedTags.value = '$env')\"
-          " | 
-          jq -r '.data.items[]."identifier"')
+        ")
+        
+        ocids=$(echo $oci_search ) | jq -r '.data.items[]."identifier"')
 
         for ocid in $ocids; do
-          # TODO: check if resource is an instance
-
+          # check if resource is an instance
+          # tip: resource type is embeded in the oci on second position
+          resource_type=$(echo $ocid | cit -d. -f2)
+          if [ "$resource_type" != instance ]; then
+            continue
+          fi
+          
           # get private ip    
           cache_ttl=$cache_ttl_ocid2vnics
-          cache_group=ocid2vnics
+          cache_group=oci_ocid2vnics
           cache_key=$ocid
-
-          private_ip=$(cache.invoke oci compute instance list-vnics \
-          --region $region --instance-id $ocid | 
-          jq -r '.data[]."private-ip"')
+          oci_instance=$(cache.invoke oci compute instance list-vnics --region $region --instance-id $ocid)
           
+          private_ip=$(echo $oci_instance | jq -r '.data[]."private-ip"')
           if [ -z "$private_ip" ]; then
-            echo "Error. private ip empty. Can't continue."
-            named_exit "Instance w/o private ip adress." $ocid
+            # instance w/o provite ip address - rather unsual
+            WARN "Instance w/o private ip adress." $ocid 
+            continue
           fi
 
           instances+=($private_ip)
+          
+          # trick - by putting $ocid in cache with key $private_ip - I'll be to receive $ocid in other  place f the code
+          cache_ttl=$cache_ttl_ip2instance
+          cache_group=oci_ip2instance
+          cache_key=$private_ip
+          cache.invoke echo $ocid >/dev/null
 
         done
       done
@@ -378,24 +394,25 @@ function populate_instance_variables() {
   unset instance_variables
   declare -g -A instance_variables
 
-  # get tags
-  cache_group=ip2instance
-  cache_key=$private_ip
-
-  # get tags
+  # get instance ocid by private ip (trick above)
   cache_ttl=$cache_ttl_ip2instance
-  cache_group=ip2instance
+  cache_group=oci_ip2instance
   cache_key=$private_ip
+  instance_ocid=$(cache.invoke echo $ocid)
 
-  cache.invoke oci compute instance get \
-  --region $region --instance-id $ocid | 
-  jq ".data.\"defined-tags\".$tag_ns" | tr -d '{}" ,' | tr ':' '=' > $temp_dir/oci_instance.tags
+  # get compute instance details
+  cache_ttl=$cache_ttl_compute_instance
+  cache_group=oci_compute_instance
+  cache_key=$instance_ocid
+  compute_instance=$(cache.invoke oci compute instance get --region $region --instance-id $instance_ocid)
+  
+  echo $compute_instance | 
+  jq ".data.\"defined-tags\".$tag_ns" | 
+  tr -d '{}" ,' > $temp_dir/oci_instance.tags
 
-  source $temp_dir/oci_instance.tags
-
-  tags=$(cat $temp_dir/oci_instance.tags | cut -f1 -d=)
+  tags=$(cat $temp_dir/oci_instance.tags | cut -f1 -d:)
   for tag in $tags; do
-    instance_variables[$tag]=${!tag}
+    instance_variables[$tag]=$(cat $temp_dir/oci_instance.tags | grep "^$tag:"| cut -f2 -d:)
   done
 
   rm $temp_dir/oci_instance.tags
@@ -462,29 +479,30 @@ function get_host_variables() {
 #verify region
 for region in $regions; do
   cache_ttl=$cache_ttl_region
-  cache_group=region
+  cache_group=oci_region
   cache_key=regions
-  region_name=$(cache.invoke oci iam region list | jq -r ".data[] | select(.name==\"$region\") | .name")
+  oci_regions=$(cache.invoke oci iam region list)
+
+  region_name=$(echo $oci_regions | jq -r ".data[] | select(.name==\"$region\") | .name")
   if [ "$region" != "$region_name" ]; then
     echo "No such region: $region"
   fi
 done
 
 # discover ENV names via OCI ENUM tag 
-cache_ttl=$cache_ttl_tag2values
-cache_group=tag2values
+cache_ttl=$cache_ttl_tag
+cache_group=oci_tag
 cache_key=${tag_ns}_${tag_env_list_key}
 
-tag_type=$(cache.invoke oci iam tag get --tag-name $tag_env_list_key --tag-namespace-id $tag_ns | 
-jq -r '.data.validator."validator-type"')
+oci_tag=$(cache.invoke oci iam tag get --tag-name $tag_env_list_key --tag-namespace-id $tag_ns)
+tag_type=$(echo $oci_tag | jq -r '.data.validator."validator-type"')
 if [ "$tag_type" != ENUM ]; then
   #TODO: add named exit
   echo "Error. Tag with list of environments must be ENUM type. Exiting."
   exit 1
 fi
 
-envs=$(cache.invoke oci iam tag get --tag-name $tag_env_list_key --tag-namespace-id $tag_ns | 
-jq .data.validator.values | tr -d '[]" ,' | grep -v '^$')
+envs=$(echo $oci_tag | jq .data.validator.values | tr -d '[]" ,' | grep -v '^$')
 
 #
 # execute ansible required tasks

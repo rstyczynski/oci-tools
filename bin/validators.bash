@@ -5,7 +5,7 @@
 #
 
 function validator_DEBUG() {
-  if [ $validator_debug == set ]; then
+  if [ $validator_debug == yes ]; then
     return 0
   else
     return 1
