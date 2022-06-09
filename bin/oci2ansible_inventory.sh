@@ -441,7 +441,7 @@ function populate_hostgroup_variables() {
   if [ -z "$ansible_ssh_user" ]; then
     ansible_ssh_user=$(getcfg $script_cfg ansible_ssh_user)
   fi
-  if [ -z "$ansible_ssh_private_key_file" ]; then
+  if [ -z "$ansible_ssh_user" ]; then
     WARN "ansible_ssh_user unknown."
     WARN "Specify per env (--setconfig ${env}_ansible_ssh_user=USER) or global one (--setconfig ansible_ssh_user=USER)"
   else
@@ -456,7 +456,7 @@ function populate_hostgroup_variables() {
     WARN "ansible_ssh_private_key_file unknown."
     WARN "Specify env specific (--setconfig ${env}_ansible_ssh_private_key_file=KEYPATH) or global one (--setconfig ansible_ssh_private_key_file=KEYPATH)"
   else
-    ansible_hostgroupr[ansible_ssh_private_key_file]=$ansible_ssh_private_key_file
+    ansible_hostgroup[ansible_ssh_private_key_file]=$ansible_ssh_private_key_file
   fi
 }
 
