@@ -545,6 +545,7 @@ envs=$(echo $oci_tag | jq .data.validator.values | tr -d '[]" ,' | grep -v '^$')
 #
 # execute ansible required tasks
 #
+set -x
 if [ ! -z "$setconfig" ]; then
   echo $setconfig | grep '=' >/dev/null ]
   if [ $? -eq 1 ]; then
