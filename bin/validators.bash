@@ -13,7 +13,7 @@
 #
 # DONE
 #
-# (none)
+# Mark function level variables as local
 
 #
 # debug handler
@@ -61,7 +61,7 @@ validator_info[integer]='integer'
 #
 
 function validator_yesno() {
-  value=$(echo $1 | tr '[A-Z]' '[a-z]')
+  local value=$(echo $1 | tr '[A-Z]' '[a-z]')
 
   case $value in
   yes)  return 0;;
@@ -71,7 +71,7 @@ function validator_yesno() {
 }
 
 function validator_integer() {
-  value=$1
+  local value=$1
 
   # https://stackoverflow.com/questions/806906/how-do-i-test-if-a-variable-is-a-number-in-bash
   re='^[0-9]+$'
@@ -81,7 +81,7 @@ function validator_integer() {
 }
 
 function validator_word() {
-  value=$1
+  local value=$1
 
   re='^[a-zA-Z0-9_]+$'
   if ! [[ $value =~ $re ]] ; then
@@ -90,7 +90,7 @@ function validator_word() {
 }
 
 function validator_words() {
-  value=$1
+  local value=$1
 
   re='^[ a-zA-Z0-9_]+$'
   if ! [[ $value =~ $re ]] ; then
@@ -99,7 +99,7 @@ function validator_words() {
 }
 
 function validator_label() {
-  value=$1
+  local value=$1
 
   re='^[a-zA-Z0-9_-]+$'
   if ! [[ $value =~ $re ]] ; then
@@ -108,7 +108,7 @@ function validator_label() {
 }
 
 function validator_labels() {
-  value=$1
+  local value=$1
 
   # hyphen at the end: https://stackoverflow.com/questions/55377810/bash-regex-with-hyphen-and-dot
   re='^[ a-zA-Z0-9_-]+$'
@@ -118,7 +118,7 @@ function validator_labels() {
 }
 
 function validator_flag() {
-  value=$1
+  local value=$1
 
   test -z "$value" && return 0
   test "$value" == set && return 0
@@ -128,7 +128,7 @@ function validator_flag() {
 }
 
 function validator_directory_writable() {
-  dir=$1
+  local dir=$1
 
   test ! -d  $dir && return 1
   touch $dir/marker
@@ -138,7 +138,7 @@ function validator_directory_writable() {
 
 
 function validator_ip_address() {
-  ip_address=$1
+  local ip_address=$1
 
   >&2 python3 <<EOF
 import ipaddress
@@ -154,8 +154,8 @@ EOF
 
 # on-line
 function validator_tcp_service_reachable() {
-  ip_address=$(echo $1 | cut -d: -f1)
-  ip_address_port=$(echo $1 | cut -d: -f2)
+  local ip_address=$(echo $1 | cut -d: -f1)
+  local ip_address_port=$(echo $1 | cut -d: -f2)
 
   : ${validator_tcp_service_reachable_timeout:=5}
 
@@ -177,7 +177,7 @@ EOF
 
 # on-line
 function validator_ip_address_reachable() {
-  ip_address=$1
+  local ip_address=$1
 
   : ${validator_ip_address_reachable_timeout:=5}
 
@@ -189,7 +189,7 @@ function validator_ip_address_reachable() {
 }
 
 function validator_ip_network() {
-  ip_address=$1
+  local ip_address=$1
 
   >&2 python3 <<EOF
 import ipaddress
@@ -204,8 +204,8 @@ EOF
 }
 
 function validator_oci_format_ocid() {
-  resource_ocid=$1
-  resource_type=$2
+  local resource_ocid=$1
+  local resource_type=$2
 
   : ${resource_type:=^[a-z]+}
 
@@ -274,7 +274,7 @@ function validator_oci_lookup_ocid() {
 
 # on-line
 function validator_oci_lookup_region() {
-  region=$1
+  local region=$1
 
   if [ "$validator_usecache" == yes ]; then
     cache_ttl=$cache_ttl_oci_region
@@ -295,7 +295,7 @@ function validator_oci_lookup_region() {
 
 # on-line
 function validator_oci_lookup_regions() {
-  regions=$@
+  local regions=$@
 
   IFS=,
   for region in $regions; do
@@ -310,7 +310,7 @@ function validator_oci_lookup_regions() {
 # 
 
 function validators_validate() {
-  var_name=$1
+  local var_name=$1
 
   unset validate_codes
   declare -gA validate_codes
