@@ -1,6 +1,21 @@
 #!/bin/bash
 
 #
+# TODO
+#
+# (none)
+
+#
+# PROGRESS
+#
+# NORMAL add cahce for on-line services
+
+#
+# DONE
+#
+# (none)
+
+#
 # debug handler
 #
 
@@ -9,6 +24,27 @@ function validator_DEBUG() {
     echo $@ >&2
   fi
 }
+
+function validator_WARN() {
+  if [ "$validator_warining" == yes ]; then
+    echo $@ >&2
+  fi
+}
+
+# 
+# init code
+#
+: ${validator_warining:=yes}
+: ${validator_usecache:=yes}
+
+if [ "$validator_usecache" == yes]; then
+  cache.invoke >/dev/null 2>/dev/null
+  if [ $? -eq 127 ]; then
+    validator_usecache=no
+    WARN "cache.bash not available. To use cache source cache.bash firs."
+  fi
+fi
+
 
 #
 # validators info
@@ -87,6 +123,8 @@ function validator_flag() {
 
   test -z "$value" && return 0
   test "$value" == set && return 0
+  test "$value" == yes && return 0
+  test "$value" == no && return 0
   return 1
 }
 
@@ -115,6 +153,7 @@ EOF
   return $?
 }
 
+# on-line
 function validator_tcp_service_reachable() {
   ip_address=$(echo $1 | cut -d: -f1)
   ip_address_port=$(echo $1 | cut -d: -f2)
@@ -137,6 +176,7 @@ EOF
   return $?
 }
 
+# on-line
 function validator_ip_address_reachable() {
   ip_address=$1
 
@@ -144,7 +184,7 @@ function validator_ip_address_reachable() {
 
   timeout $validator_ip_address_reachable_timeout ping -c1 $ip_address >/dev/null 2>&1 
   ping_status=$?
-  # [ "$ping_status" -ne 0 ] && >&2 echo "Host does not respond to ICMP."
+  [ "$ping_status" -ne 0 ] && >&2 echo "Host does not respond to ICMP."
 
   return $ping_status
 }
@@ -209,11 +249,22 @@ function validator_oci_format_ocid_tenancy() {
   return $?
 }
 
+# on-line
 function validator_oci_lookup_ocid() {
   ocid=$1
 
-  oci search resource free-text-search --text "$ocid" | 
-  jq '.data.items[]'  | 
+  region=$(echo $ocid | cut -f2 -d.)
+
+  if [ "$validator_usecache" == yes]; then
+    cache_ttl=$cache_ttl_oci_ocid_search
+    cache_group=oci_ocid
+    cache_key=$ocid
+    oci_ocid_search=$(cache.invoke "oci search -region $region resource free-text-search --text \"$ocid\"")
+  else
+    oci_ocid_search=$(oci search -region $region resource free-text-search --text "$ocid")
+  fi
+
+  echo $oci_ocid_search | jq '.data.items[]'  | 
   jq "select(.identifier==\"$ocid\")" |
   grep "\"identifier\": \"$ocid" >/dev/null
   search_status=$?
@@ -221,6 +272,40 @@ function validator_oci_lookup_ocid() {
 
   return $search_status
 }
+
+# on-line
+function validator_oci_lookup_region() {
+  region=$1
+
+  if [ "$validator_usecache" == yes]; then
+    cache_ttl=$cache_ttl_oci_region
+    cache_group=oci_region
+    cache_key=regions
+    oci_regions=$(cache.invoke oci iam region list)
+  else
+     oci_regions=$(oci iam region list)
+  fi
+
+  region_name=$(echo $oci_regions | jq -r ".data[] | select(.name==\"$region\") | .name")
+  if [ "$region" != "$region_name" ]; then
+    >&2 echo "No such region: $region"
+  fi
+
+}
+
+# on-line
+function validator_oci_lookup_regions() {
+  regions=$1
+
+  for region in $regions; do
+    validator_oci_lookup_region $region
+  done
+
+}
+
+#
+# test
+# 
 
 function validators_validate() {
   var_name=$1
