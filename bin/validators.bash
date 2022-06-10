@@ -3,7 +3,7 @@
 #
 # TODO
 #
-# (none)
+# List of words, labels, etc. always separated by , w/o spaces
 
 #
 # PROGRESS
@@ -296,9 +296,11 @@ function validator_oci_lookup_region() {
 function validator_oci_lookup_regions() {
   regions=$@
 
+  IFS=,
   for region in $regions; do
     validator_oci_lookup_region $region
   done
+  unset IFS
 
 }
 
