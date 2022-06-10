@@ -17,6 +17,7 @@
 #
 # DONE
 #
+# CRITIC always quote response from cache in echo
 # NORMAL move region validation to validators lib
 # NORMAL add treace handler - set -x
 # HIGH Main processing with exit and usage
@@ -383,7 +384,8 @@ function populate_instances() {
           (definedTags.namespace = '$tag_ns' && definedTags.key = 'ENV' && definedTags.value = '$env')\"
         ")
         
-        ocids=$(echo $oci_search | jq -r '.data.items[]."identifier"')
+        # TIP: always quote response from cache
+        ocids=$(echo "$oci_search" | jq -r '.data.items[]."identifier"')
 
         for ocid in $ocids; do
           # check if resource is an instance
@@ -399,7 +401,7 @@ function populate_instances() {
           cache_key=$ocid
           oci_instance=$(cache.invoke oci compute instance list-vnics --region $region --instance-id $ocid)
           
-          private_ip=$(echo $oci_instance | jq -r '.data[]."private-ip"')
+          private_ip=$(echo "$oci_instance" | jq -r '.data[]."private-ip"')
           if [ -z "$private_ip" ]; then
             # instance w/o provite ip address - rather unsual
             WARN "Instance w/o private ip adress." $ocid 
@@ -443,7 +445,7 @@ function populate_instance_variables() {
   cache_key=$instance_ocid
   compute_instance=$(cache.invoke oci compute instance get --region $region --instance-id $instance_ocid)
   
-  echo $compute_instance | 
+  echo "$compute_instance" | 
   jq ".data.\"defined-tags\".$tag_ns" | 
   tr -d '{}" ,' > $temp_dir/oci_instance.tags
 
@@ -541,7 +543,7 @@ cache_group=oci_tag
 cache_key=${tag_ns}_${tag_env_list_key}
 
 oci_tag=$(cache.invoke oci iam tag get --tag-name $tag_env_list_key --tag-namespace-id $tag_ns)
-tag_type=$(echo $oci_tag | jq -r '.data.validator."validator-type"')
+tag_type=$(echo "$oci_tag" | jq -r '.data.validator."validator-type"')
 if [ "$tag_type" != ENUM ]; then
   #TODO: add named exit
   echo "Error. Tag with list of environments must be ENUM type. Exiting."
