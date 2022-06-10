@@ -13,7 +13,7 @@
 #
 # PROGRESS
 #
-
+# Generated inventory JSON parsng failed.
 
 #
 # DONE
@@ -95,6 +95,7 @@ set_exit_code_variable "Directory not writeable." 3
 set_exit_code_variable "Instance selector not recognised." 4
 set_exit_code_variable "Parameter validation failed."  5
 set_exit_code_variable "Wrong invocation of setconfig." 6
+&& set_exit_code_variable "Generated inventory JSON parsng failed." 7
 
 set_exit_code_variable "Configuration saved."  0
 set_exit_code_variable "Ansible host completed" 0
@@ -589,7 +590,7 @@ fi
 #
 if [ "$list" == yes ]; then 
   get_ansible_inventory $envs >/$temp_dir/inventory.json
-  jq /$temp_dir/inventory.json
+  jq . /$temp_dir/inventory.json && named_exit "Generated inventory JSON parsng failed."
   rm /$temp_dir/inventory.json
 
   named_exit "Ansible list completed"
@@ -597,7 +598,7 @@ fi
 
 if [ ! -z "$host" ]; then
   get_host_variables $host >/$temp_dir/variables.json
-  jq ".\"$host\"" /$temp_dir/variables.json 
+  jq ".\"$host\"" /$temp_dir/variables.json && named_exit "Generated inventory JSON parsng failed."
   rm /$temp_dir/variables.json
   named_exit "Ansible host completed"
 fi
