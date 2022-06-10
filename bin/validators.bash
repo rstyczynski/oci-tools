@@ -294,7 +294,7 @@ function validator_oci_lookup_region() {
 
 # on-line
 function validator_oci_lookup_regions() {
-  regions=$1
+  regions=$@
 
   for region in $regions; do
     validator_oci_lookup_region $region

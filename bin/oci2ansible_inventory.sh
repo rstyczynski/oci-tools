@@ -14,6 +14,7 @@
 # PROGRESS
 #
 # NORMAL move region validation to validators lib
+set -x
 
 #
 # DONE
