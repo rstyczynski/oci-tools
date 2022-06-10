@@ -1,7 +1,6 @@
 #!/bin/bash
 
 # TODO
-# HIGH parametrize env ssh key 
 # HIGH handle envs discovery / envs parameter
 # NORMAL add mandatory parameters handler
 # NORMAL move region validation to validators lib
@@ -10,6 +9,8 @@
 # NICE named_exit verification auto scan
 
 # DONE
+# HIGH Main processing with exit and usage
+# HIGH parametrize env ssh key 
 # 1. validate parameters
 # 6. change fags (set) to yes|no
 # adhoc fixed way of caling oci via cache
@@ -542,7 +543,7 @@ fi
 envs=$(echo $oci_tag | jq .data.validator.values | tr -d '[]" ,' | grep -v '^$')
 
 #
-# execute ansible required tasks
+# execute configuration tasks
 #
 if [ ! -z "$setconfig" ]; then
   echo $setconfig | grep '=' >/dev/null
@@ -558,7 +559,21 @@ if [ ! -z "$setconfig" ]; then
       named_exit "Configuration saved." $script_cfg
     fi
   fi
+  exit 0
 fi
 
-test "$list" == yes && get_ansible_inventory $envs | jq
-test ! -z "$host" && get_host_variables $host | jq ".\"$host\""
+#
+# execute ansible required tasks
+#
+if [ "$list" == yes ]; then 
+  get_ansible_inventory $envs | jq
+  exit 0
+fi
+
+if [ ! -z "$host" ]; then
+  get_host_variables $host | jq ".\"$host\""
+  exit 0
+fi
+
+# nothing done? Present how to use the script.
+usage
