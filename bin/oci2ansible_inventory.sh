@@ -1,15 +1,23 @@
 #!/bin/bash
 
+#
 # TODO
+#
 # HIGH handle envs discovery / envs parameter
 # NORMAL add mandatory parameters handler
-# NORMAL move region validation to validators lib
 # LOW cache_ttl as one global parameter
 # NICE TODO script information
 # NICE named_exit verification auto scan
 # EXPERIMENTAL Associate with jump host env level ansible user / key
 
+#
+# PROGRESS
+#
+# NORMAL move region validation to validators lib
+
+#
 # DONE
+#
 # HIGH Main processing with exit and usage
 # HIGH parametrize env ssh key 
 # 1. validate parameters
@@ -22,7 +30,7 @@ script_version='1.0'
 script_by='ryszard.styczynski@oracle.com'
 
 script_args='list,host:,progress_spinner:,validate_params:'
-script_args_persist='tag_ns:,tag_env_list_key:,regions:,envs:,cache_ttl_tag:,cache_ttl_search_instances:,cache_ttl_ocid2vnics:,cache_ttl_ip2instance:,cache_ttl_compute_instance:,cache_ttl_region:'
+script_args_persist='tag_ns:,tag_env_list_key:,regions:,envs:,cache_ttl_oci_tag:,cache_ttl_oci_search_instances:,cache_ttl_oci_ocid2vnics:,cache_ttl_oci_ip2instance:,cache_ttl_oci_compute_instance:,cache_ttl_oci_region:'
 script_args_system='cfg_id:,temp_dir:,debug,warning:,help,setconfig:'
 
 script_cfg='oci2ansible_inventory'
@@ -37,29 +45,29 @@ script_args_default[debug]=no
 script_args_default[warning]=yes
 script_args_default[validate_params]=yes
 script_args_default[progress_spinner]=yes
-script_args_default[cache_ttl_region]=43200               # month
-script_args_default[cache_ttl_tag]=43200                  # month
-script_args_default[cache_ttl_search_instances]=1440      # day
-script_args_default[cache_ttl_ocid2vnics]=5184000         # 10 years
-script_args_default[cache_ttl_ip2instance]=5184000        # 10 years
-script_args_default[cache_ttl_compute_instance]=5184000   # 10 years
+script_args_default[cache_ttl_oci_region]=43200               # month
+script_args_default[cache_ttl_oci_tag]=43200                  # month
+script_args_default[cache_ttl_oci_search_instances]=1440      # day
+script_args_default[cache_ttl_oci_ocid2vnics]=5184000         # 10 years
+script_args_default[cache_ttl_oci_ip2instance]=5184000        # 10 years
+script_args_default[cache_ttl_oci_compute_instance]=5184000   # 10 years
 
 declare -A script_args_validator
 script_args_validator[cfg_id]=label
-script_args_validator[debug]=yesno
-script_args_validator[help]=yesno
+script_args_validator[debug]=flag
+script_args_validator[help]=flag
 script_args_validator[temp_dir]=directory_writable
 script_args_validator[validate_params]=yesno
 script_args_validator[progress_spinner]=yesno
-script_args_validator[cache_ttl_region]=integer
-script_args_validator[cache_ttl_search_instances]=integer
-script_args_validator[cache_ttl_ocid2vnics]=integer
-script_args_validator[cache_ttl_ip2instance]=integer
-script_args_validator[cache_ttl_compute_instance]=integer
+script_args_validator[cache_ttl_oci_region]=integer
+script_args_validator[cache_ttl_oci_search_instances]=integer
+script_args_validator[cache_ttl_oci_ocid2vnics]=integer
+script_args_validator[cache_ttl_oci_ip2instance]=integer
+script_args_validator[cache_ttl_oci_compute_instance]=integer
 script_args_validator[tag_ns]=word
 script_args_validator[tag_env_list_key]=word
-script_args_validator[regions]=labels
-script_args_validator[list]=yesno
+script_args_validator[regions]=oci_lookup_regions
+script_args_validator[list]=flag
 script_args_validator[host]=ip_address
 
 # exit codes
@@ -350,7 +358,7 @@ function populate_instances() {
 
     for region in $regions; do
 
-        cache_ttl=$cache_ttl_search_instances
+        cache_ttl=$cache_ttl_oci_search_instances
         cache_group=oci_search_instances
         cache_key=${region}_${tag_ns}_${env}
         oci_search=$(cache.invoke \
@@ -372,7 +380,7 @@ function populate_instances() {
           fi
           
           # get private ip    
-          cache_ttl=$cache_ttl_ocid2vnics
+          cache_ttl=$cache_ttl_oci_ocid2vnics
           cache_group=oci_ocid2vnics
           cache_key=$ocid
           oci_instance=$(cache.invoke oci compute instance list-vnics --region $region --instance-id $ocid)
@@ -387,7 +395,7 @@ function populate_instances() {
           instances+=($private_ip)
           
           # trick - by putting $ocid in cache with key $private_ip - I'll be to receive $ocid in other  place f the code
-          cache_ttl=$cache_ttl_ip2instance
+          cache_ttl=$cache_ttl_oci_ip2instance
           cache_group=oci_ip2instance
           cache_key=$private_ip
           cache.invoke echo $ocid >/dev/null
@@ -409,13 +417,13 @@ function populate_instance_variables() {
   declare -g -A instance_variables
 
   # get instance ocid by private ip (trick above)
-  cache_ttl=$cache_ttl_ip2instance
+  cache_ttl=$cache_ttl_oci_ip2instance
   cache_group=oci_ip2instance
   cache_key=$private_ip
   instance_ocid=$(cache.invoke echo $ocid)
 
   # get compute instance details
-  cache_ttl=$cache_ttl_compute_instance
+  cache_ttl=$cache_ttl_oci_compute_instance
   cache_group=oci_compute_instance
   cache_key=$instance_ocid
   compute_instance=$(cache.invoke oci compute instance get --region $region --instance-id $instance_ocid)
@@ -512,21 +520,8 @@ function get_host_variables() {
 #
 #
 
-#verify region
-for region in $regions; do
-  cache_ttl=$cache_ttl_region
-  cache_group=oci_region
-  cache_key=regions
-  oci_regions=$(cache.invoke oci iam region list)
-
-  region_name=$(echo $oci_regions | jq -r ".data[] | select(.name==\"$region\") | .name")
-  if [ "$region" != "$region_name" ]; then
-    echo "No such region: $region"
-  fi
-done
-
 # discover ENV names via OCI ENUM tag 
-cache_ttl=$cache_ttl_tag
+cache_ttl=$cache_ttl_oci_tag
 cache_group=oci_tag
 cache_key=${tag_ns}_${tag_env_list_key}
 
