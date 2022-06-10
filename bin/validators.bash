@@ -288,7 +288,7 @@ function validator_oci_lookup_region() {
   region_name=$(echo "$oci_regions" | jq -r ".data[] | select(.name==\"$region\") | .name")
   if [ "$region" != "$region_name" ]; then
     >&2 echo "No such region: $region"
-    exit 1
+    return 1
   fi
 
 }
