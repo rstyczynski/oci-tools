@@ -454,7 +454,7 @@ function populate_instance_variables() {
   compute_instance=$(cache.invoke oci compute instance get --region "$search_region" --instance-id "$instance_ocid")
   
   # TODO check empty answer
-  
+
   echo "$compute_instance" | 
   jq ".data.\"defined-tags\".$tag_ns" | 
   tr -d '{}" ,' > $temp_dir/oci_instance.tags
@@ -588,12 +588,17 @@ fi
 # execute ansible required tasks
 #
 if [ "$list" == yes ]; then 
-  get_ansible_inventory $envs 
+  get_ansible_inventory $envs >/$temp_dir/inventory.json
+  jq /$temp_dir/inventory.json
+  rm /$temp_dir/inventory.json
+
   named_exit "Ansible list completed"
 fi
 
 if [ ! -z "$host" ]; then
-  get_host_variables $host | jq ".\"$host\""
+  get_host_variables $host >/$temp_dir/variables.json
+  jq ".\"$host\"" /$temp_dir/variables.json 
+  rm /$temp_dir/variables.json
   named_exit "Ansible host completed"
 fi
 
