@@ -16,6 +16,16 @@ export cache_ttl
 export cache_group
 export cache_key
 
+cache_group=
+cache_key=
+cache_ttl=
+cache_dir=
+cache_debug=
+cache_warning=yes
+
+cache_progress=no
+cache_spinner_cnt=1
+cache_spinner="/-\|"
 #
 # Check environment
 #
@@ -58,17 +68,6 @@ function cache.ensure_environment() {
   return $result
 }
 
-
-cache_group=
-cache_key=
-cache_ttl=
-cache_dir=
-cache_debug=
-cache_warning=yes
-
-cache_progress=no
-cache_spinner_cnt=1
-cache_spinner="/-\|"
 
 # https://stackoverflow.com/questions/238073/how-to-add-a-progress-bar-to-a-shell-script
 function cache._progress() {

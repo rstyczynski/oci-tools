@@ -392,6 +392,7 @@ function populate_instances() {
           # tip: resource type is embeded in the oci on second position
           resource_type=$(echo $ocid | cut -d. -f2)
           if [ "$resource_type" != instance ]; then
+            WARN "Resource in not an compute instance" $ocid 
             continue
           fi
           
