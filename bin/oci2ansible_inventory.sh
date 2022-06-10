@@ -376,9 +376,9 @@ function populate_instances() {
   env)
     env=$select_value
 
-    IFS=,
-    for region in $regions; do
-        unset IFS
+    #IFS=,
+    for region in $(echo $regions | tr , ' '); do
+        #unset IFS
 
         cache_ttl=$cache_ttl_oci_search_instances
         cache_group=oci_search_instances
@@ -443,7 +443,7 @@ function populate_instance_variables() {
   cache_ttl=$cache_ttl_oci_ip2instance
   cache_group=oci_ip2instance
   cache_key=$private_ip
-  instance_ocid=$(cache.invoke echo $ocid)
+  instance_ocid=$(cache.invoke echo $private_ip)
 
   # get compute instance details
   cache_ttl=$cache_ttl_oci_compute_instance

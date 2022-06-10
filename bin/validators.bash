@@ -298,9 +298,9 @@ function validator_oci_lookup_region() {
 function validator_oci_lookup_regions() {
   local regions=$@
 
-  IFS=,
-  for region in $regions; do
-    unset IFS
+  #IFS=,
+  for region in $(echo $regions | tr , ' '); do
+    #unset IFS
 
     validator_oci_lookup_region $region
   done
@@ -323,9 +323,9 @@ function validators_validate() {
     validator_DEBUG "Validates: $var_name"
   fi
 
-  IFS=,
-  for validator in ${script_args_validator[$var_name]}; do
-    unset IFS
+  #IFS=,
+  for validator in $(echo ${script_args_validator[$var_name]} | tr , ' '); do
+    #unset IFS
 
     type validator_$validator | head -1 | grep "^validator_$validator is a function$" >/dev/null
     if [ $? -ne 0 ]; then
