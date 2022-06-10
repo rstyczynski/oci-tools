@@ -32,7 +32,7 @@ script_by='ryszard.styczynski@oracle.com'
 
 script_args='list,host:,progress_spinner:,validate_params:'
 script_args_persist='tag_ns:,tag_env_list_key:,regions:,envs:,cache_ttl_oci_tag:,cache_ttl_oci_search_instances:,cache_ttl_oci_ocid2vnics:,cache_ttl_oci_ip2instance:,cache_ttl_oci_compute_instance:,cache_ttl_oci_region:'
-script_args_system='cfg_id:,temp_dir:,debug,trece,warning:,help,setconfig:'
+script_args_system='cfg_id:,temp_dir:,debug,trace,warning:,help,setconfig:'
 
 script_cfg='oci2ansible_inventory'
 
