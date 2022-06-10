@@ -8,12 +8,13 @@
 #
 # PROGRESS
 #
-# NORMAL add cahce for on-line services
+# CRITICAL unset IFS in loops
 
 #
 # DONE
 #
 # Mark function level variables as local
+# NORMAL add cahce for on-line services
 
 #
 # debug handler
@@ -213,7 +214,7 @@ function validator_oci_format_ocid() {
   declare -gA validator_oci_format_ocid_error
 
   IFS=. read ocid_ver oci_resource_type oci_realm oci_region id_a id_bid_c <<< $resource_ocid
-
+  unset IFS
 
   # https://docs.oracle.com/en-us/iaas/Content/General/Concepts/identifiers.htm
 
@@ -299,10 +300,10 @@ function validator_oci_lookup_regions() {
 
   IFS=,
   for region in $regions; do
+    unset IFS
+
     validator_oci_lookup_region $region
   done
-  unset IFS
-
 }
 
 #
@@ -324,6 +325,7 @@ function validators_validate() {
 
   IFS=,
   for validator in ${script_args_validator[$var_name]}; do
+    unset IFS
 
     type validator_$validator | head -1 | grep "^validator_$validator is a function$" >/dev/null
     if [ $? -ne 0 ]; then
@@ -345,7 +347,7 @@ function validators_validate() {
     validate_codes[$validator_cnt]=$validator_exit_code
     validator_cnt=$(( $validator_cnt + 1 ))
   done
-  unset IFS
+  
 
   return $validator_passed
 }

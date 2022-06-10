@@ -13,6 +13,7 @@
 #
 # PROGRESS
 #
+# CRITICAL unset IFS in loops
 
 #
 # DONE
@@ -372,6 +373,7 @@ function populate_instances() {
 
     IFS=,
     for region in $regions; do
+        unset IFS
 
         cache_ttl=$cache_ttl_oci_search_instances
         cache_group=oci_search_instances
@@ -390,7 +392,7 @@ function populate_instances() {
         for ocid in $ocids; do
           # check if resource is an instance
           # tip: resource type is embeded in the oci on second position
-          resource_type=$(echo $ocid | cut -d. -f2)
+          resource_type=$(echo "$ocid" | cut -d. -f2)
           if [ "$resource_type" != instance ]; then
             WARN "Resource in not an compute instance" $ocid 
             continue
@@ -419,8 +421,6 @@ function populate_instances() {
 
         done
       done
-      unset IFS
-
     ;;
   *)
     named_exit "Instance selector not recognised." $select_by
