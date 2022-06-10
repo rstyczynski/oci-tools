@@ -458,9 +458,7 @@ function populate_instance_variables() {
   # TIP: react on empty answer when not possible
   if [ -z "$compute_instance" ]; then
     WARN "Cache returned emty answer. Clearing cache and retries." $instance_ocid
-    cache_ttl=0
-    compute_instance=$(cache.invoke oci compute instance get --region "$search_region" --instance-id "$instance_ocid")
-    cache_ttl=$cache_ttl_oci_compute_instance
+    cache.flush oci compute instance get --region "$search_region" --instance-id "$instance_ocid"
     compute_instance=$(cache.invoke oci compute instance get --region "$search_region" --instance-id "$instance_ocid")
   fi
 

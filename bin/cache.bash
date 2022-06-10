@@ -88,7 +88,7 @@ function cache.warning() {
   fi
 }
 
-function cache.evict() {
+function cache.evict_group() {
   cmd=$@
 
   cache._progress
@@ -112,6 +112,28 @@ function cache.evict() {
   find $cache_dir/$cache_group -type f -mmin +$cache_ttl -delete 2>/dev/null
   # delete dirs if empty
   find $cache_dir -type d -empty -delete 2>/dev/null
+}
+
+
+function cache.flush() {
+  cmd=$@
+
+  cache._progress
+
+  if [ -z "$cmd" ]; then
+    : ${cache_group:=.}
+  fi
+
+  : ${cache_dir:=$HOME/.cache/cache_answer}
+
+  # command fingerprint
+  : ${cache_key:=$(echo $cmd | sha512sum | cut -f1 -d' ')}
+  
+  # data group
+  : ${cache_group:=$(echo $cache_key | cut -b1-4)}
+
+  cache.debug "Flushing $cache_group/$cache_key."
+  rm -rf $cache_dir/$cache_group/$cache_key.*
 }
 
 function cache._invoke() {
@@ -177,7 +199,7 @@ function cache.invoke() {
   echo "cache_ttl=$cache_ttl" > $cache_dir/$cache_group/.info
 
   # delete old data. Note: evict is after setting TTL, so updated TTL will be effective imadiately
-  cache.evict $cmd
+  cache.evict_group $cmd
 
   # execute
   cache.debug "cache_dir=$cache_dir"
@@ -215,9 +237,9 @@ function cache.help() {
 Bash cache library $lib_version
 
 cache.invoke cmd              - use to invoke command cmd. Exit code comes from cmd
-cache.evict cmd               - remove old respose; controled by ttl
-cache_group=group cache.evict - remove all old data of given group
-cache.evict                   - remove all old data
+cache.evict_group cmd               - remove old respose; controled by ttl
+cache_group=group cache.evict_group - remove all old data of given group
+cache.evict_group                   - remove all old data
 
 Response data is kept in cache_dir/cache_group/cache_key file. Files are deleted after cache_ttl minutes.
 cache is controlled by belowenv variables:
@@ -230,7 +252,7 @@ cache_debug=no|yes             - debug flag
 cache_warning=yes|no           - warning flag
 
 Few facts:
-1. Bash cache uses flock to serialise data eviction. If not available cache.evict should be executed manually.
+1. Bash cache uses flock to serialise data eviction. If not available cache.evict_group should be executed manually.
 2. Cached respone is stored with info file having inforation about kept data. 
 3. Cache TTL is specific for cache group, and stored in cache directory in info file.
 
@@ -256,7 +278,7 @@ cache_dir=~/greetings
 cat ~/greetings/echo/.info
 
 ls -la ~/greetings/echo
-cache_group=echo cache.evict
+cache_group=echo cache.evict_group
 ls -la ~/greetings/echo
 
 EOF
