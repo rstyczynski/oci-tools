@@ -277,8 +277,8 @@ fi
 
 # read parameters from cfg file
 for cfg_param in $(echo $script_args_persist | tr , ' ' | tr -d :); do
-  if [ -z ${!cfg_param} ]; then
-    eval $cfg_param=$(getcfg $script_cfg $cfg_param)
+  if [ -z "${!cfg_param}" ]; then
+    eval $cfg_param="$(getcfg $script_cfg $cfg_param)"
   fi
 done
 
@@ -479,6 +479,8 @@ function populate_hostgroup_variables() {
 #
 # inventory formatter
 #
+
+echo $regions
 
 function get_ansible_inventory() {
 
