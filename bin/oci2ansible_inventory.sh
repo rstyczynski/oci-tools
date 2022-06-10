@@ -13,11 +13,12 @@
 #
 # PROGRESS
 #
-# fix look for the instance in proper region
+
 
 #
 # DONE
 #
+# fix look for the instance in proper region
 # CRITICAL unset IFS in loops
 # CRITICAL always quote response from cache in echo
 # NORMAL move region validation to validators lib
@@ -96,6 +97,9 @@ set_exit_code_variable "Parameter validation failed."  5
 set_exit_code_variable "Wrong invocation of setconfig." 6
 
 set_exit_code_variable "Configuration saved."  0
+set_exit_code_variable "Ansible host completed" 0
+set_exit_code_variable "set config completed" 0
+set_exit_code_variable "Ansible list completed" 0
 
 #
 # Check environment
@@ -447,9 +451,7 @@ function populate_instance_variables() {
   cache_key=$instance_ocid
 
   local search_region=$(echo "$instance_ocid" | cut -f4 -d.)
-  echo xxx:$search_region
   compute_instance=$(cache.invoke oci compute instance get --region "$search_region" --instance-id "$instance_ocid")
-  echo xxx:$search_region
 
   echo "$compute_instance" | 
   jq ".data.\"defined-tags\".$tag_ns" | 
@@ -576,23 +578,20 @@ if [ ! -z "$setconfig" ]; then
       named_exit "Configuration saved." $script_cfg
     fi
   fi
-  exit 0
+  named_exit "set config completed"
 fi
 
 #
 # execute ansible required tasks
 #
 if [ "$list" == yes ]; then 
-  get_ansible_inventory $envs 
-  #| jq
-
-  echo XXX:exit
-  exit 0
+  get_ansible_inventory $envs | jq
+  named_exit "Ansible list completed"
 fi
 
 if [ ! -z "$host" ]; then
   get_host_variables $host | jq ".\"$host\""
-  exit 0
+  named_exit "Ansible host completed"
 fi
 
 # nothing done? Present how to use the script.
