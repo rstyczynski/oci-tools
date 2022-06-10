@@ -278,7 +278,7 @@ done
 
 if [ $validate_params == yes ]; then
   for param in $(echo "$script_args_persist,$script_args_system,$script_args" | tr , ' ' | tr -d :); do
-      if [ ! -z ${!param} ]; then
+      if [ ! -z "${!param}" ]; then
         validators_validate $param
         if [ $? -ne 0 ]; then
           validator_debug_value=$validator_debug
@@ -303,7 +303,7 @@ fi
 
 # set parameters when not set
 for cfg_param in $(echo $script_args_persist | tr , ' ' | tr -d :); do
-  if [ -z ${!cfg_param} ]; then
+  if [ -z "${!cfg_param}" ]; then
     echo
     echo "Info. Required configurable $cfg_param unknown."
     read -p "Enter value for $cfg_param:" $cfg_param

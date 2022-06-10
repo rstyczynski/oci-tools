@@ -37,14 +37,13 @@ function validator_WARN() {
 : ${validator_warining:=yes}
 : ${validator_usecache:=yes}
 
-if [ "$validator_usecache" == yes]; then
+if [ "$validator_usecache" == yes ]; then
   cache.invoke >/dev/null 2>/dev/null
   if [ $? -eq 127 ]; then
     validator_usecache=no
     WARN "cache.bash not available. To use cache source cache.bash firs."
   fi
 fi
-
 
 #
 # validators info
