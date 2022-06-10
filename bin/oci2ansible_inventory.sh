@@ -39,6 +39,7 @@ script_cfg='oci2ansible_inventory'
 script_libs='config.sh cache.bash JSON.bash validators.bash'
 script_tools='oci cat cut tr grep jq'
 
+unset script_args_default
 declare -A script_args_default
 script_args_default[cfg_id]=$script_cfg
 script_args_default[temp_dir]=~/tmp
@@ -54,7 +55,9 @@ script_args_default[cache_ttl_oci_ocid2vnics]=5184000         # 10 years
 script_args_default[cache_ttl_oci_ip2instance]=5184000        # 10 years
 script_args_default[cache_ttl_oci_compute_instance]=5184000   # 10 years
 
+unset script_args_validator
 declare -A script_args_validator
+
 script_args_validator[cfg_id]=label
 script_args_validator[debug]=flag
 script_args_validator[help]=flag
@@ -69,9 +72,9 @@ script_args_validator[cache_ttl_oci_ip2instance]=integer
 script_args_validator[cache_ttl_oci_compute_instance]=integer
 script_args_validator[tag_ns]=word
 script_args_validator[tag_env_list_key]=word
-script_args_validator[regions]=oci_lookup_regions
 script_args_validator[list]=flag
 script_args_validator[host]=ip_address
+script_args_validator[regions]=oci_lookup_regions
 
 # exit codes
 if [ ! -f $(dirname "$0" 2>/dev/null)/named_exit.sh ]; then
@@ -270,7 +273,6 @@ if [ "$help" == yes ]; then
   exit 0
 fi
 
-echo 1:$regions
 #
 # read parameters from config file
 #
@@ -282,12 +284,10 @@ for cfg_param in $(echo $script_args_persist | tr , ' ' | tr -d :); do
   fi
 done
 
-echo 2:$regions
 #
 # validate. validate params even from config file, as it's possible thet it was edited manually
 #
 
-set -x
 if [ $validate_params == yes ]; then
 #  for param in $(echo "$script_args_persist,$script_args_system,$script_args" | tr , ' ' | tr -d :); do
     for param in regions; do
@@ -303,8 +303,7 @@ if [ $validate_params == yes ]; then
       fi
   done
 fi
-echo 3:$regions
-set +x
+
 #
 # persist parameters
 #
