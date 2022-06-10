@@ -445,7 +445,7 @@ function populate_instance_variables() {
   cache_ttl=$cache_ttl_oci_compute_instance
   cache_group=oci_compute_instance
   cache_key=$instance_ocid
-  local region=$(echo "$instance_ocid" | cut -f3 -d.)
+  local region=$(echo "$instance_ocid" | cut -f4 -d.)
   echo xxx:$region
   compute_instance=$(cache.invoke oci compute instance get --region $region --instance-id $instance_ocid)
   
