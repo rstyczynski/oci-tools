@@ -448,7 +448,7 @@ function populate_instance_variables() {
 
   local search_region=$(echo "$instance_ocid" | cut -f4 -d.)
   echo xxx:$search_region
-  compute_instance=$(cache.invoke oci compute instance get --region $search_region --instance-id $instance_ocid)
+  compute_instance=$(cache.invoke oci compute instance get --region "$search_region" --instance-id "$instance_ocid")
   echo xxx:$search_region
 
   echo "$compute_instance" | 
@@ -583,7 +583,10 @@ fi
 # execute ansible required tasks
 #
 if [ "$list" == yes ]; then 
-  get_ansible_inventory $envs | jq
+  get_ansible_inventory $envs 
+  #| jq
+
+  echo XXX:exit
   exit 0
 fi
 
