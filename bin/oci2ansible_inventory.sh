@@ -453,9 +453,8 @@ function populate_instance_variables() {
   search_region=$(echo "$instance_ocid" | cut -f4 -d.)
   compute_instance=$(cache.invoke oci compute instance get --region "$search_region" --instance-id "$instance_ocid")
   
-  echo cache.invoke oci compute instance get --region "$search_region" --instance-id "$instance_ocid"
-  echo $compute_instance
-
+  # TODO check empty answer
+  
   echo "$compute_instance" | 
   jq ".data.\"defined-tags\".$tag_ns" | 
   tr -d '{}" ,' > $temp_dir/oci_instance.tags
