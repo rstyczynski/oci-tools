@@ -430,7 +430,7 @@ function populate_instances() {
 }
 
 function populate_instance_variables() {
-  private_ip=$1
+  local private_ip=$1
 
   unset instance_variables
   declare -g -A instance_variables
@@ -445,10 +445,12 @@ function populate_instance_variables() {
   cache_ttl=$cache_ttl_oci_compute_instance
   cache_group=oci_compute_instance
   cache_key=$instance_ocid
-  local region=$(echo "$instance_ocid" | cut -f4 -d.)
-  echo xxx:$region
-  compute_instance=$(cache.invoke oci compute instance get --region $region --instance-id $instance_ocid)
-  
+
+  local search_region=$(echo "$instance_ocid" | cut -f4 -d.)
+  echo xxx:$search_region
+  compute_instance=$(cache.invoke oci compute instance get --region $search_region --instance-id $instance_ocid)
+  echo xxx:$search_region
+
   echo "$compute_instance" | 
   jq ".data.\"defined-tags\".$tag_ns" | 
   tr -d '{}" ,' > $temp_dir/oci_instance.tags
