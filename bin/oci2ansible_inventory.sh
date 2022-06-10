@@ -369,6 +369,7 @@ function populate_instances() {
   env)
     env=$select_value
 
+    IFS=,
     for region in $regions; do
 
         cache_ttl=$cache_ttl_oci_search_instances
@@ -415,7 +416,8 @@ function populate_instances() {
 
         done
       done
-
+      unset IFS
+      
     ;;
   *)
     named_exit "Instance selector not recognised." $select_by
