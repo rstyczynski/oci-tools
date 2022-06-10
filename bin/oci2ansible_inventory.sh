@@ -18,6 +18,7 @@
 #
 # DONE
 #
+# NORMAL add treace handler - set -x
 # HIGH Main processing with exit and usage
 # HIGH parametrize env ssh key 
 # 1. validate parameters
@@ -31,7 +32,7 @@ script_by='ryszard.styczynski@oracle.com'
 
 script_args='list,host:,progress_spinner:,validate_params:'
 script_args_persist='tag_ns:,tag_env_list_key:,regions:,envs:,cache_ttl_oci_tag:,cache_ttl_oci_search_instances:,cache_ttl_oci_ocid2vnics:,cache_ttl_oci_ip2instance:,cache_ttl_oci_compute_instance:,cache_ttl_oci_region:'
-script_args_system='cfg_id:,temp_dir:,debug,warning:,help,setconfig:'
+script_args_system='cfg_id:,temp_dir:,debug,trece,warning:,help,setconfig:'
 
 script_cfg='oci2ansible_inventory'
 
@@ -42,6 +43,7 @@ declare -A script_args_default
 script_args_default[cfg_id]=$script_cfg
 script_args_default[temp_dir]=~/tmp
 script_args_default[debug]=no
+script_args_default[trace]=no
 script_args_default[warning]=yes
 script_args_default[validate_params]=yes
 script_args_default[progress_spinner]=yes
@@ -56,6 +58,7 @@ declare -A script_args_validator
 script_args_validator[cfg_id]=label
 script_args_validator[debug]=flag
 script_args_validator[help]=flag
+script_args_validator[trace]=flag
 script_args_validator[temp_dir]=directory_writable
 script_args_validator[validate_params]=yesno
 script_args_validator[progress_spinner]=yesno
@@ -162,6 +165,13 @@ for param in $(echo "$script_args_persist,$script_args_system,$script_args" | tr
     eval $param=no
   fi
 done
+
+#
+# trace
+#
+if [ "$trace" == yes ]; then
+  set -x
+fi
 
 #
 # debug handler
