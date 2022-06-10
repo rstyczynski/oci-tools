@@ -13,11 +13,11 @@
 #
 # PROGRESS
 #
-# NORMAL move region validation to validators lib
 
 #
 # DONE
 #
+# NORMAL move region validation to validators lib
 # NORMAL add treace handler - set -x
 # HIGH Main processing with exit and usage
 # HIGH parametrize env ssh key 
@@ -329,7 +329,7 @@ for cfg_param in $(echo $script_args_persist | tr , ' ' | tr -d :); do
     setcfg $script_cfg $cfg_param "${!cfg_param}" force
   fi
 done
-echo 4:$regions
+
 # persist when not persisted. All data is already validated.
 for cfg_param in $(echo $script_args_persist | tr , ' ' | tr -d :); do
   value=$(getcfg $script_cfg $cfg_param)
@@ -338,7 +338,6 @@ for cfg_param in $(echo $script_args_persist | tr , ' ' | tr -d :); do
   fi
 done
 
-echo 5:$regions
 #
 # proccess parameters
 #
