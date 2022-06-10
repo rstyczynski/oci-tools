@@ -13,11 +13,12 @@
 #
 # PROGRESS
 #
-# CRITICAL unset IFS in loops
+# fix look for the instance in proper region
 
 #
 # DONE
 #
+# CRITICAL unset IFS in loops
 # CRITICAL always quote response from cache in echo
 # NORMAL move region validation to validators lib
 # NORMAL add treace handler - set -x
@@ -444,6 +445,7 @@ function populate_instance_variables() {
   cache_ttl=$cache_ttl_oci_compute_instance
   cache_group=oci_compute_instance
   cache_key=$instance_ocid
+  local region=$(cho "$ocid" | cut -f2 -d.)
   compute_instance=$(cache.invoke oci compute instance get --region $region --instance-id $instance_ocid)
   
   echo "$compute_instance" | 
