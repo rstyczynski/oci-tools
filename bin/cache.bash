@@ -1,6 +1,19 @@
 #/bin/bash
 
 #
+# TODO
+#
+
+#
+# PROGRESS
+#
+
+#
+# DONE
+#
+# TIP: react on empty answer when not possible
+
+#
 # script information
 #
 

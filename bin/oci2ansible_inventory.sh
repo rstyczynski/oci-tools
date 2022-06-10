@@ -13,11 +13,11 @@
 #
 # PROGRESS
 #
-# TIP: react on empty answer when not possible
 
 #
 # DONE
 #
+# TIP: react on empty answer when not possible
 # Generated inventory JSON parsng failed.
 # fix look for the instance in proper region
 # CRITICAL unset IFS in loops
