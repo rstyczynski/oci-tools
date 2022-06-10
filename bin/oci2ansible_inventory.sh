@@ -450,9 +450,11 @@ function populate_instance_variables() {
   cache_group=oci_compute_instance
   cache_key=$instance_ocid
 
-  set -x
   search_region=$(echo "$instance_ocid" | cut -f4 -d.)
   compute_instance=$(cache.invoke oci compute instance get --region "$search_region" --instance-id "$instance_ocid")
+  
+  echo compute_instance=$(cache.invoke oci compute instance get --region "$search_region" --instance-id "$instance_ocid")
+  echo $compute_instance
 
   echo "$compute_instance" | 
   jq ".data.\"defined-tags\".$tag_ns" | 
@@ -463,7 +465,7 @@ function populate_instance_variables() {
   for tag in $tags; do
     instance_variables[$tag]=$(cat $temp_dir/oci_instance.tags | grep "^$tag:"| cut -f2 -d:)
   done
-  set +x
+
   rm $temp_dir/oci_instance.tags
 
 }
