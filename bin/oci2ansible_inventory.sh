@@ -270,7 +270,7 @@ if [ "$help" == yes ]; then
   exit 0
 fi
 
-
+echo 1:$regions
 #
 # read parameters from config file
 #
@@ -282,6 +282,7 @@ for cfg_param in $(echo $script_args_persist | tr , ' ' | tr -d :); do
   fi
 done
 
+echo 2:$regions
 #
 # validate. validate params even from config file, as it's possible thet it was edited manually
 #
@@ -300,7 +301,7 @@ if [ $validate_params == yes ]; then
       fi
   done
 fi
-
+echo 3:$regions
 #
 # persist parameters
 #
@@ -318,23 +319,24 @@ for cfg_param in $(echo $script_args_persist | tr , ' ' | tr -d :); do
     echo "Info. Required configurable $cfg_param unknown."
     read -p "Enter value for $cfg_param:" $cfg_param
     
-    validators_validate $cfg_param
+    validators_validate "$cfg_param"
     if [ $? -ne 0 ]; then
       named_exit "Parameter validation failed." $cfg_param
     fi 
 
-    setcfg $script_cfg $cfg_param ${!cfg_param} force
+    setcfg $script_cfg $cfg_param "${!cfg_param}" force
   fi
 done
-
+echo 4:$regions
 # persist when not persisted. All data is already validated.
 for cfg_param in $(echo $script_args_persist | tr , ' ' | tr -d :); do
   value=$(getcfg $script_cfg $cfg_param)
   if [ -z "$value" ]; then
-    setcfg $script_cfg $cfg_param ${!cfg_param} force
+    setcfg $script_cfg $cfg_param "${!cfg_param}" force
   fi
 done
 
+echo 5:$regions
 #
 # proccess parameters
 #
@@ -479,8 +481,6 @@ function populate_hostgroup_variables() {
 #
 # inventory formatter
 #
-
-echo $regions
 
 function get_ansible_inventory() {
 
