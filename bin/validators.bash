@@ -277,7 +277,7 @@ function validator_oci_lookup_ocid() {
 function validator_oci_lookup_region() {
   region=$1
 
-  if [ "$validator_usecache" == yes]; then
+  if [ "$validator_usecache" == yes ]; then
     cache_ttl=$cache_ttl_oci_region
     cache_group=oci_region
     cache_key=regions

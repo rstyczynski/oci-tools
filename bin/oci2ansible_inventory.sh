@@ -166,7 +166,7 @@ done
 #
 # debug handler
 #
-if [ $debug == yes ]; then
+if [ "$debug" == yes ]; then
 
   # enable debug for loaded libraries
   for script_lib in $script_libs; do
