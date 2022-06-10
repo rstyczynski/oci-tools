@@ -17,7 +17,7 @@
 #
 # DONE
 #
-# CRITIC always quote response from cache in echo
+# CRITICAL always quote response from cache in echo
 # NORMAL move region validation to validators lib
 # NORMAL add treace handler - set -x
 # HIGH Main processing with exit and usage
@@ -461,9 +461,10 @@ function populate_instance_variables() {
 function populate_hostgroup_variables() {
   local env=$1
 
+  unset ansible_hostgroup
   declare -g -A ansible_hostgroup
-  ansible_hostgroup=( "${ansible_hostgroup[@]/ansible_ssh_user}" )
-  ansible_hostgroup=( "${ansible_hostgroup[@]/ansible_ssh_private_key_file}" )
+  # ansible_hostgroup=( "${ansible_hostgroup[@]/ansible_ssh_user}" )
+  # ansible_hostgroup=( "${ansible_hostgroup[@]/ansible_ssh_private_key_file}" )
 
   ansible_ssh_user=$(getcfg $script_cfg ${env}_ansible_ssh_user)
   : ${ansible_ssh_user:=$(getcfg $script_cfg ansible_ssh_user)}
