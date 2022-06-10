@@ -289,7 +289,8 @@ echo 2:$regions
 
 set -x
 if [ $validate_params == yes ]; then
-  for param in $(echo "$script_args_persist,$script_args_system,$script_args" | tr , ' ' | tr -d :); do
+#  for param in $(echo "$script_args_persist,$script_args_system,$script_args" | tr , ' ' | tr -d :); do
+    for param in regions; do
       if [ ! -z "${!param}" ]; then
         validators_validate $param
         if [ $? -ne 0 ]; then
