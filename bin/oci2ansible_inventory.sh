@@ -283,7 +283,7 @@ if [ $validate_params == yes ]; then
         if [ $? -ne 0 ]; then
           validator_debug_value=$validator_debug
           validator_debug=yes
-          validators_validate $param
+          validators_validate "$param"
           validator_debug=$validator_debug_value
           named_exit "Parameter validation failed."
         fi 
