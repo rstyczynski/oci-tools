@@ -306,7 +306,7 @@ function validator_oci_lookup_regions() {
 }
 
 #
-# test
+# handler
 # 
 
 function validators_validate() {
@@ -332,6 +332,7 @@ function validators_validate() {
       validate_codes[$validator_cnt]=127
       break
     fi
+
     validator_$validator ${!var_name}
     validator_exit_code=$?
 
@@ -345,8 +346,13 @@ function validators_validate() {
     validator_cnt=$(( $validator_cnt + 1 ))
   done
   unset IFS
+
   return $validator_passed
 }
+
+#
+# test
+# 
 
 function validators_test() {
 
