@@ -417,7 +417,7 @@ function populate_instances() {
         done
       done
       unset IFS
-      
+
     ;;
   *)
     named_exit "Instance selector not recognised." $select_by
@@ -464,7 +464,7 @@ function populate_hostgroup_variables() {
   nsible_hostgroup=( "${ansible_hostgroup[@]/ansible_ssh_private_key_file}" )
 
   ansible_ssh_user=$(getcfg $script_cfg ${env}_ansible_ssh_user)
-  ${ansible_ssh_user:=ansible_ssh_user:=$(getcfg $script_cfg ansible_ssh_user)}
+  ${ansible_ssh_user:=$(getcfg $script_cfg ansible_ssh_user)}
   if [ -z "$ansible_ssh_user" ]; then
     WARN "ansible_ssh_user unknown for $env. Specify per env (--setconfig ${env}_ansible_ssh_user=USER) or global one (--setconfig ansible_ssh_user=USER)"
   else
