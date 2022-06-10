@@ -596,7 +596,7 @@ fi
 #
 if [ "$list" == yes ]; then 
   get_ansible_inventory $envs >/$temp_dir/inventory.json
-  jq . /$temp_dir/inventory.json && named_exit "Generated inventory JSON parsng failed."
+  jq . /$temp_dir/inventory.json || named_exit "Generated inventory JSON parsng failed."
   rm /$temp_dir/inventory.json
 
   named_exit "Ansible list completed"
@@ -604,7 +604,7 @@ fi
 
 if [ ! -z "$host" ]; then
   get_host_variables $host >/$temp_dir/variables.json
-  jq ".\"$host\"" /$temp_dir/variables.json && named_exit "Generated inventory JSON parsng failed."
+  jq ".\"$host\"" /$temp_dir/variables.json || named_exit "Generated inventory JSON parsng failed."
   rm /$temp_dir/variables.json
   named_exit "Ansible host completed"
 fi
