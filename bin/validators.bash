@@ -282,7 +282,7 @@ function validator_oci_lookup_region() {
     cache_key=regions
     oci_regions=$(cache.invoke oci iam region list)
   else
-     oci_regions=$(oci iam region list)
+    oci_regions=$(oci iam region list)
   fi
 
   region_name=$(echo $oci_regions | jq -r ".data[] | select(.name==\"$region\") | .name")

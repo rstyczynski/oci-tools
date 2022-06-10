@@ -11,6 +11,11 @@ lib_by='ryszard.styczynski@oracle.com'
 lib_tools=''
 lib_cfg=''
 
+# cache init 
+export cache_ttl
+export cache_group
+export cache_key
+
 #
 # Check environment
 #
