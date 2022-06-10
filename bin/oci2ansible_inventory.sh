@@ -36,11 +36,11 @@ script_args_default[debug]=no
 script_args_default[warning]=yes
 script_args_default[validate_params]=yes
 script_args_default[progress_spinner]=yes
-script_args_default[cache_ttl_region]=43200          # month
-script_args_default[cache_ttl_tag]=43200      # month
-script_args_default[cache_ttl_search_instances]=1440 # day
-script_args_default[cache_ttl_ocid2vnics]=5184000    # 10 years
-script_args_default[cache_ttl_ip2instance]=5184000   # 10 years
+script_args_default[cache_ttl_region]=43200               # month
+script_args_default[cache_ttl_tag]=43200                  # month
+script_args_default[cache_ttl_search_instances]=1440      # day
+script_args_default[cache_ttl_ocid2vnics]=5184000         # 10 years
+script_args_default[cache_ttl_ip2instance]=5184000        # 10 years
 script_args_default[cache_ttl_compute_instance]=5184000   # 10 years
 
 declare -A script_args_validator
@@ -114,7 +114,7 @@ done
 # read arguments
 #
 
-# Parameters are reflected in shell varaibles which are set with parameter value. 
+# Parameters are reflected in shell variables which are set with parameter value. 
 # No value parameters are set to 'set' if exist in cmd line arguents
 
 # clean params to avoid exported ones
@@ -440,9 +440,7 @@ function populate_hostgroup_variables() {
   nsible_hostgroup=( "${ansible_hostgroup[@]/ansible_ssh_private_key_file}" )
 
   ansible_ssh_user=$(getcfg $script_cfg ${env}_ansible_ssh_user)
-  if [ -z "$ansible_ssh_user" ]; then
-    ansible_ssh_user=$(getcfg $script_cfg ansible_ssh_user)
-  fi
+  ${ansible_ssh_user:=ansible_ssh_user:=$(getcfg $script_cfg ansible_ssh_user)}
   if [ -z "$ansible_ssh_user" ]; then
     WARN "ansible_ssh_user unknown for $env. Specify per env (--setconfig ${env}_ansible_ssh_user=USER) or global one (--setconfig ansible_ssh_user=USER)"
   else
@@ -450,9 +448,8 @@ function populate_hostgroup_variables() {
   fi
 
   ansible_ssh_private_key_file=$(getcfg $script_cfg ${env}_ansible_ssh_private_key_file)
-  if [ -z "$ansible_ssh_private_key_file" ]; then
-    ansible_ssh_private_key_file=$(getcfg $script_cfg ansible_ssh_private_key_file)
-  fi
+  ${ansible_ssh_private_key_file:=$(getcfg $script_cfg ansible_ssh_private_key_file)}
+
   if [ -z "$ansible_ssh_private_key_file" ]; then
     WARN "ansible_ssh_private_key_file unknown for $env. Specify env specific (--setconfig ${env}_ansible_ssh_private_key_file=KEYPATH) or global one (--setconfig ansible_ssh_private_key_file=KEYPATH)"
   else
