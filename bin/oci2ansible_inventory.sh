@@ -13,11 +13,12 @@
 #
 # PROGRESS
 #
-# Generated inventory JSON parsng failed.
+# TIP: react on empty answer when not possible
 
 #
 # DONE
 #
+# Generated inventory JSON parsng failed.
 # fix look for the instance in proper region
 # CRITICAL unset IFS in loops
 # CRITICAL always quote response from cache in echo
@@ -453,8 +454,15 @@ function populate_instance_variables() {
 
   search_region=$(echo "$instance_ocid" | cut -f4 -d.)
   compute_instance=$(cache.invoke oci compute instance get --region "$search_region" --instance-id "$instance_ocid")
-  
-  # TODO check empty answer
+
+  # TIP: react on empty answer when not possible
+  if [ -z "$compute_instance" ]; then
+    WARN "Cache returned emty answer. Clearing cache and retries." $instance_ocid
+    cache_ttl=0
+    compute_instance=$(cache.invoke oci compute instance get --region "$search_region" --instance-id "$instance_ocid")
+    cache_ttl=$cache_ttl_oci_compute_instance
+    compute_instance=$(cache.invoke oci compute instance get --region "$search_region" --instance-id "$instance_ocid")
+  fi
 
   echo "$compute_instance" | 
   jq ".data.\"defined-tags\".$tag_ns" | 
