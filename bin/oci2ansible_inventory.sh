@@ -443,17 +443,17 @@ function populate_instance_variables() {
   cache_ttl=$cache_ttl_oci_ip2instance
   cache_group=oci_ip2instance
   cache_key=$private_ip
-  instance_ocid=$(cache.invoke echo $private_ip)
+  instance_ocid=$(cache.invoke get)
 
   # get compute instance details
   cache_ttl=$cache_ttl_oci_compute_instance
   cache_group=oci_compute_instance
   cache_key=$instance_ocid
 
-  local search_region=$(echo "$instance_ocid" | cut -f4 -d.)
+  set -x
+  search_region=$(echo "$instance_ocid" | cut -f4 -d.)
   compute_instance=$(cache.invoke oci compute instance get --region "$search_region" --instance-id "$instance_ocid")
 
-  set -x
   echo "$compute_instance" | 
   jq ".data.\"defined-tags\".$tag_ns" | 
   tr -d '{}" ,' > $temp_dir/oci_instance.tags
