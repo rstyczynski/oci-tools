@@ -589,7 +589,7 @@ fi
 # execute ansible required tasks
 #
 if [ "$list" == yes ]; then 
-  get_ansible_inventory $envs | jq
+  get_ansible_inventory $envs 
   named_exit "Ansible list completed"
 fi
 
