@@ -7,6 +7,7 @@
 # LOW cache_ttl as one global parameter
 # NICE TODO script information
 # NICE named_exit verification auto scan
+# EXPERIMENTAL Associate with jump host env level ansible user / key
 
 # DONE
 # HIGH Main processing with exit and usage
@@ -246,7 +247,7 @@ function usage() {
 #
 about >&2
 
-if [ "$help" == set ]; then
+if [ "$help" == yes ]; then
   usage
   exit 0
 fi
