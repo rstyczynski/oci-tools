@@ -100,7 +100,7 @@ done
 # trace
 #
 if [ "$trace" == yes ]; then
-  PS4='${LINENO} '
+  PS4='+${LINENO}: '
   set -x
 fi
 
