@@ -289,13 +289,12 @@ function get_ansible_inventory() {
 
   JSON.init
 
-  for host_group in $(echo $envs | tr ',' ' '); do
+  for host_group in $envs; do
     JSON.object.init $host_group
 
     populate_instances env $host_group
     JSON.array.add instances hosts
 
-    echo $populate_hostgroup_variables $env
     populate_hostgroup_variables $env
     JSON.map.add ansible_hostgroup vars
 
@@ -338,7 +337,10 @@ function get_host_variables() {
 # discover envs if not provided
 #
 test "$envs" == discover && unset envs
-if [ -z "$envs" ]; then
+if [ ! -z "$envs" ]; then
+  # convert comma separated to space separated 
+  envs=$(echo $envs | tr ',' ' ')
+else
   WARN "envs parameter not specified. Discovering list of environments from tag."
   # discover ENV names via OCI ENUM tag 
   cache_ttl=$cache_ttl_oci_tag
@@ -353,6 +355,9 @@ if [ -z "$envs" ]; then
 
   envs=$(echo $oci_tag | jq .data.validator.values | tr -d '[]" ,' | grep -v '^$')
 fi
+
+
+
 
 #
 # execute configuration tasks
@@ -379,8 +384,8 @@ fi
 #
 
 if [ "$list" == yes ]; then 
-  get_ansible_inventory $envs #>/$temp_dir/inventory.json
-  #jq . /$temp_dir/inventory.json || named_exit "Generated inventory JSON parsing failed"
+  get_ansible_inventory $envs >/$temp_dir/inventory.json
+  jq . /$temp_dir/inventory.json || named_exit "Generated inventory JSON parsing failed"
   rm /$temp_dir/inventory.json
 
   named_exit "Ansible list completed"
