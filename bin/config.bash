@@ -238,7 +238,8 @@ function config.test() {
 #
 
 echo XXX: $BASH_SOURCE
-if [ ! $0 == "-bash" ] || [ "$(basename $BASH_SOURCE)" == config.bash  ]; then
+echo XXX: $0
+if [ ! $0 == "-bash" ] || [ "$(basename $0)" == config.bash  ]; then
   echo "Do not run this bash librry. It's is intended to be used by source config.bash"
   echo "As you started me - executing exemplary test to let you know how to use the library."
   echo 
