@@ -112,6 +112,3 @@ function test.test_group1() {
   }
   verify "simple math4 - test function, result function" code2test $(code2expect)
 }
-test_group1
-
-
