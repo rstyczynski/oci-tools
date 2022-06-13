@@ -237,5 +237,12 @@ function config.test() {
 # default run
 #
 
-config.test
+if [ ! $0 == "-bash" ]; then
+  echo "Do not run this bash librry. It's is intended to be used by source config.bash"
+  echo "As you started me - executing exemplary test to let you know how to use the library."
+  echo 
+
+  config.test
+
+fi
 
