@@ -9,6 +9,7 @@
 #
 # PROGRESS
 #
+# temp dir with script name
 # SYSTEM add generic Trap with default Quit
 
 #
@@ -44,6 +45,7 @@ test -z "$script_bin" && named_exit "Script bin directory unknown."
 unset script_args_default
 declare -A script_args_default
 script_args_default[cfg_id]=$script_cfg
+mkdir - ~/tmp/$script_name
 script_args_default[temp_dir]=~/tmp/$script_name
 script_args_default[debug]=no
 script_args_default[trace]=no
