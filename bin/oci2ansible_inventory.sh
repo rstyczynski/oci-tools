@@ -36,7 +36,7 @@
 # 4. check if resource is an instance
 
 ########################################
-#  script configuration code starts here
+#  script properties
 ########################################
 
 script_name='oci2ansible_inventory'
@@ -54,6 +54,7 @@ script_tools='oci cat cut tr grep jq'
 
 ########################################
 # run genercic steps for the script 1of2
+#  --- do not change this section ---
 ########################################
 
 unset script_args_default
@@ -67,6 +68,11 @@ if [ ! -f $(dirname "$0" 2>/dev/null)/script_generic_handler_1of2.bash ]; then
   exit 1
 fi
 source $(dirname "$0" 2>/dev/null)/script_generic_handler_1of2.bash
+
+
+#########################################
+# configure custom arguments & exit codes
+#########################################
 
 # argumenets - default values
 script_args_default[progress_spinner]=yes
@@ -103,11 +109,13 @@ set_exit_code_variable "Ansible host completed" 0
 
 ########################################
 # run genercic steps for the script 2of2
+#  --- do not change this section ---
 ########################################
 if [ ! -f $(dirname "$0" 2>/dev/null)/script_generic_handler_2of2.bash ]; then
   named_exit "Required library not found in script path." script_generichandler_2of2.bash 
 fi
 source $(dirname "$0")/script_generic_handler_2of2.bash
+
 
 ################################
 # actual script code starts here
