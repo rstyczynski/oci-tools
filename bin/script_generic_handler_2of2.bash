@@ -100,7 +100,7 @@ done
 # trace
 #
 if [ "$trace" == yes ]; then
-  PS4='+${LINENO}: '
+  export PS4='# ${BASH_SOURCE}:${LINENO}: ${FUNCNAME[0]}() - [${SHLVL},${BASH_SUBSHELL},$?] '
   set -x
 fi
 
