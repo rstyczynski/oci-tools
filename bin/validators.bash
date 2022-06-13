@@ -99,6 +99,15 @@ function validator_words() {
   fi
 }
 
+function validator_list() {
+  local value=$1
+
+  re='^[,a-zA-Z0-9_]+$'
+  if ! [[ $value =~ $re ]] ; then
+    return 1
+  fi
+}
+
 function validator_label() {
   local value=$1
 

@@ -98,7 +98,7 @@ script_args_validator[tag_env_list_key]=word
 script_args_validator[list]=flag
 script_args_validator[host]=ip_address
 script_args_validator[regions]=oci_lookup_regions
-script_args_validator[envs]=words
+script_args_validator[envs]=list
 
 # exit codes - use above 10 for custom purposes.
 set_exit_code_variable "Instance selector not recognised." 10
