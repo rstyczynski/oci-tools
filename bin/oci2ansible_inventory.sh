@@ -39,12 +39,11 @@
 # run genercic steps for the script 1of2
 ########################################
 
-if [ ! -f $(dirname "$0" 2>/dev/null)/named_exit.sh ]; then
-  echo "$script_name: Critical error. Required named_exit.sh library not found in script path. Can't continue."
+if [ ! -f $(dirname "$0" 2>/dev/null)/script_generic_handler_1of2.bash ]; then
+  echo "Required library not found in script path." script_generic_handler_1of2.bash >&2
   exit 1
 fi
-source $(dirname "$0")/named_exit.sh
-
+source $(dirname "$0")/script_generic_handler_1of2.bash
 
 ########################################
 #  script configuration code starts here
@@ -117,10 +116,10 @@ set_exit_code_variable "Ansible host completed" 0
 ########################################
 # run genercic steps for the script 2of2
 ########################################
-if [ ! -f $(dirname "$0" 2>/dev/null)/script_generic_handler.bash ]; then
-  named_exit "Required library not found in script path." script_generichandler.bash 
+if [ ! -f $(dirname "$0" 2>/dev/null)/script_generic_handler_2of2.bash ]; then
+  named_exit "Required library not found in script path." script_generichandler_2of2.bash 
 fi
-source $(dirname "$0")/script_generic_handler.bash
+source $(dirname "$0")/script_generic_handler_2of2.bash
 
 ################################
 # actual script code starts here

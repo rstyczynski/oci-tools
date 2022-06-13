@@ -4,6 +4,12 @@
 # core settings
 #
 
+# discover script directory
+unset script_bin
+script_path=$0
+test $script_path != '-bash' && script_bin=$(dirname "$0")
+test -z "$script_bin" && named_exit "Script bin directory unknown."
+
 # script param attributes
 
 unset script_args_default
@@ -19,7 +25,6 @@ set_exit_code_variable "Required tools not available." 3
 set_exit_code_variable "Directory not writeable." 4
 set_exit_code_variable "Parameter validation failed."  5
 
-
 # extend script libs by config validator, as used by generic code
 script_libs="$script_libs config.bash validators.bash"
 
@@ -29,12 +34,6 @@ script_args_system="$script_args_system,cfg_id:,temp_dir:,debug,trace,warning:,h
 #
 # Check environment
 #
-
-# discover script directory
-unset script_bin
-script_path=$0
-test $script_path != '-bash' && script_bin=$(dirname "$0")
-test -z "$script_bin" && named_exit "Script bin directory unknown."
 
 # check required libs
 unset missing_tools
@@ -222,7 +221,7 @@ done
 # validate. validate params even from config file, as it's possible thet it was edited manually
 #
 
-if [ $validate_params == yes ]; then
+if [ "$validate_params" == yes ]; then
 #  for param in $(echo "$script_args_persist,$script_args_system,$script_args" | tr , ' ' | tr -d :); do
     for param in regions; do
       if [ ! -z "${!param}" ]; then
