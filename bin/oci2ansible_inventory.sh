@@ -3,7 +3,6 @@
 #
 # TODO
 #
-# HIGH handle envs discovery / envs parameter
 # NORMAL add mandatory parameters handler
 # LOW cache_ttl as one global parameter
 # NICE TODO script information
@@ -13,6 +12,7 @@
 #
 # PROGRESS
 #
+# HIGH handle envs discovery / envs parameter
 
 #
 # DONE
@@ -97,11 +97,13 @@ set_exit_code_variable "Instance selector not recognised." 4
 set_exit_code_variable "Parameter validation failed."  5
 set_exit_code_variable "Wrong invocation of setconfig." 6
 set_exit_code_variable "Generated inventory JSON parsng failed." 7
+set_exit_code_variable "Tag with list of environments must be ENUM type." 8
 
 set_exit_code_variable "Configuration saved."  0
 set_exit_code_variable "Ansible host completed" 0
 set_exit_code_variable "set config completed" 0
 set_exit_code_variable "Ansible list completed" 0
+
 
 #
 # Check environment
@@ -553,23 +555,24 @@ function get_host_variables() {
 }
 
 #
+# logic
 #
-#
 
-# discover ENV names via OCI ENUM tag 
-cache_ttl=$cache_ttl_oci_tag
-cache_group=oci_tag
-cache_key=${tag_ns}_${tag_env_list_key}
+if [ -z "$envs" ]; then
+  WARN "envs parameter not specified. Discovering list of environments from tag."
+  # discover ENV names via OCI ENUM tag 
+  cache_ttl=$cache_ttl_oci_tag
+  cache_group=oci_tag
+  cache_key=${tag_ns}_${tag_env_list_key}
 
-oci_tag=$(cache.invoke oci iam tag get --tag-name $tag_env_list_key --tag-namespace-id $tag_ns)
-tag_type=$(echo "$oci_tag" | jq -r '.data.validator."validator-type"')
-if [ "$tag_type" != ENUM ]; then
-  #TODO: add named exit
-  echo "Error. Tag with list of environments must be ENUM type. Exiting."
-  exit 1
-fi
+  oci_tag=$(cache.invoke oci iam tag get --tag-name $tag_env_list_key --tag-namespace-id $tag_ns)
+  tag_type=$(echo "$oci_tag" | jq -r '.data.validator."validator-type"')
+  if [ "$tag_type" != ENUM ]; then
+    named_exit "Error. Tag with list of environments must be ENUM type."
+  fi
 
-envs=$(echo $oci_tag | jq .data.validator.values | tr -d '[]" ,' | grep -v '^$')
+  envs=$(echo $oci_tag | jq .data.validator.values | tr -d '[]" ,' | grep -v '^$')
+if
 
 #
 # execute configuration tasks
@@ -588,7 +591,7 @@ if [ ! -z "$setconfig" ]; then
       named_exit "Configuration saved." $script_cfg
     fi
   fi
-  named_exit "set config completed"
+  named_exit "set config completed" # never used
 fi
 
 #
@@ -609,5 +612,5 @@ if [ ! -z "$host" ]; then
   named_exit "Ansible host completed"
 fi
 
-# nothing done? Present how to use the script.
+# nothing requested? Present how to use the script.
 usage
