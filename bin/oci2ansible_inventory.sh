@@ -71,6 +71,8 @@ source $(dirname "$0" 2>/dev/null)/script_generic_handler_1of2.bash
 # argumenets - default values
 script_args_default[progress_spinner]=yes
 
+declare -p script_args_default
+
 exit 1
 
 
