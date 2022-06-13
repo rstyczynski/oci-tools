@@ -20,8 +20,8 @@
 # switch to config.bash
 # NORMAL Move generic script steps to external bash file
 # HIGH handle envs discovery / envs parameter
-# TIP: react on empty answer when not possible
-# Generated inventory JSON parsng failed.
+# TIP: react on empty answer when such answer is not possible
+# Generated inventory JSON parsing failed
 # fix look for the instance in proper region
 # CRITICAL unset IFS in loops
 # CRITICAL always quote response from cache in echo
@@ -33,6 +33,10 @@
 # 6. change fags (set) to yes|no
 # adhoc fixed way of caling oci via cache
 # 4. check if resource is an instance
+
+########################################
+#  script configuration code starts here
+########################################
 
 script_name='oci2ansible_inventory'
 script_version='1.0'
@@ -99,7 +103,7 @@ set_exit_code_variable "Parameter validation failed."  5
 
 set_exit_code_variable "Instance selector not recognised." 10
 set_exit_code_variable "Wrong invocation of setconfig." 11
-set_exit_code_variable "Generated inventory JSON parsng failed." 12
+set_exit_code_variable "Generated inventory JSON parsing failed" 12
 set_exit_code_variable "Tag with list of environments must be ENUM type." 13
 
 set_exit_code_variable "Configuration saved."  0
@@ -127,7 +131,7 @@ if ! touch $temp_dir/marker; then
 fi
 rm -f $temp_dir/marker
 
-
+# cache spinner
 cache_progress=$progress_spinner
 
 #
@@ -221,7 +225,7 @@ function populate_instance_variables() {
   search_region=$(echo "$instance_ocid" | cut -f4 -d.)
   compute_instance=$(cache.invoke oci compute instance get --region "$search_region" --instance-id "$instance_ocid")
 
-  # TIP: react on empty answer when not possible
+  # TIP: react on empty answer when such answer is not possible
   if [ -z "$compute_instance" ]; then
     WARN "Cache returned emty answer. Clearing cache and retries." $instance_ocid
     cache.flush oci compute instance get --region "$search_region" --instance-id "$instance_ocid"
@@ -271,7 +275,6 @@ function populate_hostgroup_variables() {
 #
 # inventory formatter
 #
-
 function get_ansible_inventory() {
 
   envs=$@
@@ -318,8 +321,12 @@ function get_host_variables() {
   JSON.close
 }
 
+########################################
+# script start control logic
+########################################
+
 #
-# start control logic
+# discover envs if not provided
 #
 test "$envs" == discover && unset envs
 if [ -z "$envs" ]; then
@@ -363,7 +370,7 @@ fi
 #
 if [ "$list" == yes ]; then 
   get_ansible_inventory $envs >/$temp_dir/inventory.json
-  jq . /$temp_dir/inventory.json || named_exit "Generated inventory JSON parsng failed."
+  jq . /$temp_dir/inventory.json || named_exit "Generated inventory JSON parsing failed"
   rm /$temp_dir/inventory.json
 
   named_exit "Ansible list completed"
@@ -371,7 +378,7 @@ fi
 
 if [ ! -z "$host" ]; then
   get_host_variables $host >/$temp_dir/variables.json
-  jq ".\"$host\"" /$temp_dir/variables.json || named_exit "Generated inventory JSON parsng failed."
+  jq ".\"$host\"" /$temp_dir/variables.json || named_exit "Generated inventory JSON parsing failed"
   rm /$temp_dir/variables.json
   named_exit "Ansible host completed"
 fi

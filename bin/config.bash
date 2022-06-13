@@ -221,7 +221,8 @@ EOF
 function config.test() {
 
   if [ ! -f $(dirname "$0" 2>/dev/null)/unit_test.bash ]; then
-    echo "$script_name: Critical error. Required named_exit.sh library not found in script path. Can't continue."
+    echo
+    echo "$script_name: Critical error. Required unit_test.bash library not found in script path. Test will not be executed."
     exit 1
   fi
 
@@ -239,7 +240,7 @@ function config.test() {
 
 if [[ $0 == "$BASH_SOURCE" ]] ; then
   echo "Do not run this bash library. It's is intended to be used by source config.bash"
-  echo "As you started me - executing exemplary test to let you know how to use the library."
+  echo "As you started - executing exemplary test to let you know how to use the library."
   echo 
 
   config.test
