@@ -69,7 +69,7 @@ function test._verify_fromfile() {
   do
       id_prev=$id
       id=$(( $id + 1 ))
-      eval verify $test_params
+      eval test.verify $test_params
   done < $test_file
 }
 
