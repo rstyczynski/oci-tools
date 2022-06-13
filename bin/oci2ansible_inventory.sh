@@ -36,14 +36,14 @@
 # 4. check if resource is an instance
 
 ########################################
-# run genercic steps for the script
+# run genercic steps for the script 1of2
 ########################################
 
-if [ ! -f $(dirname "$0" 2>/dev/null)/script_generic_handler.bash ]; then
-  echo "Required library not found in script path." script_generichandler.bash >&2
+if [ ! -f $(dirname "$0" 2>/dev/null)/named_exit.sh ]; then
+  echo "$script_name: Critical error. Required named_exit.sh library not found in script path. Can't continue."
   exit 1
 fi
-source $(dirname "$0")/script_generic_handler.bash
+source $(dirname "$0")/named_exit.sh
 
 
 ########################################
@@ -63,6 +63,7 @@ script_cfg='oci2ansible_inventory'
 script_libs='cache.bash JSON.bash'
 script_tools='oci cat cut tr grep jq'
 
+# argumenets - default values
 script_args_default[cfg_id]=$script_cfg
 script_args_default[temp_dir]=~/tmp
 script_args_default[debug]=no
@@ -77,7 +78,7 @@ script_args_default[cache_ttl_oci_ocid2vnics]=5184000         # 10 years
 script_args_default[cache_ttl_oci_ip2instance]=5184000        # 10 years
 script_args_default[cache_ttl_oci_compute_instance]=5184000   # 10 years
 
-
+# argumenets - validators
 script_args_validator[cfg_id]=label
 script_args_validator[debug]=flag
 script_args_validator[help]=flag
@@ -96,7 +97,7 @@ script_args_validator[list]=flag
 script_args_validator[host]=ip_address
 script_args_validator[regions]=oci_lookup_regions
 
-
+# exit codes - use above 10 for custo purposes
 set_exit_code_variable "Script bin directory unknown." 1
 set_exit_code_variable "Required library not found in script path." 2
 set_exit_code_variable "Required tools not available." 3
@@ -109,10 +110,17 @@ set_exit_code_variable "Generated inventory JSON parsing failed" 12
 set_exit_code_variable "Tag with list of environments must be ENUM type." 13
 
 set_exit_code_variable "Configuration saved."  0
-set_exit_code_variable "Ansible host completed" 0
 set_exit_code_variable "set config completed" 0
 set_exit_code_variable "Ansible list completed" 0
+set_exit_code_variable "Ansible host completed" 0
 
+########################################
+# run genercic steps for the script 2of2
+########################################
+if [ ! -f $(dirname "$0" 2>/dev/null)/script_generic_handler.bash ]; then
+  named_exit "Required library not found in script path." script_generichandler.bash 
+fi
+source $(dirname "$0")/script_generic_handler.bash
 
 ################################
 # actual script code starts here

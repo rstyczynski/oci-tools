@@ -12,12 +12,13 @@ declare -A script_args_default
 unset script_args_validator
 declare -A script_args_validator
 
-# exit codes
-if [ ! -f $(dirname "$0" 2>/dev/null)/named_exit.sh ]; then
-  echo "$script_name: Critical error. Required named_exit.sh library not found in script path. Can't continue."
-  exit 1
-fi
-source $(dirname "$0")/named_exit.sh
+# system level exit codes
+set_exit_code_variable "Script bin directory unknown." 1
+set_exit_code_variable "Required library not found in script path." 2
+set_exit_code_variable "Required tools not available." 3
+set_exit_code_variable "Directory not writeable." 4
+set_exit_code_variable "Parameter validation failed."  5
+
 
 # extend script libs by config validator, as used by generic code
 script_libs="$script_libs config.bash validators.bash"
