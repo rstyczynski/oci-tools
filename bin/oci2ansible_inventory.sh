@@ -3,6 +3,7 @@
 #
 # TODO
 #
+# SYSTEM add Trap with default Quit - generic
 # NORMAL add function to get script params. Should enable to write params with new lines, and potential comments. Current list with comma is hard to read.
 # NORMAL add mandatory parameters handler
 # LOW cache_ttl as one global parameter
@@ -13,6 +14,7 @@
 #
 # PROGRESS
 #
+# fix cache.invoke for already cached value
 
 #
 # DONE
@@ -215,7 +217,7 @@ function populate_instance_variables() {
   cache_ttl=$cache_ttl_oci_ip2instance
   cache_group=oci_ip2instance
   cache_key=$private_ip
-  instance_ocid=$(cache.invoke get)
+  instance_ocid=$(cache.invoke :)
 
   # get compute instance details
   cache_ttl=$cache_ttl_oci_compute_instance
