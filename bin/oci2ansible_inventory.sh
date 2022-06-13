@@ -44,6 +44,7 @@ if [ ! -f $(dirname "$0" 2>/dev/null)/script_generic_handler_1of2.bash ]; then
   exit 1
 fi
 source $(dirname "$0")/script_generic_handler_1of2.bash
+echo "Loaded: $(dirname "$0")/script_generic_handler_1of2.bash"
 
 ########################################
 #  script configuration code starts here
