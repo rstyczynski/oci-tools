@@ -56,15 +56,18 @@ script_tools='oci cat cut tr grep jq'
 # run genercic steps for the script 1of2
 ########################################
 
+unset script_args_default
+declare -A script_args_default
+
+unset script_args_validator
+declare -A script_args_validator
+
 if [ ! -f $(dirname "$0" 2>/dev/null)/script_generic_handler_1of2.bash ]; then
   echo "Required library not found in script path." script_generic_handler_1of2.bash >&2
   exit 1
 fi
 source $(dirname "$0")/script_generic_handler_1of2.bash
 echo "Loaded: $(dirname "$0")/script_generic_handler_1of2.bash"
-
-echo XXX
-declare -p script_args_default
 
 # argumenets - default values
 script_args_default[progress_spinner]=yes
