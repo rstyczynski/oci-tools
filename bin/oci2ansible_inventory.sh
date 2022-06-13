@@ -70,12 +70,6 @@ source $(dirname "$0" 2>/dev/null)/script_generic_handler_1of2.bash
 
 # argumenets - default values
 script_args_default[progress_spinner]=yes
-
-declare -p script_args_default
-
-exit 1
-
-
 script_args_default[cache_ttl_oci_region]=43200               # month
 script_args_default[cache_ttl_oci_tag]=43200                  # month
 script_args_default[cache_ttl_oci_search_instances]=1440      # day

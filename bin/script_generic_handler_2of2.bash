@@ -10,14 +10,6 @@ script_path=$0
 test $script_path != '-bash' && script_bin=$(dirname "$0")
 test -z "$script_bin" && named_exit "Script bin directory unknown."
 
-# script param attributes
-
-unset script_args_default
-declare -A script_args_default
-
-unset script_args_validator
-declare -A script_args_validator
-
 # system level exit codes
 set_exit_code_variable "Script bin directory unknown." 1
 set_exit_code_variable "Required library not found in script path." 2
@@ -76,7 +68,6 @@ done
 # set default values
 #
 
-echo XXX:${!script_args_default[@]}
 for variable in ${!script_args_default[@]}; do
   eval $variable=${script_args_default[$variable]}
 done
