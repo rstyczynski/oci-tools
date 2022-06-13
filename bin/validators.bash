@@ -13,6 +13,7 @@
 #
 # DONE
 #
+# list validator - words with comma as a separator
 # Mark function level variables as local
 # NORMAL add cahce for on-line services
 
