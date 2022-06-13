@@ -558,7 +558,7 @@ function get_host_variables() {
 #
 # start control logic
 #
-
+test "$envs" == discover && unset envs
 if [ -z "$envs" ]; then
   WARN "envs parameter not specified. Discovering list of environments from tag."
   # discover ENV names via OCI ENUM tag 
