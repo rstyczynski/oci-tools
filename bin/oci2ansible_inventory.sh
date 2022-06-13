@@ -107,7 +107,7 @@ set_exit_code_variable "set config completed" 0
 set_exit_code_variable "Ansible list completed" 0
 
 # run genercic steps for the script
-if [ ! -f $(dirname "$0" 2>/dev/null)/script_generichandler.bash ]; then
+if [ ! -f $(dirname "$0" 2>/dev/null)/script_generic_handler.bash ]; then
   named_exit "Required library not found in script path." script_generichandler.bash
 fi
 source $(dirname "$0")/script_generic_handler.bash
