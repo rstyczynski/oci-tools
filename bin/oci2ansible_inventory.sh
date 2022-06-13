@@ -379,8 +379,8 @@ fi
 #
 
 if [ "$list" == yes ]; then 
-  get_ansible_inventory $envs >/$temp_dir/inventory.json
-  jq . /$temp_dir/inventory.json || named_exit "Generated inventory JSON parsing failed"
+  get_ansible_inventory $envs #>/$temp_dir/inventory.json
+  #jq . /$temp_dir/inventory.json || named_exit "Generated inventory JSON parsing failed"
   rm /$temp_dir/inventory.json
 
   named_exit "Ansible list completed"
