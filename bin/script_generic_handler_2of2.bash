@@ -217,6 +217,8 @@ done
 # validate. validate params even from config file, as it's possible thet it was edited manually
 #
 
+echo XXX: PARAMS: $validate_params
+
 if [ "$validate_params" == yes ]; then
 #  for param in $(echo "$script_args_persist,$script_args_system,$script_args" | tr , ' ' | tr -d :); do
     for param in regions; do
