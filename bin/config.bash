@@ -3,7 +3,6 @@
 #
 # TODO
 #
-# handle running as script / sourcing
 
 #
 # PROGRESS
@@ -13,6 +12,7 @@
 # DONE
 #
 # added self test routines
+# handle running as script / sourcing
 
 function config._getcfg(){
     source=$1

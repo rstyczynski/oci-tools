@@ -13,11 +13,11 @@
 #
 # PROGRESS
 #
-# switch to config.bash
 
 #
 # DONE
 #
+# switch to config.bash
 # NORMAL Move generic script steps to external bash file
 # HIGH handle envs discovery / envs parameter
 # TIP: react on empty answer when not possible
