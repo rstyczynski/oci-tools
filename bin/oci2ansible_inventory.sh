@@ -184,7 +184,7 @@ done
 # trace
 #
 if [ "$trace" == yes ]; then
-  PS4='${LINENO}'
+  PS4='${LINENO} '
   set -x
 fi
 
@@ -556,7 +556,7 @@ function get_host_variables() {
 }
 
 #
-# logic
+# start control logic
 #
 
 if [ -z "$envs" ]; then
