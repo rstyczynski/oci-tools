@@ -13,11 +13,11 @@
 #
 # PROGRESS
 #
-# NORMAL Move generic script steps to external bash file
 
 #
 # DONE
 #
+# NORMAL Move generic script steps to external bash file
 # HIGH handle envs discovery / envs parameter
 # TIP: react on empty answer when not possible
 # Generated inventory JSON parsng failed.
@@ -88,18 +88,18 @@ if [ ! -f $(dirname "$0" 2>/dev/null)/named_exit.sh ]; then
   echo "$script_name: Critical error. Required named_exit.sh library not found in script path. Can't continue."
   exit 1
 fi
-
 source $(dirname "$0")/named_exit.sh
 
 set_exit_code_variable "Script bin directory unknown." 1
-set_exit_code_variable "Required tools not available." 2
-set_exit_code_variable "Directory not writeable." 3
-
-set_exit_code_variable "Instance selector not recognised." 4
+set_exit_code_variable "Required library not found in script path." 2
+set_exit_code_variable "Required tools not available." 3
+set_exit_code_variable "Directory not writeable." 4
 set_exit_code_variable "Parameter validation failed."  5
-set_exit_code_variable "Wrong invocation of setconfig." 6
-set_exit_code_variable "Generated inventory JSON parsng failed." 7
-set_exit_code_variable "Tag with list of environments must be ENUM type." 8
+
+set_exit_code_variable "Instance selector not recognised." 10
+set_exit_code_variable "Wrong invocation of setconfig." 11
+set_exit_code_variable "Generated inventory JSON parsng failed." 12
+set_exit_code_variable "Tag with list of environments must be ENUM type." 13
 
 set_exit_code_variable "Configuration saved."  0
 set_exit_code_variable "Ansible host completed" 0
@@ -108,10 +108,9 @@ set_exit_code_variable "Ansible list completed" 0
 
 # run genercic steps for the script
 if [ ! -f $(dirname "$0" 2>/dev/null)/script_generichandler.bash ]; then
-  echo "$script_name: Critical error. Required script_generichandler.bash library not found in script path. Can't continue."
-  exit 1
+  named_exit "Required library not found in script path." script_generichandler.bash
 fi
-source $(dirname "$0")/script_generichandler.bash
+source $(dirname "$0")/script_generic_handler.bash
 
 ################################
 # actual script code starts here
