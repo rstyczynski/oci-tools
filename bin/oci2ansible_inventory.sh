@@ -14,11 +14,11 @@
 #
 # PROGRESS
 #
-# fix cache.invoke for already cached value
 
 #
 # DONE
 #
+# fix cache.invoke for already cached value
 # externalise generic code
 # switch to config.bash
 # NORMAL Move generic script steps to external bash file
