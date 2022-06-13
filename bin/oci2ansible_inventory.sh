@@ -62,6 +62,9 @@ script_cfg='oci2ansible_inventory'
 script_libs='cache.bash JSON.bash'
 script_tools='oci cat cut tr grep jq'
 
+echo XXX
+define -p script_args_default
+
 # argumenets - default values
 script_args_default[cfg_id]=$script_cfg
 script_args_default[temp_dir]=~/tmp

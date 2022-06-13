@@ -25,7 +25,7 @@ test -z "$script_bin" && named_exit "Script bin directory unknown."
 # script param attributes
 
 unset script_args_default
-declare -g -A script_args_default
+declare -A script_args_default
 
 unset script_args_validator
-declare -g -A script_args_validator
+declare -A script_args_validator
