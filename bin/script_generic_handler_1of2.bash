@@ -9,11 +9,11 @@
 #
 # PROGRESS
 #
-# fix validators, default
 
 #
 # DONE
 #
+# fix validators, default
 # improve trace with details
 
 # load named_exit
