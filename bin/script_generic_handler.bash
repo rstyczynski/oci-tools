@@ -159,7 +159,7 @@ function usage() {
     echo "Persisted values (config: $script_cfg)":
     persistent=none
     for variable in $(echo $script_args_persist | tr , ' ' | tr -d :); do
-      var_value=$(getcfg $script_cfg $variable)
+      var_value=$(config.getcfg $script_cfg $variable)
       if [ ! -z "$var_value" ]; then
         echo " \-$variable: $var_value"
         persistent=$persistent,$variable
@@ -188,7 +188,7 @@ fi
 # read parameters from cfg file
 for cfg_param in $(echo $script_args_persist | tr , ' ' | tr -d :); do
   if [ -z "${!cfg_param}" ]; then
-    eval $cfg_param="$(getcfg $script_cfg $cfg_param)"
+    eval $cfg_param="$(config.getcfg $script_cfg $cfg_param)"
   fi
 done
 
@@ -234,14 +234,14 @@ for cfg_param in $(echo $script_args_persist | tr , ' ' | tr -d :); do
       named_exit "Parameter validation failed." $cfg_param
     fi 
 
-    setcfg $script_cfg $cfg_param "${!cfg_param}" force
+    config.setcfg $script_cfg $cfg_param "${!cfg_param}" force
   fi
 done
 
 # persist when not persisted. All data is already validated.
 for cfg_param in $(echo $script_args_persist | tr , ' ' | tr -d :); do
-  value=$(getcfg $script_cfg $cfg_param)
+  value=$(config.getcfg $script_cfg $cfg_param)
   if [ -z "$value" ]; then
-    setcfg $script_cfg $cfg_param "${!cfg_param}" force
+    config.setcfg $script_cfg $cfg_param "${!cfg_param}" force
   fi
 done

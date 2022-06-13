@@ -13,6 +13,7 @@
 #
 # PROGRESS
 #
+# switch to config.bash
 
 #
 # DONE
@@ -43,7 +44,7 @@ script_args_system='cfg_id:,temp_dir:,debug,trace,warning:,help,setconfig:,progr
 
 script_cfg='oci2ansible_inventory'
 
-script_libs='config.sh cache.bash JSON.bash validators.bash'
+script_libs='config.bash cache.bash JSON.bash validators.bash'
 script_tools='oci cat cut tr grep jq'
 
 unset script_args_default
