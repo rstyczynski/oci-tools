@@ -85,7 +85,7 @@ script_args_validator[regions]=oci_lookup_regions
 
 # exit codes
 if [ ! -f $(dirname "$0" 2>/dev/null)/named_exit.sh ]; then
-  echo "$script_name: Critical error. Required library not found in script path. Can't continue."
+  echo "$script_name: Critical error. Required named_exit.sh library not found in script path. Can't continue."
   exit 1
 fi
 
@@ -107,7 +107,11 @@ set_exit_code_variable "set config completed" 0
 set_exit_code_variable "Ansible list completed" 0
 
 # run genercic steps for the script
-source script_generichandler.bash
+if [ ! -f $(dirname "$0" 2>/dev/null)/script_generichandler.bash ]; then
+  echo "$script_name: Critical error. Required script_generichandler.bash library not found in script path. Can't continue."
+  exit 1
+fi
+source $(dirname "$0")/script_generichandler.bash
 
 ################################
 # actual script code starts here
