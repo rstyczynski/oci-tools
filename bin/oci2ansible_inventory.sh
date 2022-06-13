@@ -143,6 +143,7 @@ cache_progress=$progress_spinner
 function quit() {
   # temp dir is deleted by generic code
   # put other quit actions here
+  : # colon added as null operation
 }
 
 #
