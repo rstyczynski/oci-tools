@@ -288,7 +288,7 @@ function get_ansible_inventory() {
 
   JSON.init
 
-  for host_group in $envs; do
+  for host_group in $(echo $envs | tr ',' ' '); do
     JSON.object.init $host_group
 
     populate_instances env $host_group
