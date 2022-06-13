@@ -128,12 +128,6 @@ source $(dirname "$0")/script_generic_handler_2of2.bash
 # proccess parameters
 #
 
-# data and temp directories
-if ! touch $temp_dir/marker; then
-  named_exit "Directory not writeable." $temp_dir
-fi
-rm -f $temp_dir/marker
-
 # cache spinner
 cache_progress=$progress_spinner
 
