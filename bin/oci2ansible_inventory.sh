@@ -570,7 +570,7 @@ if [ -z "$envs" ]; then
   if [ "$tag_type" != ENUM ]; then
     named_exit "Error. Tag with list of environments must be ENUM type."
   fi
-
+  
   envs=$(echo $oci_tag | jq .data.validator.values | tr -d '[]" ,' | grep -v '^$')
 if
 
