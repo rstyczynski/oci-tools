@@ -60,11 +60,12 @@ function setcfg() {
     : ${global:=Y}
     global=$(echo $global | tr [a-z] [A-Z])
 
+    # check if it's possible to store data in /etc (sudo)
     case $global in
     Y)  
         timeout -s 9 1 sudo -S touch /etc/$which.config >/dev/null 2>/dev/null
         if [ $? -ne 0 ]; then
-            >&2 echo "Notice that config can't be stored in /etc/x-ray.config, as this user has no root access. Config is stored in user space at ~/.x-ray/config. It's not a problem."
+            >&2 echo "Notice that config can't be stored in /etc/$which.config, as this user has no root access. Config is stored in user space at ~/.x-ray/config. It's not a problem."
             unset global
         else
             timeout -s 9 1 sudo chmod 644 /etc/$which.config
