@@ -47,8 +47,7 @@ script_args_default[trace]=no
 script_args_default[warning]=yes
 script_args_default[validate_params]=yes
 
-unset script_args_validator
-declare -A script_args_validator
+
 script_args_validator[cfg_id]=label
 script_args_validator[debug]=flag
 script_args_validator[help]=flag
