@@ -3,7 +3,6 @@
 #
 # TODO
 #
-# SYSTEM add generic Trap with default Quit
 # NORMAL add function to get script params. Should enable to write params with new lines, and potential comments. Current list with comma is hard to read.
 # NORMAL add mandatory parameters handler
 # LOW cache_ttl as one global parameter
@@ -14,6 +13,7 @@
 #
 # PROGRESS
 #
+# SYSTEM add generic Trap with default Quit
 
 #
 # DONE
@@ -136,6 +136,14 @@ rm -f $temp_dir/marker
 
 # cache spinner
 cache_progress=$progress_spinner
+
+#
+# define quit
+#
+function quit() {
+  # temp dir is deleted by generic code
+  # put other quit actions here
+}
 
 #
 # get data from oci

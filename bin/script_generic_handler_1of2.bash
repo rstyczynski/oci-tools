@@ -9,10 +9,12 @@
 #
 # PROGRESS
 #
+# SYSTEM add generic Trap with default Quit
 
 #
 # DONE
 #
+
 # fix missing tools check, lib load
 # fix validators, default
 # improve trace with details
@@ -42,7 +44,7 @@ test -z "$script_bin" && named_exit "Script bin directory unknown."
 unset script_args_default
 declare -A script_args_default
 script_args_default[cfg_id]=$script_cfg
-script_args_default[temp_dir]=~/tmp
+script_args_default[temp_dir]=~/tmp/$script_name
 script_args_default[debug]=no
 script_args_default[trace]=no
 script_args_default[warning]=yes
@@ -56,3 +58,19 @@ script_args_validator[help]=flag
 script_args_validator[trace]=flag
 script_args_validator[temp_dir]=directory_writable
 script_args_validator[validate_params]=yesno
+
+#
+# execute quit function on exit
+#
+
+function script_generic_handler._quit(){
+
+  if [ -d $temp_dir/$script_name ]; then
+    rm -rf $temp_dir/$script_name
+  fi
+  [[ $(type -t quit) == function ]] && quit
+
+}
+
+trap script_generic_handler._quit exit int
+
