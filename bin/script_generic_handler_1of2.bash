@@ -9,11 +9,11 @@
 #
 # PROGRESS
 #
-# SYSTEM add generic Trap with default Quit
 
 #
 # DONE
 #
+# SYSTEM add generic Trap with default Quit
 # temp dir with script name
 # fix missing tools check, lib load
 # fix validators, default
