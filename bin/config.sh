@@ -13,17 +13,17 @@ function getcfg() {
     value_row=$(cat /etc/$which.config 2>/dev/null | grep "^$what=" | tail -1 | grep "^$what=" )
     if [ $? -eq 0 ]; then
         if [ "$info" == show_file ]; then
-            echo "$which/$what has value $(echo $value_row | cut -d= -f2) stored in config file: /etc/$which.config"
+            echo "$which/$what has value $(echo $value_row | cut -d= -f2-999) stored in config file: /etc/$which.config"
         else
-            echo $value_row | cut -d= -f2
+            echo $value_row | cut -d= -f2-999
         fi
     else
             value_row=$(cat ~/.$which/config 2>/dev/null | grep "^$what=" | tail -1 | grep "^$what=" )
             if [ $? -eq 0 ]; then
                 if [ "$info" == show_file ]; then
-                    echo "$which/$what has value $(echo $value_row | cut -d= -f2) stored in config file: /etc/$which.config"
+                    echo "$which/$what has value $(echo $value_row | cut -d= -f2-999) stored in config file: /etc/$which.config"
                 else
-                    echo $value_row | cut -d= -f2
+                    echo $value_row | cut -d= -f2-999
                 fi
             else
                 return 1
