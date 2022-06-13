@@ -1,6 +1,31 @@
 
 
 #
+# core settings
+#
+
+# script param attributes
+
+unset script_args_default
+declare -A script_args_default
+
+unset script_args_validator
+declare -A script_args_validator
+
+# exit codes
+if [ ! -f $(dirname "$0" 2>/dev/null)/named_exit.sh ]; then
+  echo "$script_name: Critical error. Required named_exit.sh library not found in script path. Can't continue."
+  exit 1
+fi
+source $(dirname "$0")/named_exit.sh
+
+# extend script libs by config validator, as used by generic code
+script_libs="$script_libs config.bash validators.bash"
+
+# extend system argument by generic ones
+script_args_system="$script_args_system,cfg_id:,temp_dir:,debug,trace,warning:,help,setconfig:,progress_spinner:,validate_params:"
+
+#
 # Check environment
 #
 

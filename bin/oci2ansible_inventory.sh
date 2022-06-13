@@ -13,6 +13,7 @@
 #
 # PROGRESS
 #
+# externalise generic code
 
 #
 # DONE
@@ -35,6 +36,17 @@
 # 4. check if resource is an instance
 
 ########################################
+# run genercic steps for the script
+########################################
+
+if [ ! -f $(dirname "$0" 2>/dev/null)/script_generic_handler.bash ]; then
+  echo "Required library not found in script path." script_generichandler.bash >&2
+  exit 1
+fi
+source $(dirname "$0")/script_generic_handler.bash
+
+
+########################################
 #  script configuration code starts here
 ########################################
 
@@ -44,15 +56,13 @@ script_by='ryszard.styczynski@oracle.com'
 
 script_args='list,host:'
 script_args_persist='tag_ns:,tag_env_list_key:,regions:,envs:,cache_ttl_oci_tag:,cache_ttl_oci_search_instances:,cache_ttl_oci_ocid2vnics:,cache_ttl_oci_ip2instance:,cache_ttl_oci_compute_instance:,cache_ttl_oci_region:'
-script_args_system='cfg_id:,temp_dir:,debug,trace,warning:,help,setconfig:,progress_spinner:,validate_params:'
+script_args_system=''
 
 script_cfg='oci2ansible_inventory'
 
-script_libs='config.bash cache.bash JSON.bash validators.bash'
+script_libs='cache.bash JSON.bash'
 script_tools='oci cat cut tr grep jq'
 
-unset script_args_default
-declare -A script_args_default
 script_args_default[cfg_id]=$script_cfg
 script_args_default[temp_dir]=~/tmp
 script_args_default[debug]=no
@@ -67,8 +77,6 @@ script_args_default[cache_ttl_oci_ocid2vnics]=5184000         # 10 years
 script_args_default[cache_ttl_oci_ip2instance]=5184000        # 10 years
 script_args_default[cache_ttl_oci_compute_instance]=5184000   # 10 years
 
-unset script_args_validator
-declare -A script_args_validator
 
 script_args_validator[cfg_id]=label
 script_args_validator[debug]=flag
@@ -88,12 +96,6 @@ script_args_validator[list]=flag
 script_args_validator[host]=ip_address
 script_args_validator[regions]=oci_lookup_regions
 
-# exit codes
-if [ ! -f $(dirname "$0" 2>/dev/null)/named_exit.sh ]; then
-  echo "$script_name: Critical error. Required named_exit.sh library not found in script path. Can't continue."
-  exit 1
-fi
-source $(dirname "$0")/named_exit.sh
 
 set_exit_code_variable "Script bin directory unknown." 1
 set_exit_code_variable "Required library not found in script path." 2
@@ -111,11 +113,6 @@ set_exit_code_variable "Ansible host completed" 0
 set_exit_code_variable "set config completed" 0
 set_exit_code_variable "Ansible list completed" 0
 
-# run genercic steps for the script
-if [ ! -f $(dirname "$0" 2>/dev/null)/script_generic_handler.bash ]; then
-  named_exit "Required library not found in script path." script_generichandler.bash
-fi
-source $(dirname "$0")/script_generic_handler.bash
 
 ################################
 # actual script code starts here
