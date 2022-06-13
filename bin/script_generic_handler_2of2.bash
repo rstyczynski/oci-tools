@@ -71,7 +71,7 @@ while [[ $# -gt 0 ]]; do
   fi
   var_name=$(echo $1 | cut -b3-999)
   if [[ "$2" != --* ]]; then
-    eval $var_name=$2; shift 2
+    eval $var_name="$2"; shift 2
   else
     eval $var_name="set"; shift 1
   fi
