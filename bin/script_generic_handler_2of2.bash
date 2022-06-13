@@ -31,6 +31,9 @@ script_libs="$script_libs config.bash validators.bash"
 # extend system argument by generic ones
 script_args_system="$script_args_system,cfg_id:,temp_dir:,debug,trace,warning:,help,setconfig:,progress_spinner:,validate_params:"
 
+# extnd script tools
+script_tools="$script_tools,getopt,sed,cut,tr,grep"
+
 #
 # Check environment
 #

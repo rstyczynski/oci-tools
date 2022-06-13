@@ -96,13 +96,7 @@ script_args_validator[list]=flag
 script_args_validator[host]=ip_address
 script_args_validator[regions]=oci_lookup_regions
 
-# exit codes - use above 10 for custo purposes
-set_exit_code_variable "Script bin directory unknown." 1
-set_exit_code_variable "Required library not found in script path." 2
-set_exit_code_variable "Required tools not available." 3
-set_exit_code_variable "Directory not writeable." 4
-set_exit_code_variable "Parameter validation failed."  5
-
+# exit codes - use above 10 for custom purposes.
 set_exit_code_variable "Instance selector not recognised." 10
 set_exit_code_variable "Wrong invocation of setconfig." 11
 set_exit_code_variable "Generated inventory JSON parsing failed" 12
