@@ -4,27 +4,14 @@
 # core settings
 #
 
-# discover script directory
-unset script_bin
-script_path=$0
-test $script_path != '-bash' && script_bin=$(dirname "$0")
-test -z "$script_bin" && named_exit "Script bin directory unknown."
-
-# system level exit codes
-set_exit_code_variable "Script bin directory unknown." 1
-set_exit_code_variable "Required library not found in script path." 2
-set_exit_code_variable "Required tools not available." 3
-set_exit_code_variable "Directory not writeable." 4
-set_exit_code_variable "Parameter validation failed."  5
-
 # extend script libs by config validator, as used by generic code
-script_libs="$script_libs config.bash validators.bash"
+script_libs="$script_libs,config.bash,validators.bash"
 
 # extend system argument by generic ones
 script_args_system="$script_args_system,cfg_id:,temp_dir:,debug,trace,warning:,help,setconfig:,progress_spinner:,validate_params:"
 
-# extnd script tools
-script_tools="$script_tools getopt sed cut tr grep sort"
+# extend script tools
+script_tools="$script_tools,getopt,sed,cut,tr,grep"
 
 #
 # Check environment
@@ -32,15 +19,17 @@ script_tools="$script_tools getopt sed cut tr grep sort"
 
 # check required libs
 unset missing_tools
-for script_lib in $(echo $script_libs | tr ',' ' '); do
+IFS=', '
+for script_lib in $script_libs; do
   test ! -f $script_bin/$script_lib && missing_tools="$script_lib,$missing_tools"
 done
 
 # check required tools
-for cli_tool in $(echo $script_tools | tr ',' ' ' | tr ' ' '\n' | sort -u); do
+for cli_tool in $script_tools; do
   which $cli_tool > /dev/null 2>/dev/null
   test $? -eq 1 && missing_tools="$cli_tool,$missing_tools"
 done
+unset IFS
 
 missing_tools=$(echo $missing_tools | sed 's/,$//')
 test ! -z "$missing_tools" && named_exit "Required tools not available." "$missing_tools"
@@ -48,7 +37,7 @@ test ! -z "$missing_tools" && named_exit "Required tools not available." "$missi
 #
 # load libraries
 #
-for script_lib in $(echo $script_libs | tr ',' ' '); do
+for script_lib in $script_libs; do
   source $script_bin/$script_lib 2>/dev/null
 done
 

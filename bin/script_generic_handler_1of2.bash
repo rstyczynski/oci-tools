@@ -13,6 +13,7 @@
 #
 # DONE
 #
+# fix missing tools check, lib load
 # fix validators, default
 # improve trace with details
 

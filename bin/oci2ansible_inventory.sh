@@ -3,7 +3,7 @@
 #
 # TODO
 #
-# SYSTEM add Trap with default Quit - generic
+# SYSTEM add generic Trap with default Quit
 # NORMAL add function to get script params. Should enable to write params with new lines, and potential comments. Current list with comma is hard to read.
 # NORMAL add mandatory parameters handler
 # LOW cache_ttl as one global parameter
@@ -18,6 +18,7 @@
 #
 # DONE
 #
+# fix missing tools check, lib load
 # fix cache.invoke for already cached value
 # externalise generic code
 # switch to config.bash
@@ -51,8 +52,8 @@ script_args_system=''
 
 script_cfg='oci2ansible_inventory'
 
-script_libs='cache.bash JSON.bash'
-script_tools='oci cat cut tr grep jq'
+script_libs='cache.bash,JSON.bash'
+script_tools='oci,cat,cut,tr,grep,jq'
 
 ########################################
 # run genercic steps for the script 1of2
