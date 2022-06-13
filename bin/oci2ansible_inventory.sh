@@ -250,16 +250,16 @@ function populate_hostgroup_variables() {
   # ansible_hostgroup=( "${ansible_hostgroup[@]/ansible_ssh_user}" )
   # ansible_hostgroup=( "${ansible_hostgroup[@]/ansible_ssh_private_key_file}" )
 
-  ansible_ssh_user=$(getcfg $script_cfg ${env}_ansible_ssh_user)
-  : ${ansible_ssh_user:=$(getcfg $script_cfg ansible_ssh_user)}
+  ansible_ssh_user=$(config.getcfg $script_cfg ${env}_ansible_ssh_user)
+  : ${ansible_ssh_user:=$(config.getcfg $script_cfg ansible_ssh_user)}
   if [ -z "$ansible_ssh_user" ]; then
     WARN "ansible_ssh_user unknown for $env. Specify per env (--setconfig ${env}_ansible_ssh_user=USER) or global one (--setconfig ansible_ssh_user=USER)"
   else
     ansible_hostgroup[ansible_ssh_user]=$ansible_ssh_user
   fi
 
-  ansible_ssh_private_key_file=$(getcfg $script_cfg ${env}_ansible_ssh_private_key_file)
-  : ${ansible_ssh_private_key_file:=$(getcfg $script_cfg ansible_ssh_private_key_file)}
+  ansible_ssh_private_key_file=$(config.getcfg $script_cfg ${env}_ansible_ssh_private_key_file)
+  : ${ansible_ssh_private_key_file:=$(config.getcfg $script_cfg ansible_ssh_private_key_file)}
 
   if [ -z "$ansible_ssh_private_key_file" ]; then
     WARN "ansible_ssh_private_key_file unknown for $env. Specify env specific (--setconfig ${env}_ansible_ssh_private_key_file=KEYPATH) or global one (--setconfig ansible_ssh_private_key_file=KEYPATH)"
@@ -351,7 +351,7 @@ if [ ! -z "$setconfig" ]; then
     if [ -z "$key" ] || [ -z "$value" ]; then
       named_exit "Wrong invocation of setconfig." $setcfg
     else
-      setcfg $script_cfg $key $value force
+      config.setcfg $script_cfg $key $value force
       named_exit "Configuration saved." $script_cfg
     fi
   fi
