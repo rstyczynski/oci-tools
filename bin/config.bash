@@ -225,10 +225,10 @@ function config.test() {
     exit 1
   fi
 
-  test_group1_init
-  test_group1
-  test_group1_results
-  test_group1_clean
+  config.test_group1_init
+  config.test_group1
+  config.test_group1_results
+  config.test_group1_clean
 }
 
 #
