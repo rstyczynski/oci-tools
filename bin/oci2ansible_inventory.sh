@@ -573,7 +573,7 @@ if [ -z "$envs" ]; then
   fi
 
   envs=$(echo $oci_tag | jq .data.validator.values | tr -d '[]" ,' | grep -v '^$')
-if
+fi
 
 #
 # execute configuration tasks
