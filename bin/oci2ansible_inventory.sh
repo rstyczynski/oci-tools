@@ -375,6 +375,9 @@ fi
 #
 # execute ansible required tasks
 #
+
+echo XXX: $envs
+
 if [ "$list" == yes ]; then 
   get_ansible_inventory $envs >/$temp_dir/inventory.json
   jq . /$temp_dir/inventory.json || named_exit "Generated inventory JSON parsing failed"
