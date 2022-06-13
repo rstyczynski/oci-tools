@@ -295,6 +295,7 @@ function get_ansible_inventory() {
     populate_instances env $host_group
     JSON.array.add instances hosts
 
+    echo $populate_hostgroup_variables $env
     populate_hostgroup_variables $env
     JSON.map.add ansible_hostgroup vars
 
