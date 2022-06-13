@@ -32,7 +32,7 @@ script_libs="$script_libs config.bash validators.bash"
 script_args_system="$script_args_system,cfg_id:,temp_dir:,debug,trace,warning:,help,setconfig:,progress_spinner:,validate_params:"
 
 # extnd script tools
-script_tools="$script_tools,getopt,sed,cut,tr,grep"
+script_tools="$script_tools getopt sed cut tr grep"
 
 #
 # Check environment
@@ -45,7 +45,7 @@ for script_lib in $script_libs; do
 done
 
 # check required tools
-for cli_tool in $script_tools; do
+for cli_tool in $(echo $script_tools | tr ',' ' '); do
   which $cli_tool > /dev/null 2>/dev/null
   test $? -eq 1 && missing_tools="$cli_tool,$missing_tools"
 done
