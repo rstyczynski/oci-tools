@@ -29,7 +29,7 @@ for cli_tool in $script_tools; do
   which $cli_tool > /dev/null 2>/dev/null
   test $? -eq 1 && missing_tools="$cli_tool,$missing_tools"
 done
-unset IFS
+
 
 missing_tools=$(echo $missing_tools | sed 's/,$//')
 test ! -z "$missing_tools" && named_exit "Required tools not available." "$missing_tools"
@@ -40,6 +40,7 @@ test ! -z "$missing_tools" && named_exit "Required tools not available." "$missi
 for script_lib in $script_libs; do
   source $script_bin/$script_lib 2>/dev/null
 done
+unset IFS
 
 #
 # read arguments
