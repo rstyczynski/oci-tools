@@ -17,6 +17,11 @@ script_cfg='oci_fetch_logs'
 script_tools='oci jq cut tr'
 
 # exit codes
+if [ ! -f $(dirname "$0")/named_exit.sh ]; then
+  echo "$script_name: Critical error. Required library not found in script path. Can't continue."
+  exit 1
+fi
+
 source $(dirname "$0")/named_exit.sh
 
 set_exit_code_variable "Script bin directory unknown." 1
@@ -25,7 +30,7 @@ set_exit_code_variable "Required tools not available." 2
 set_exit_code_variable "Query execuion error." 3
 set_exit_code_variable "OCI client execution failed." 4
 set_exit_code_variable "Trying to fetch 10+ pages than expected." 5
-set_exit_code_variable "Directory not writable." 6
+set_exit_code_variable "Directory not writeable." 6
 
 set_exit_code_variable "No data to fetch." 0
 set_exit_code_variable "Data expected, but no data to fetch." 0
@@ -79,6 +84,18 @@ while [[ $# -gt 0 ]]; do
 done
 
 #
+# debug handler
+#
+
+function DEBUG() {
+  if [ $debug == set ]; then
+    return 0
+  else
+    return 1
+  fi
+}
+
+#
 # script info
 #
 function about() {
@@ -130,7 +147,7 @@ done
 for cfg_param in $(echo $script_args_persist | tr , ' ' | tr -d :); do
   if [ -z ${!cfg_param} ]; then
     echo
-    echo "Warning. Required configurble $cfg_param unknown."
+    echo "Warning. Required configurable $cfg_param unknown."
     read -p "Enter value for $cfg_param:" $cfg_param
     setcfg $script_cfg $cfg_param ${!cfg_param} force
   fi
@@ -154,7 +171,7 @@ done
 mkdir -p $tmp_dir
 
 if ! touch $tmp_dir/marker; then
-  named_exit "Directory not writable." $tmp_dir
+  named_exit "Directory not writeable." $tmp_dir
 fi
 rm -f $tmp_dir/marker
 
