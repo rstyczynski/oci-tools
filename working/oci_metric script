@@ -1,5 +1,15 @@
 
 
+####
+ssh 10.196.5.7 
+
+source /mwlogs/tools/umc/bin/umc.h
+source /mwlogs/tools/oci-tools/bin/x-ray_reports.sh 
+
+
+
+####
+
 env=prod
 component=soa
 
