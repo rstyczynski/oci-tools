@@ -63,14 +63,17 @@ unset script_args_validator
 declare -A script_args_validator
 
 if [ ! -f $(dirname "$0" 2>/dev/null)/script_generic_handler_1of2.bash ]; then
-  echo "Required library not found in script path." script_generic_handler_1of2.bash >&2
+  echo "Required library not found in script path. Info:script_generic_handler_1of2.bash " >&2
   exit 1
 fi
-source $(dirname "$0")/script_generic_handler_1of2.bash
-echo "Loaded: $(dirname "$0")/script_generic_handler_1of2.bash"
+source $(dirname "$0" 2>/dev/null)/script_generic_handler_1of2.bash
 
 # argumenets - default values
 script_args_default[progress_spinner]=yes
+
+exit 1
+
+
 script_args_default[cache_ttl_oci_region]=43200               # month
 script_args_default[cache_ttl_oci_tag]=43200                  # month
 script_args_default[cache_ttl_oci_search_instances]=1440      # day
