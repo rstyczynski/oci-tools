@@ -2,6 +2,19 @@
 # core settings 1of2
 #
 
+#
+# TODO
+#
+
+#
+# PROGRESS
+#
+
+#
+# DONE
+#
+# improve trace with details
+
 # load named_exit
 if [ ! -f $(dirname "$0" 2>/dev/null)/named_exit.sh ]; then
   echo "$script_name: Critical error. Required named_exit.sh library not found in script path. Can't continue."

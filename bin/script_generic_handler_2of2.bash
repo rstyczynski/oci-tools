@@ -100,8 +100,9 @@ done
 # trace
 #
 if [ "$trace" == yes ]; then
+  # http://www.skybert.net/bash/debugging-bash-scripts-on-the-command-line/
   export PS4='# ${BASH_SOURCE}:${LINENO}: ${FUNCNAME[0]}() - [${SHLVL},${BASH_SUBSHELL},$?] '
-  set -x
+  set -o xtrace
 fi
 
 #
