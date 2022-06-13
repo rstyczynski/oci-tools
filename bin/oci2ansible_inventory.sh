@@ -12,11 +12,11 @@
 #
 # PROGRESS
 #
-# HIGH handle envs discovery / envs parameter
 
 #
 # DONE
 #
+# HIGH handle envs discovery / envs parameter
 # TIP: react on empty answer when not possible
 # Generated inventory JSON parsng failed.
 # fix look for the instance in proper region
