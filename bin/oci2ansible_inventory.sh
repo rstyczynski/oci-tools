@@ -17,6 +17,7 @@
 #
 # DONE
 #
+# fix envs parameters is a list with comma as a separator
 # SYSTEM add generic Trap with default Quit
 # fix missing tools check, lib load
 # fix cache.invoke for already cached value
@@ -375,8 +376,6 @@ fi
 #
 # execute ansible required tasks
 #
-
-echo XXX: $envs
 
 if [ "$list" == yes ]; then 
   get_ansible_inventory $envs >/$temp_dir/inventory.json
