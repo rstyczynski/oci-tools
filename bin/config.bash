@@ -225,6 +225,8 @@ function config.test() {
     exit 1
   fi
 
+  source $(dirname "$0" 2>/dev/null)/unit_test.bash
+
   config.test_group1_init
   config.test_group1
   config.test_group1_results
