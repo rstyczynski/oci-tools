@@ -40,7 +40,7 @@ script_tools="$script_tools getopt sed cut tr grep"
 
 # check required libs
 unset missing_tools
-for script_lib in $script_libs; do
+for script_lib in $(echo $script_libs | tr ',' ' '); do
   test ! -f $script_bin/$script_lib && missing_tools="$script_lib,$missing_tools"
 done
 
@@ -56,7 +56,7 @@ test ! -z "$missing_tools" && named_exit "Required tools not available." "$missi
 #
 # load libraries
 #
-for script_lib in $script_libs; do
+for script_lib in $(echo $script_libs | tr ',' ' '); do
   source $script_bin/$script_lib 2>/dev/null
 done
 
@@ -76,6 +76,7 @@ done
 # set default values
 #
 
+echo XXX:${!script_args_default[@]}
 for variable in ${!script_args_default[@]}; do
   eval $variable=${script_args_default[$variable]}
 done
