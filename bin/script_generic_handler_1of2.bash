@@ -11,7 +11,7 @@
 #
 # PROGRESS
 #
-
+# fix sort arguments in help 
 
 #
 # DONE

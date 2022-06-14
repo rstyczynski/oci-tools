@@ -176,7 +176,7 @@ function usage() {
   echo 
   echo 'Argument formats:'
   if [ ${#script_args_validator[@]} -gt 0 ];then
-    for variable in ${!script_args_validator[@]}; do
+    for variable in $(echo ${!script_args_validator[@]} | tr ' ' '\n' | sort); do
       echo " \-$variable: ${script_args_validator[$variable]}"
     done
   else
@@ -186,7 +186,7 @@ function usage() {
   echo 
   echo 'Default values:'
   if [ ${#script_args_default[@]} -gt 0 ];then
-    for variable in ${!script_args_default[@]}; do
+    for variable in $(echo ${!script_args_default[@]}  | tr ' ' '\n' | sort); do
       echo " \-$variable: ${script_args_default[$variable]}"
     done
   else
@@ -197,7 +197,7 @@ function usage() {
     echo
     echo "Persisted values (config: $script_cfg)":
     persistent=none
-    for variable in $(echo $script_args_persist | tr , ' ' | tr -d :); do
+    for variable in $(echo $script_args_persist | tr , '\n' | sort | tr -d :); do
       var_value=$(config.getcfg $script_cfg $variable)
       if [ ! -z "$var_value" ]; then
         echo " \-$variable: $var_value"
