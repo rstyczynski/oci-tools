@@ -71,7 +71,7 @@ script_tools='oci,jq,cat,cut,tr,grep'
 # run genercic steps for the script 1of3
 #  --- do not change this section ---
 if [ ! -f $(dirname "$0" 2>/dev/null)/script_generic_handler_1of2.bash ]; then
-  echo "Required library not found in script path. Info:script_generic_handler_1of2.bash " >&2
+  echo "Required library not found in script path. Info: script_generic_handler_1of2.bash " >&2
   exit 1
 fi
 source $(dirname "$0" 2>/dev/null)/script_generic_handler_1of2.bash
@@ -373,7 +373,7 @@ else
   oci_tag=$(cache.invoke oci iam tag get --tag-name $tag_env --tag-namespace-id $tag_ns)
   tag_type=$(echo "$oci_tag" | jq -r '.data.validator."validator-type"')
   if [ "$tag_type" != ENUM ]; then
-    named_exit "Error. Tag with list of environments must be ENUM type."
+    named_exit "Tag with list of environments must be ENUM type."
   fi
 
   envs=$(echo $oci_tag | jq .data.validator.values | tr -d '[]" ,' | grep -v '^$')
