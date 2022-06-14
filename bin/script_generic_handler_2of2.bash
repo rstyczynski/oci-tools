@@ -250,7 +250,7 @@ done
 
 function generic.check_mandatory_arguments() {
 
-  if [ ! -z $@ ]; then
+  if [ ! -z "$@" ]; then
     mantatory_args=$@
   else
     mantatory_args=$(echo $script_args_mandatory | tr , ' ' | tr -d :)
@@ -259,7 +259,6 @@ function generic.check_mandatory_arguments() {
   local mandatory_missing=''
   for cfg_param in $mantatory_args; do
     if [ -z "${!cfg_param}" ]; then
-      echo
       echo "Required argument $cfg_param missing."
       if [ -z "$mandatory_missing" ]; then
         mandatory_missing=$cfg_param
