@@ -11,11 +11,11 @@
 #
 # PROGRESS
 #
-# fix sort arguments in help 
 
 #
 # DONE
 #
+# fix sort arguments in help 
 # NORMAL set local persist as default
 # NORMAL convert generic code into functions
 # fix handle ctrl-c interrupt handler

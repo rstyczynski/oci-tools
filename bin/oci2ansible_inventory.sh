@@ -3,7 +3,7 @@
 #
 # TODO
 #
-# CRITICAL Check if generic script_ varaibles are filled. Phase 1 of generic steps
+# CRITICAL Check if generic script_* varaibles are filled. Phase 1 of generic steps
 # NORMAL add function to get script params. Should enable to write params with new lines, and potential comments. Current list with comma is hard to read.
 # LOW cache_ttl as one global parameter
 # NICE TODO script information
