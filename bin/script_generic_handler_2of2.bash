@@ -130,6 +130,12 @@ function generic.load_cli_arguments() {
     done
   fi
 
+  # cache spinner
+  for script_lib in $script_libs; do
+    lib_name=$(echo $script_lib | cut -f1 -d.)
+    eval ${lib_name}_progress=$progress_spinner
+  done
+
   # set script_cfg name
   if [ ! -z "$config_id" ]; then
     script_cfg=$config_id

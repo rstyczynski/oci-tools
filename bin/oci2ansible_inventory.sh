@@ -4,7 +4,6 @@
 # TODO
 #
 # CRITICAL Check if generic script_* varaibles are filled. Phase 1 of generic steps
-# NORMAL add function to get script params. Should enable to write params with new lines, and potential comments. Current list with comma is hard to read.
 # LOW cache_ttl as one global parameter
 # NICE TODO script information
 # NICE named_exit verification auto scan
@@ -17,6 +16,7 @@
 #
 # DONE
 #
+# fix general support to enable libary spinner
 # NORMAL convert generic code into functions
 # NORMAL add mandatory parameters handler
 # fix envs parameters is a list with comma as a separator
@@ -45,6 +45,7 @@
 # REJECTED
 #
 # --help should skip validation | already done. It was problem on osx, where getops does not accept long args. 
+# NORMAL add function to get script params. Should enable to write params with new lines, and potential comments. Current list with comma is hard to read.
 
 
 ########################################
@@ -259,8 +260,6 @@ function populate_hostgroup_variables() {
 
   unset ansible_hostgroup
   declare -g -A ansible_hostgroup
-  # ansible_hostgroup=( "${ansible_hostgroup[@]/ansible_ssh_user}" )
-  # ansible_hostgroup=( "${ansible_hostgroup[@]/ansible_ssh_private_key_file}" )
 
   ansible_ssh_user=$(config.getcfg $script_cfg ${env}_ansible_ssh_user)
   : ${ansible_ssh_user:=$(config.getcfg $script_cfg ansible_ssh_user)}
@@ -347,14 +346,6 @@ if [ ! -z "$setconfig" ]; then
     fi
   fi
 fi
-
-########################################
-# process arguments
-########################################
-
-# cache spinner
-cache_progress=$progress_spinner
-
 
 ########################################
 # script start control logic

@@ -15,6 +15,7 @@
 #
 # DONE
 #
+# fix general support to enable libary spinner
 # fix sort arguments in help 
 # NORMAL set local persist as default
 # NORMAL convert generic code into functions
