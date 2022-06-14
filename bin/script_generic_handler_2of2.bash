@@ -238,7 +238,9 @@ fi
 for cfg_param in $(echo $script_args_persist | tr , ' ' | tr -d :); do
   value=$(config.getcfg $script_cfg $cfg_param)
   if [ -z "$value" ]; then
-    config.setcfg $script_cfg $cfg_param "${!cfg_param}" force
+    if [ ! -z "${!cfg_param}" ]; then
+      config.setcfg $script_cfg $cfg_param "${!cfg_param}" force
+    fi
   fi
 done
 
