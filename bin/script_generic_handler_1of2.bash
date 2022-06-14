@@ -7,11 +7,11 @@
 #
 # TODO
 #
-# NORMAL set local persist as default
 
 #
 # PROGRESS
 #
+# NORMAL set local persist as default
 
 #
 # DONE
