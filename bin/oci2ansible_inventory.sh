@@ -134,6 +134,7 @@ generic.load_cli_arguments $@
 generic.load_persisted_arguments
 generic.validate_arguments
 generic.persist_arguments
+generic.check_mandatory_arguments
 #  --- do not change this section ---
 ########################################
 
