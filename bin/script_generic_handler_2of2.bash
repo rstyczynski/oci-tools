@@ -4,10 +4,7 @@
 # core settings & functions 2of2
 #
 
-#
 # execute quit function on exit
-#
-
 trap script_generic_handler._exit exit int
 trap script_generic_handler._interrupt int
 
@@ -28,9 +25,9 @@ function script_generic_handler._interrupt(){
 }
 
 
-#
-# Check environment
-#
+#############################
+# Helper functions
+#############################
 
 # check required libs
 function generic.check_required_tools() {
@@ -195,9 +192,8 @@ function usage() {
 }
 
 
-
 ###########################
-# perform non help steps
+# define non help functions
 ###########################
 
 # read parameters from cfg file
