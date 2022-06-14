@@ -129,8 +129,8 @@ source $script_bin/script_generic_handler_2of2.bash || named_exit "Required libr
 
 generic.check_required_tools
 generic.set_default_arguments
-generic.load_persisted_arguments
 generic.load_cli_arguments
+generic.load_persisted_arguments
 generic.validate_arguments
 generic.persist_arguments
 
