@@ -32,11 +32,11 @@ if [ $OSTYPE != 'linux-gnu' ]; then
 fi
 
 # load named_exit
-if [ ! -f $(dirname "$0" 2>/dev/null)/named_exit.sh ]; then
-  echo "Critical error. Required named_exit.sh library not found in script path. Can't continue." >&2
+if [ ! -f $(dirname "$0" 2>/dev/null)/named_exit.bash ]; then
+  echo "Critical error. Required named_exit.bash library not found in script path. Can't continue." >&2
   exit 1
 fi
-source $(dirname "$0")/named_exit.sh
+source $(dirname "$0" 2>/dev/null)/named_exit.bash
 
 # system level exit codes
 set_exit_code_variable "Script bin directory unknown." 1
