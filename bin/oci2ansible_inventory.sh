@@ -354,42 +354,6 @@ fi
 # cache spinner
 cache_progress=$progress_spinner
 
-# convert comma separated to space separated to buse regular IFS in the script
-regions=$(echo $regions | tr , ' ')
-
-#
-# discover envs if not provided
-#
-test "$envs" == discover && unset envs
-if [ ! -z "$envs" ]; then
-  # convert comma separated to space separated to buse regular IFS in the script
-  envs=$(echo $envs | tr ',' ' ')
-else
-  WARN "envs parameter not specified. Discovering list of environments from tag."
-
-  generic.check_mandatory_arguments tag_env tag_ns
-
-  # discover ENV names via OCI ENUM tag 
-  cache_ttl=$cache_ttl_oci_tag
-  cache_group=oci_tag
-  cache_key=${tag_ns}_${tag_env}
-
-  oci_tag=$(cache.invoke oci iam tag get --tag-name $tag_env --tag-namespace-id $tag_ns)
-  tag_type=$(echo "$oci_tag" | jq -r '.data.validator."validator-type"')
-  if [ "$tag_type" != ENUM ]; then
-    named_exit "Tag with list of environments must be ENUM type."
-  fi
-
-  envs=$(echo $oci_tag | jq .data.validator.values | tr -d '[]" ,' | grep -v '^$')
-fi
-
-########################################
-# run genercic steps for the script 3of3
-#  --- do not change this section ---
-generic.check_mandatory_arguments
-#  --- do not change this section ---
-########################################
-
 
 ########################################
 # script start control logic
@@ -400,7 +364,39 @@ generic.check_mandatory_arguments
 # execute ansible required tasks
 #
 
-if [ "$list" == yes ]; then 
+if [ "$list" == yes ]; then
+
+  # convert comma separated to space separated to buse regular IFS in the script
+  regions=$(echo $regions | tr , ' ')
+
+  #
+  # discover envs if not provided
+  #
+  test "$envs" == discover && unset envs
+  if [ ! -z "$envs" ]; then
+    # convert comma separated to space separated to buse regular IFS in the script
+    envs=$(echo $envs | tr ',' ' ')
+  else
+    WARN "envs parameter not specified. Discovering list of environments from tag."
+
+    generic.check_mandatory_arguments tag_env tag_ns
+
+    # discover ENV names via OCI ENUM tag 
+    cache_ttl=$cache_ttl_oci_tag
+    cache_group=oci_tag
+    cache_key=${tag_ns}_${tag_env}
+
+    oci_tag=$(cache.invoke oci iam tag get --tag-name $tag_env --tag-namespace-id $tag_ns)
+    tag_type=$(echo "$oci_tag" | jq -r '.data.validator."validator-type"')
+    if [ "$tag_type" != ENUM ]; then
+      named_exit "Tag with list of environments must be ENUM type."
+    fi
+
+    envs=$(echo $oci_tag | jq .data.validator.values | tr -d '[]" ,' | grep -v '^$')
+  fi
+
+  generic.check_mandatory_arguments envs regions
+
   get_ansible_inventory $envs >/$temp_dir/inventory.json
   jq . /$temp_dir/inventory.json || named_exit "Generated inventory JSON parsing failed"
   rm /$temp_dir/inventory.json
