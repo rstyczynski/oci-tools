@@ -13,11 +13,11 @@
 #
 # PROGRESS
 #
-# NORMAL convert generic code into functions
 
 #
 # DONE
 #
+# NORMAL convert generic code into functions
 # NORMAL add mandatory parameters handler
 # fix envs parameters is a list with comma as a separator
 # SYSTEM add generic Trap with default Quit

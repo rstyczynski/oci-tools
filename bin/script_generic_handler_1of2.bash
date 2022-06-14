@@ -12,11 +12,11 @@
 #
 # PROGRESS
 #
-# NORMAL convert generic code into functions
 
 #
 # DONE
 #
+# NORMAL convert generic code into functions
 # fix handle ctrl-c interrupt handler
 # fix persist only arguents with value. Never ask for the value. 
 # NORMAL add mandatory parameters handler
