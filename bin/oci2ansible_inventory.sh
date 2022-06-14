@@ -57,8 +57,8 @@ script_by='ryszard.styczynski@oracle.com'
 script_repo=https://github.com/rstyczynski/oci-tools.git
 
 script_args='list,host:'
-script_args_mandatory='regions:,envs:'
-script_args_persist="$script_args_mandatory,tag_ns:,tag_env:"
+script_args_mandatory=''
+script_args_persist="$script_args_mandatory,regions:,envs:,tag_ns:,tag_env:"
 script_args_persist="$script_args_persist,cache_ttl_oci_tag:,cache_ttl_oci_search_instances:,\
 cache_ttl_oci_ocid2vnics:,cache_ttl_oci_ip2instance:,cache_ttl_oci_compute_instance:,cache_ttl_oci_region:"
 script_args_system=''
@@ -69,7 +69,7 @@ script_libs='cache.bash,JSON.bash'
 script_tools='oci,jq,cat,cut,tr,grep'
 
 ########################################
-# run genercic steps for the script 1of3
+# run genercic steps for the script 1of2
 #  --- do not change this section ---
 source $(dirname "$0" 2>/dev/null)/script_generic_handler_1of2.bash || echo "Required library not found in script path. Info: script_generic_handler_1of2.bash " >&2 || exit 1
 #  --- do not change this section ---
@@ -123,7 +123,7 @@ function quit() {
 }
 
 ########################################
-# run genercic steps for the script 2of3
+# run genercic steps for the script 2of2
 #  --- do not change this section ---
 source $script_bin/script_generic_handler_2of2.bash || named_exit "Required library not found in script path." script_generichandler_2of2.bash 
 
