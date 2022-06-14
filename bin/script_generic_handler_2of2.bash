@@ -70,7 +70,6 @@ function generic.set_default_arguments() {
 # read command line arguments
 #
 function generic.load_cli_arguments() {
-  set -x
   valid_opts=$(getopt --longoptions "$script_args,$script_args_persist,$script_args_system" --options "" --name "$script_name" -- $@)
   eval set --"$valid_opts"
 
@@ -129,8 +128,6 @@ function generic.load_cli_arguments() {
     usage
     exit 0
   fi
-
-  set +x
 }
 
 function DEBUG() {
