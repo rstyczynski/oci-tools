@@ -115,8 +115,8 @@ function generic.load_cli_arguments() {
   fi
 
   # set script_cfg name
-  if [ ! -z "$cfg_id" ]; then
-    script_cfg=$cfg_id
+  if [ ! -z "$config_id" ]; then
+    script_cfg=$config_id
   fi
 
   #
@@ -233,11 +233,15 @@ function generic.validate_arguments() {
 # persist parameters. All data is already validated.
 #
 function generic.persist_arguments() {
+
+  local config_level
+  test "$global_config" == y && config_level=global || config_level=local
+
   for cfg_param in $(echo $script_args_persist | tr , ' ' | tr -d :); do
     value=$(config.getcfg $script_cfg $cfg_param)
     if [ -z "$value" ]; then
       if [ ! -z "${!cfg_param}" ]; then
-        config.setcfg $script_cfg $cfg_param "${!cfg_param}" force
+        config.setcfg $script_cfg $cfg_param "${!cfg_param}" $config_level
       fi
     fi
   done

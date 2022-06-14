@@ -59,7 +59,7 @@ test -z "$script_bin" && named_exit "Script bin directory unknown."
 script_libs="$script_libs,config.bash,validators.bash"
 
 # extend system argument by generic ones
-script_args_system="$script_args_system,cfg_id:,temp_dir:,debug,trace,warning:,help,setconfig:,progress_spinner:,validate_params:"
+script_args_system="$script_args_system,config_id:,temp_dir:,debug,trace,warning:,help,setconfig:,progress_spinner:,validate_params:"
 
 # extend script tools
 script_tools="$script_tools,getopt,sed,cut,tr,grep"
@@ -69,7 +69,8 @@ unset script_args_validator
 declare -A script_args_validator
 
 script_args_validator[temp_dir]=directory_writable
-script_args_validator[cfg_id]=label
+script_args_validator[config_id]=label
+script_args_validator[global_config]=flag
 script_args_validator[debug]=flag
 script_args_validator[trace]=flag
 script_args_validator[warning]=flag
@@ -82,7 +83,9 @@ declare -A script_args_default
 
 temp_dir=$HOME/tmp/$script_name/$RANDOM; mkdir -p $temp_dir
 script_args_default[temp_dir]=$temp_dir
-script_args_default[cfg_id]=$script_cfg
+script_args_default[config_id]=$script_cfg
+script_args_default[global_config]=no
+script_args_default[warning]=yes
 script_args_default[debug]=no
 script_args_default[trace]=no
 script_args_default[warning]=yes
