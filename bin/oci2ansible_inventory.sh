@@ -13,11 +13,11 @@
 #
 # PROGRESS
 #
-# NORMAL add mandatory parameters handler
 
 #
 # DONE
 #
+# NORMAL add mandatory parameters handler
 # fix envs parameters is a list with comma as a separator
 # SYSTEM add generic Trap with default Quit
 # fix missing tools check, lib load

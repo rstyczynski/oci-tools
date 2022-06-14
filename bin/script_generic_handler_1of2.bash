@@ -15,6 +15,7 @@
 #
 # DONE
 #
+# fix handle ctrl-c interrupt handler
 # fix persist only arguents with value. Never ask for the value. 
 # NORMAL add mandatory parameters handler
 # CRITICAL check if OS is linux-gnu
@@ -44,7 +45,7 @@ set_exit_code_variable "Required library not found in script path." 2
 set_exit_code_variable "Required tools not available." 3
 set_exit_code_variable "Mandatory arguments missing." 4
 set_exit_code_variable "Parameter validation failed."  5
-
+set_exit_code_variable "Operation interrupted." 6
 
 # discover script directory
 unset script_bin

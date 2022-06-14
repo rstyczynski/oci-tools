@@ -37,9 +37,10 @@ unset IFS
 # execute quit function on exit
 #
 
-trap script_generic_handler._quit exit int
+trap script_generic_handler._exit exit int
+trap script_generic_handler._interrupt int
 
-function script_generic_handler._quit(){
+function script_generic_handler._exit(){
 
   if [ -d $temp_dir ]; then
     rm -rf $temp_dir
@@ -49,6 +50,11 @@ function script_generic_handler._quit(){
   [[ $(type -t quit) == function ]] && quit
 }
 
+function script_generic_handler._interrupt(){
+
+  script_generic_handler._exit
+  named_exit "Operation interrupted."
+}
 
 #
 # read arguments
@@ -69,6 +75,10 @@ done
 for variable in ${!script_args_default[@]}; do
   eval $variable=${script_args_default[$variable]}
 done
+
+#
+# read command line arguments
+#
 
 valid_opts=$(getopt --longoptions "$script_args,$script_args_persist,$script_args_system" --options "" --name "$script_name" -- $@)
 eval set --"$valid_opts"
@@ -200,6 +210,10 @@ if [ "$help" == yes ]; then
   usage
   exit 0
 fi
+
+###########################
+# perform non help steps
+###########################
 
 #
 # read parameters from config file
