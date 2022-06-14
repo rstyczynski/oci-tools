@@ -1,7 +1,7 @@
-
+#!/bin/bash
 
 #
-# core settings
+# core settings & functions 2of2
 #
 
 # extend script libs by config validator, as used by generic code
@@ -41,6 +41,23 @@ for script_lib in $script_libs; do
   source $script_bin/$script_lib 2>/dev/null
 done
 unset IFS
+
+#
+# execute quit function on exit
+#
+
+trap script_generic_handler._quit exit int
+
+function script_generic_handler._quit(){
+
+  if [ -d $temp_dir ]; then
+    rm -rf $temp_dir
+  fi
+
+  # invoke quit function if defined
+  [[ $(type -t quit) == function ]] && quit
+}
+
 
 #
 # read arguments
@@ -181,6 +198,7 @@ function usage() {
     fi
   fi
 }
+
 
 #
 # start

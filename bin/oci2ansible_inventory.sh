@@ -13,6 +13,7 @@
 #
 # PROGRESS
 #
+# --help should skip validation
 
 #
 # DONE
@@ -42,10 +43,13 @@
 ########################################
 #  script properties
 ########################################
-
+  export PS4='# ${BASH_SOURCE}:${LINENO}: ${FUNCNAME[0]}() - [${SHLVL},${BASH_SUBSHELL},$?] '
+  set -o xtrace
+  
 script_name='oci2ansible_inventory'
 script_version='1.0'
 script_by='ryszard.styczynski@oracle.com'
+script_repo=https://github.com/rstyczynski/oci-tools.git
 
 script_args='list,host:'
 script_args_persist='tag_ns:,tag_env_list_key:,regions:,envs:,cache_ttl_oci_tag:,cache_ttl_oci_search_instances:,cache_ttl_oci_ocid2vnics:,cache_ttl_oci_ip2instance:,cache_ttl_oci_compute_instance:,cache_ttl_oci_region:'
@@ -54,19 +58,12 @@ script_args_system=''
 script_cfg='oci2ansible_inventory'
 
 script_libs='cache.bash,JSON.bash'
-script_tools='oci,cat,cut,tr,grep,jq'
+script_tools='oci,jq,cat,cut,tr,grep'
 
 ########################################
 # run genercic steps for the script 1of2
 #  --- do not change this section ---
 ########################################
-
-unset script_args_default
-declare -A script_args_default
-
-unset script_args_validator
-declare -A script_args_validator
-
 if [ ! -f $(dirname "$0" 2>/dev/null)/script_generic_handler_1of2.bash ]; then
   echo "Required library not found in script path. Info:script_generic_handler_1of2.bash " >&2
   exit 1
@@ -78,16 +75,7 @@ source $(dirname "$0" 2>/dev/null)/script_generic_handler_1of2.bash
 # configure custom arguments & exit codes
 #########################################
 
-# argumenets - default values
-script_args_default[progress_spinner]=yes
-script_args_default[cache_ttl_oci_region]=43200               # month
-script_args_default[cache_ttl_oci_tag]=43200                  # month
-script_args_default[cache_ttl_oci_search_instances]=1440      # day
-script_args_default[cache_ttl_oci_ocid2vnics]=5184000         # 10 years
-script_args_default[cache_ttl_oci_ip2instance]=5184000        # 10 years
-script_args_default[cache_ttl_oci_compute_instance]=5184000   # 10 years
-
-# argumenets - validators
+# arguments - validators
 script_args_validator[progress_spinner]=yesno
 script_args_validator[cache_ttl_oci_region]=integer
 script_args_validator[cache_ttl_oci_search_instances]=integer
@@ -101,6 +89,15 @@ script_args_validator[host]=ip_address
 script_args_validator[regions]=oci_lookup_regions
 script_args_validator[envs]=list
 
+# arguments - default values
+script_args_default[progress_spinner]=yes
+script_args_default[cache_ttl_oci_region]=43200               # month
+script_args_default[cache_ttl_oci_tag]=43200                  # month
+script_args_default[cache_ttl_oci_search_instances]=1440      # day
+script_args_default[cache_ttl_oci_ocid2vnics]=5184000         # 10 years
+script_args_default[cache_ttl_oci_ip2instance]=5184000        # 10 years
+script_args_default[cache_ttl_oci_compute_instance]=5184000   # 10 years
+
 # exit codes - use above 10 for custom purposes.
 set_exit_code_variable "Instance selector not recognised." 10
 set_exit_code_variable "Wrong invocation of setconfig." 11
@@ -108,7 +105,6 @@ set_exit_code_variable "Generated inventory JSON parsing failed" 12
 set_exit_code_variable "Tag with list of environments must be ENUM type." 13
 
 set_exit_code_variable "Configuration saved."  0
-set_exit_code_variable "set config completed" 0
 set_exit_code_variable "Ansible list completed" 0
 set_exit_code_variable "Ansible host completed" 0
 
@@ -116,11 +112,10 @@ set_exit_code_variable "Ansible host completed" 0
 # run genercic steps for the script 2of2
 #  --- do not change this section ---
 ########################################
-if [ ! -f $(dirname "$0" 2>/dev/null)/script_generic_handler_2of2.bash ]; then
+if [ ! -f $script_bin/script_generic_handler_2of2.bash ]; then
   named_exit "Required library not found in script path." script_generichandler_2of2.bash 
 fi
-source $(dirname "$0")/script_generic_handler_2of2.bash
-
+source $script_bin/script_generic_handler_2of2.bash
 
 ################################
 # actual script code starts here
@@ -198,7 +193,7 @@ function populate_instances() {
 
           instances+=($private_ip)
           
-          # trick - by putting $ocid in cache with key $private_ip - I'll be to receive $ocid in other  place f the code
+          # trick - by putting $ocid in cache with key $private_ip - I'll be able to receive $ocid in other place of the code
           cache_ttl=$cache_ttl_oci_ip2instance
           cache_group=oci_ip2instance
           cache_key=$private_ip
@@ -251,7 +246,6 @@ function populate_instance_variables() {
   done
 
   rm $temp_dir/oci_instance.tags
-
 }
   
 function populate_hostgroup_variables() {
@@ -284,36 +278,35 @@ function populate_hostgroup_variables() {
 # inventory formatter
 #
 function get_ansible_inventory() {
-
   envs=$@
 
   JSON.init
 
-  for host_group in $envs; do
-    JSON.object.init $host_group
+    for host_group in $envs; do
+      JSON.object.init $host_group
 
-    populate_instances env $host_group
-    JSON.array.add instances hosts
+      populate_instances env $host_group
+      JSON.array.add instances hosts
 
-    populate_hostgroup_variables $env
-    JSON.map.add ansible_hostgroup vars
+      populate_hostgroup_variables $env
+      JSON.map.add ansible_hostgroup vars
 
-    JSON.object.close $host_group
-  done
-
-  JSON.object.init _meta
-  JSON.object.init hostvars
-
-  for host_group in $envs; do
-    populate_instances env $host_group
-    for instance in ${instances[@]}; do
-      populate_instance_variables $instance
-      JSON.map.add instance_variables $instance
+      JSON.object.close $host_group
     done
-  done
-  
-  JSON.object.close
-  JSON.object.close
+
+    JSON.object.init _meta
+      JSON.object.init hostvars
+
+      for host_group in $envs; do
+        populate_instances env $host_group
+        for instance in ${instances[@]}; do
+          populate_instance_variables $instance
+          JSON.map.add instance_variables $instance
+        done
+      done
+      
+      JSON.object.close
+    JSON.object.close
 
   JSON.close
 }
@@ -323,8 +316,8 @@ function get_host_variables() {
 
   JSON.init
 
-  populate_instance_variables $instance
-  JSON.map.add instance_variables $instance
+    populate_instance_variables $instance
+    JSON.map.add instance_variables $instance
 
   JSON.close
 }
@@ -338,7 +331,7 @@ function get_host_variables() {
 #
 test "$envs" == discover && unset envs
 if [ ! -z "$envs" ]; then
-  # convert comma separated to space separated 
+  # convert comma separated to space separated to buse regular IFS in the script
   envs=$(echo $envs | tr ',' ' ')
 else
   WARN "envs parameter not specified. Discovering list of environments from tag."
@@ -355,9 +348,6 @@ else
 
   envs=$(echo $oci_tag | jq .data.validator.values | tr -d '[]" ,' | grep -v '^$')
 fi
-
-
-
 
 #
 # execute configuration tasks
@@ -376,7 +366,6 @@ if [ ! -z "$setconfig" ]; then
       named_exit "Configuration saved." $script_cfg
     fi
   fi
-  named_exit "set config completed" # never used
 fi
 
 #
