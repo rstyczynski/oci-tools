@@ -13,11 +13,11 @@
 #
 # PROGRESS
 #
+# NORMAL add mandatory parameters handler
 
 #
 # DONE
 #
-# NORMAL add mandatory parameters handler
 # fix envs parameters is a list with comma as a separator
 # SYSTEM add generic Trap with default Quit
 # fix missing tools check, lib load
@@ -365,6 +365,9 @@ if [ ! -z "$envs" ]; then
   envs=$(echo $envs | tr ',' ' ')
 else
   WARN "envs parameter not specified. Discovering list of environments from tag."
+
+  check_mandatory_arguments tag_env tag_ns
+
   # discover ENV names via OCI ENUM tag 
   cache_ttl=$cache_ttl_oci_tag
   cache_group=oci_tag
