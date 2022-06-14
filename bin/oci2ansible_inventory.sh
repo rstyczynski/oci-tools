@@ -366,7 +366,7 @@ if [ ! -z "$envs" ]; then
 else
   WARN "envs parameter not specified. Discovering list of environments from tag."
 
-  check_mandatory_arguments tag_env tag_ns
+  generic.check_mandatory_arguments tag_env tag_ns
 
   # discover ENV names via OCI ENUM tag 
   cache_ttl=$cache_ttl_oci_tag
