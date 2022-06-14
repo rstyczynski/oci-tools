@@ -43,9 +43,7 @@
 ########################################
 #  script properties
 ########################################
-  export PS4='# ${BASH_SOURCE}:${LINENO}: ${FUNCNAME[0]}() - [${SHLVL},${BASH_SUBSHELL},$?] '
-  set -o xtrace
-  
+
 script_name='oci2ansible_inventory'
 script_version='1.0'
 script_by='ryszard.styczynski@oracle.com'
