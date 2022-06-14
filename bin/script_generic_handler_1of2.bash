@@ -41,6 +41,15 @@ script_path=$0
 test $script_path != '-bash' && script_bin=$(dirname "$0" 2>/dev/null)
 test -z "$script_bin" && named_exit "Script bin directory unknown."
 
+# extend script libs by config validator, as used by generic code
+script_libs="$script_libs,config.bash,validators.bash"
+
+# extend system argument by generic ones
+script_args_system="$script_args_system,cfg_id:,temp_dir:,debug,trace,warning:,help,setconfig:,progress_spinner:,validate_params:"
+
+# extend script tools
+script_tools="$script_tools,getopt,sed,cut,tr,grep"
+
 # arguments - validators
 unset script_args_validator
 declare -A script_args_validator
