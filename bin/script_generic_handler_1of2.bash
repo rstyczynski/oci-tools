@@ -11,11 +11,12 @@
 #
 # PROGRESS
 #
-# NORMAL set local persist as default
+
 
 #
 # DONE
 #
+# NORMAL set local persist as default
 # NORMAL convert generic code into functions
 # fix handle ctrl-c interrupt handler
 # fix persist only arguents with value. Never ask for the value. 
