@@ -3,8 +3,8 @@
 #
 # TODO
 #
+# CRITICAL Check if generic script_ varaibles are filled. Phase 1 of generic steps
 # NORMAL add function to get script params. Should enable to write params with new lines, and potential comments. Current list with comma is hard to read.
-# NORMAL add mandatory parameters handler
 # LOW cache_ttl as one global parameter
 # NICE TODO script information
 # NICE named_exit verification auto scan
@@ -13,11 +13,11 @@
 #
 # PROGRESS
 #
-# --help should skip validation
 
 #
 # DONE
 #
+# NORMAL add mandatory parameters handler
 # fix envs parameters is a list with comma as a separator
 # SYSTEM add generic Trap with default Quit
 # fix missing tools check, lib load
@@ -40,6 +40,12 @@
 # adhoc fixed way of caling oci via cache
 # 4. check if resource is an instance
 
+#
+# REJECTED
+#
+# --help should skip validation | already done. It was problem on osx, where getops does not accept long args. 
+
+
 ########################################
 #  script properties
 ########################################
@@ -50,7 +56,10 @@ script_by='ryszard.styczynski@oracle.com'
 script_repo=https://github.com/rstyczynski/oci-tools.git
 
 script_args='list,host:'
-script_args_persist='tag_ns:,tag_env_list_key:,regions:,envs:,cache_ttl_oci_tag:,cache_ttl_oci_search_instances:,cache_ttl_oci_ocid2vnics:,cache_ttl_oci_ip2instance:,cache_ttl_oci_compute_instance:,cache_ttl_oci_region:'
+script_args_mandatory='regions:,envs:'
+script_args_persist="$script_args_mandatory,tag_ns:,tag_env:"
+script_args_persist="$script_args_persist,cache_ttl_oci_tag:,cache_ttl_oci_search_instances:,\
+cache_ttl_oci_ocid2vnics:,cache_ttl_oci_ip2instance:,cache_ttl_oci_compute_instance:,cache_ttl_oci_region:"
 script_args_system=''
 
 script_cfg='oci2ansible_inventory'
@@ -59,14 +68,15 @@ script_libs='cache.bash,JSON.bash'
 script_tools='oci,jq,cat,cut,tr,grep'
 
 ########################################
-# run genercic steps for the script 1of2
+# run genercic steps for the script 1of3
 #  --- do not change this section ---
-########################################
 if [ ! -f $(dirname "$0" 2>/dev/null)/script_generic_handler_1of2.bash ]; then
   echo "Required library not found in script path. Info:script_generic_handler_1of2.bash " >&2
   exit 1
 fi
 source $(dirname "$0" 2>/dev/null)/script_generic_handler_1of2.bash
+#  --- do not change this section ---
+########################################
 
 
 #########################################
@@ -81,7 +91,7 @@ script_args_validator[cache_ttl_oci_ocid2vnics]=integer
 script_args_validator[cache_ttl_oci_ip2instance]=integer
 script_args_validator[cache_ttl_oci_compute_instance]=integer
 script_args_validator[tag_ns]=word
-script_args_validator[tag_env_list_key]=word
+script_args_validator[tag_env]=word
 script_args_validator[list]=flag
 script_args_validator[host]=ip_address
 script_args_validator[regions]=oci_lookup_regions
@@ -107,13 +117,12 @@ set_exit_code_variable "Ansible list completed" 0
 set_exit_code_variable "Ansible host completed" 0
 
 ########################################
-# run genercic steps for the script 2of2
+# run genercic steps for the script 2of3
+#  --- do not change this section ---
+source $script_bin/script_generic_handler_2of2.bash || named_exit "Required library not found in script path." script_generichandler_2of2.bash 
 #  --- do not change this section ---
 ########################################
-if [ ! -f $script_bin/script_generic_handler_2of2.bash ]; then
-  named_exit "Required library not found in script path." script_generichandler_2of2.bash 
-fi
-source $script_bin/script_generic_handler_2of2.bash
+
 
 ################################
 # actual script code starts here
@@ -150,7 +159,7 @@ function populate_instances() {
     env=$select_value
 
     #IFS=,
-    for region in $(echo $regions | tr , ' '); do
+    for region in $regions; do
         #unset IFS
 
         cache_ttl=$cache_ttl_oci_search_instances
@@ -320,36 +329,10 @@ function get_host_variables() {
   JSON.close
 }
 
+
 ########################################
-# script start control logic
-########################################
-
-#
-# discover envs if not provided
-#
-test "$envs" == discover && unset envs
-if [ ! -z "$envs" ]; then
-  # convert comma separated to space separated to buse regular IFS in the script
-  envs=$(echo $envs | tr ',' ' ')
-else
-  WARN "envs parameter not specified. Discovering list of environments from tag."
-  # discover ENV names via OCI ENUM tag 
-  cache_ttl=$cache_ttl_oci_tag
-  cache_group=oci_tag
-  cache_key=${tag_ns}_${tag_env_list_key}
-
-  oci_tag=$(cache.invoke oci iam tag get --tag-name $tag_env_list_key --tag-namespace-id $tag_ns)
-  tag_type=$(echo "$oci_tag" | jq -r '.data.validator."validator-type"')
-  if [ "$tag_type" != ENUM ]; then
-    named_exit "Error. Tag with list of environments must be ENUM type."
-  fi
-
-  envs=$(echo $oci_tag | jq .data.validator.values | tr -d '[]" ,' | grep -v '^$')
-fi
-
-#
 # execute configuration tasks
-#
+########################################
 if [ ! -z "$setconfig" ]; then
   echo $setconfig | grep '=' >/dev/null
   if [ $? -eq 1 ]; then
@@ -365,6 +348,49 @@ if [ ! -z "$setconfig" ]; then
     fi
   fi
 fi
+
+########################################
+# process arguments
+########################################
+
+# convert comma separated to space separated to buse regular IFS in the script
+regions=$(echo $regions | tr , ' ')
+
+#
+# discover envs if not provided
+#
+test "$envs" == discover && unset envs
+if [ ! -z "$envs" ]; then
+  # convert comma separated to space separated to buse regular IFS in the script
+  envs=$(echo $envs | tr ',' ' ')
+else
+  WARN "envs parameter not specified. Discovering list of environments from tag."
+  # discover ENV names via OCI ENUM tag 
+  cache_ttl=$cache_ttl_oci_tag
+  cache_group=oci_tag
+  cache_key=${tag_ns}_${tag_env}
+
+  oci_tag=$(cache.invoke oci iam tag get --tag-name $tag_env --tag-namespace-id $tag_ns)
+  tag_type=$(echo "$oci_tag" | jq -r '.data.validator."validator-type"')
+  if [ "$tag_type" != ENUM ]; then
+    named_exit "Error. Tag with list of environments must be ENUM type."
+  fi
+
+  envs=$(echo $oci_tag | jq .data.validator.values | tr -d '[]" ,' | grep -v '^$')
+fi
+
+########################################
+# run genercic steps for the script 3of3
+#  --- do not change this section ---
+check_mandatory_arguments
+#  --- do not change this section ---
+########################################
+
+
+########################################
+# script start control logic
+########################################
+
 
 #
 # execute ansible required tasks

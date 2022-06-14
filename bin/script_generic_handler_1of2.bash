@@ -15,6 +15,7 @@
 #
 # DONE
 #
+# NORMAL add mandatory parameters handler
 # CRITICAL check if OS is linux-gnu
 # fix argument - list with spaces to list with commas
 # SYSTEM add generic Trap with default Quit
