@@ -262,7 +262,7 @@ function generic.check_mandatory_arguments() {
       if [ -z "$mandatory_missing" ]; then
         mandatory_missing=$cfg_param
       else
-        mandatory_missing=$mandatory_missing,cfg_param
+        mandatory_missing=$mandatory_missing,$cfg_param
       fi
     fi
   done
