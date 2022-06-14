@@ -29,9 +29,26 @@ function script_generic_handler._interrupt(){
 # Helper functions
 #############################
 
+function generic._check_required_generic_tool() {
+  tool=$1
+
+  $tool 2>/dev/null >/dev/null
+  if [ $? -eq 127 ]; then
+    if [ -z "$missing_tools" ]; then
+      missing_tools=$tool
+    else
+      missing_tools=$missing_tools,$tool
+    fi
+  fi
+}
+
 # check required libs
 function generic.check_required_tools() {
   unset missing_tools
+  
+  generic._check_required_generic_tool which
+  generic._check_required_generic_tool tr
+  test ! -z "$missing_tools" && named_exit "Required generic tools not available." "$missing_tools"
 
   script_libs=$(echo $script_libs | tr , ' ')
   for script_lib in $script_libs; do
@@ -46,8 +63,10 @@ function generic.check_required_tools() {
   done
   missing_tools=$(echo $missing_tools | sed 's/,$//')
   test ! -z "$missing_tools" && named_exit "Required tools not available." "$missing_tools"
+}
 
   # load libraries
+function generic.load_libraries() {
   script_libs=$(echo $script_libs | tr , ' ')
   for script_lib in $script_libs; do
     source $script_bin/$script_lib 2>/dev/null

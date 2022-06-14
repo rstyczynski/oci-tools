@@ -128,12 +128,12 @@ function quit() {
 source $script_bin/script_generic_handler_2of2.bash || named_exit "Required library not found in script path." script_generichandler_2of2.bash 
 
 generic.check_required_tools
+generic.load_libraries
 generic.set_default_arguments
 generic.load_cli_arguments $@
 generic.load_persisted_arguments
 generic.validate_arguments
 generic.persist_arguments
-
 #  --- do not change this section ---
 ########################################
 

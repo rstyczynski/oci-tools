@@ -45,6 +45,7 @@ source $(dirname "$0" 2>/dev/null)/named_exit.bash
 # system level exit codes
 set_exit_code_variable "Script bin directory unknown." 1
 set_exit_code_variable "Required library not found in script path." 2
+set_exit_code_variable "Required generic tools not available." 3
 set_exit_code_variable "Required tools not available." 3
 set_exit_code_variable "Mandatory arguments missing." 4
 set_exit_code_variable "Parameter validation failed."  5
@@ -63,7 +64,7 @@ script_libs="$script_libs,config.bash,validators.bash"
 script_args_system="$script_args_system,config_id:,temp_dir:,debug,trace,warning:,help,setconfig:,progress_spinner:,validate_params:"
 
 # extend script tools
-script_tools="$script_tools,getopt,sed,cut,tr,grep"
+script_tools="$script_tools,getopt,sed,cut,tr,grep,sort,which"
 
 # arguments - validators
 unset script_args_validator
