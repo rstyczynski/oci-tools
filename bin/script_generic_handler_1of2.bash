@@ -7,24 +7,31 @@
 #
 # TODO
 #
+# CRITICAL check if OS is linux-gnu
 
 #
 # PROGRESS
 #
-# fix arguent - list with spaces
 
 #
 # DONE
 #
+# fix argument - list with spaces to list with commas
 # SYSTEM add generic Trap with default Quit
 # temp dir with script name
 # fix missing tools check, lib load
 # fix validators, default
 # improve trace with details
 
+# check if OS is linux-gnu
+if [ $OSTYPE != 'linux-gnu' ]; then
+  echo "Critical error. Script is designed only for Linux. Can't continue." >&2
+  exit 1
+fi
+
 # load named_exit
 if [ ! -f $(dirname "$0" 2>/dev/null)/named_exit.sh ]; then
-  echo "$script_name: Critical error. Required named_exit.sh library not found in script path. Can't continue."
+  echo "Critical error. Required named_exit.sh library not found in script path. Can't continue." >&2
   exit 1
 fi
 source $(dirname "$0")/named_exit.sh
