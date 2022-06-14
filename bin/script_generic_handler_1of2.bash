@@ -7,10 +7,12 @@
 #
 # TODO
 #
+# NORMAL set local persist as default
 
 #
 # PROGRESS
 #
+# NORMAL convert generic code into functions
 
 #
 # DONE

@@ -13,6 +13,7 @@
 #
 # PROGRESS
 #
+# NORMAL convert generic code into functions
 
 #
 # DONE
@@ -70,11 +71,7 @@ script_tools='oci,jq,cat,cut,tr,grep'
 ########################################
 # run genercic steps for the script 1of3
 #  --- do not change this section ---
-if [ ! -f $(dirname "$0" 2>/dev/null)/script_generic_handler_1of2.bash ]; then
-  echo "Required library not found in script path. Info: script_generic_handler_1of2.bash " >&2
-  exit 1
-fi
-source $(dirname "$0" 2>/dev/null)/script_generic_handler_1of2.bash
+source $(dirname "$0" 2>/dev/null)/script_generic_handler_1of2.bash || echo "Required library not found in script path. Info: script_generic_handler_1of2.bash " >&2 || exit 1
 #  --- do not change this section ---
 ########################################
 
@@ -116,25 +113,6 @@ set_exit_code_variable "Configuration saved."  0
 set_exit_code_variable "Ansible list completed" 0
 set_exit_code_variable "Ansible host completed" 0
 
-########################################
-# run genercic steps for the script 2of3
-#  --- do not change this section ---
-source $script_bin/script_generic_handler_2of2.bash || named_exit "Required library not found in script path." script_generichandler_2of2.bash 
-#  --- do not change this section ---
-########################################
-
-
-################################
-# actual script code starts here
-################################
-
-#
-# proccess parameters
-#
-
-# cache spinner
-cache_progress=$progress_spinner
-
 #
 # define quit
 #
@@ -143,6 +121,26 @@ function quit() {
   # put other quit actions here
   : # colon added as null operation
 }
+
+########################################
+# run genercic steps for the script 2of3
+#  --- do not change this section ---
+source $script_bin/script_generic_handler_2of2.bash || named_exit "Required library not found in script path." script_generichandler_2of2.bash 
+
+generic.check_required_tools
+generic.set_default_arguments
+generic.load_persisted_arguments
+generic.load_cli_arguments
+generic.validate_arguments
+generic.persist_arguments
+
+#  --- do not change this section ---
+########################################
+
+
+################################
+# actual script code starts here
+################################
 
 #
 # get data from oci
@@ -353,6 +351,9 @@ fi
 # process arguments
 ########################################
 
+# cache spinner
+cache_progress=$progress_spinner
+
 # convert comma separated to space separated to buse regular IFS in the script
 regions=$(echo $regions | tr , ' ')
 
@@ -385,7 +386,7 @@ fi
 ########################################
 # run genercic steps for the script 3of3
 #  --- do not change this section ---
-check_mandatory_arguments
+generic.check_mandatory_arguments
 #  --- do not change this section ---
 ########################################
 

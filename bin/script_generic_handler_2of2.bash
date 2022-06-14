@@ -5,35 +5,6 @@
 #
 
 #
-# Check environment
-#
-
-# check required libs
-unset missing_tools
-IFS=', '
-for script_lib in $script_libs; do
-  test ! -f $script_bin/$script_lib && missing_tools="$script_lib,$missing_tools"
-done
-
-# check required tools
-for cli_tool in $script_tools; do
-  which $cli_tool > /dev/null 2>/dev/null
-  test $? -eq 1 && missing_tools="$cli_tool,$missing_tools"
-done
-
-
-missing_tools=$(echo $missing_tools | sed 's/,$//')
-test ! -z "$missing_tools" && named_exit "Required tools not available." "$missing_tools"
-
-#
-# load libraries
-#
-for script_lib in $script_libs; do
-  source $script_bin/$script_lib 2>/dev/null
-done
-unset IFS
-
-#
 # execute quit function on exit
 #
 
@@ -56,75 +27,108 @@ function script_generic_handler._interrupt(){
   named_exit "Operation interrupted."
 }
 
+
 #
-# read arguments
+# Check environment
 #
 
-# Parameters are reflected in shell variables which are set with parameter value. 
-# No value parameters are set to 'set' if exist in cmd line arguents
+# check required libs
+function generic.check_required_tools() {
+  unset missing_tools
 
-# clean params to avoid exported ones
-for cfg_param in $(echo "$script_args_persist,$script_args_system,$script_args" | tr , ' ' | tr -d :); do
-  unset $cfg_param
-done
+  script_libs=$(echo $script_libs | tr , ' ')
+  for script_lib in $script_libs; do
+    test ! -f $script_bin/$script_lib && missing_tools="$script_lib,$missing_tools"
+  done
+
+  # check required tools
+  script_tools=$(echo $script_tools | tr , ' ')
+  for cli_tool in $script_tools; do
+    which $cli_tool > /dev/null 2>/dev/null
+    test $? -eq 1 && missing_tools="$cli_tool,$missing_tools"
+  done
+  missing_tools=$(echo $missing_tools | sed 's/,$//')
+  test ! -z "$missing_tools" && named_exit "Required tools not available." "$missing_tools"
+
+  # load libraries
+  script_libs=$(echo $script_libs | tr , ' ')
+  for script_lib in $script_libs; do
+    source $script_bin/$script_lib 2>/dev/null
+  done
+}
 
 #
 # set default values
 #
-
-for variable in ${!script_args_default[@]}; do
-  eval $variable=${script_args_default[$variable]}
-done
+function generic.set_default_arguments() {
+  for variable in ${!script_args_default[@]}; do
+    eval $variable=${script_args_default[$variable]}
+  done
+}
 
 #
 # read command line arguments
 #
+function generic.load_cli_arguments() {
+  valid_opts=$(getopt --longoptions "$script_args,$script_args_persist,$script_args_system" --options "" --name "$script_name" -- $@)
+  eval set --"$valid_opts"
 
-valid_opts=$(getopt --longoptions "$script_args,$script_args_persist,$script_args_system" --options "" --name "$script_name" -- $@)
-eval set --"$valid_opts"
-
-while [[ $# -gt 0 ]]; do
-  if [ $1 == '--' ]; then
-    break
-  fi
-  var_name=$(echo $1 | cut -b3-999)
-  if [[ "$2" != --* ]]; then
-    eval $var_name="$2"; shift 2
-  else
-    eval $var_name="set"; shift 1
-  fi
-done
-
-# change set flag to yes|no
-for param in $(echo "$script_args_persist,$script_args_system,$script_args" | tr , '\n' | grep -v :); do
-  if [ "${!param}" == set ]; then
-    eval $param=yes
-  else
-    eval $param=no
-  fi
-done
-
-#
-# trace
-#
-if [ "$trace" == yes ]; then
-  # http://www.skybert.net/bash/debugging-bash-scripts-on-the-command-line/
-  export PS4='# ${BASH_SOURCE}:${LINENO}: ${FUNCNAME[0]}() - [${SHLVL},${BASH_SUBSHELL},$?] '
-  set -o xtrace
-fi
-
-#
-# debug handler
-#
-if [ "$debug" == yes ]; then
-
-  # enable debug for loaded libraries
-  for script_lib in $script_libs; do
-    lib_name=$(echo $script_lib | cut -f1 -d.)
-    eval ${lib_name}_debug=yes
+  while [[ $# -gt 0 ]]; do
+    if [ $1 == '--' ]; then
+      break
+    fi
+    var_name=$(echo $1 | cut -b3-999)
+    if [[ "$2" != --* ]]; then
+      eval $var_name="$2"; shift 2
+    else
+      eval $var_name="set"; shift 1
+    fi
   done
 
-fi
+  # change set flag to yes|no
+  for param in $(echo "$script_args_persist,$script_args_system,$script_args" | tr , '\n' | grep -v :); do
+    if [ "${!param}" == set ]; then
+      eval $param=yes
+    else
+      eval $param=no
+    fi
+  done
+
+  #
+  # trace
+  #
+  if [ "$trace" == yes ]; then
+    # http://www.skybert.net/bash/debugging-bash-scripts-on-the-command-line/
+    export PS4='# ${BASH_SOURCE}:${LINENO}: ${FUNCNAME[0]}() - [${SHLVL},${BASH_SUBSHELL},$?] '
+    set -o xtrace
+  fi
+
+  #
+  # debug handler
+  #
+  if [ "$debug" == yes ]; then
+    # enable debug for loaded libraries
+    for script_lib in $script_libs; do
+      lib_name=$(echo $script_lib | cut -f1 -d.)
+      eval ${lib_name}_debug=yes
+    done
+  fi
+
+  # set script_cfg name
+  if [ ! -z "$cfg_id" ]; then
+    script_cfg=$cfg_id
+  fi
+
+  #
+  # start
+  #
+  about >&2
+
+  if [ "$help" == yes ]; then
+    usage
+    exit 0
+  fi
+}
 
 function DEBUG() {
   if [ "$debug" == yes ]; then
@@ -137,16 +141,6 @@ function WARN() {
     echo $@ >&2
   fi
 }
-
-
-#
-# set config source
-#
-
-if [ ! -z "$cfg_id" ]; then
-  script_cfg=$cfg_id
-fi
-
 
 #
 # script info
@@ -201,62 +195,53 @@ function usage() {
 }
 
 
-#
-# start
-#
-about >&2
-
-if [ "$help" == yes ]; then
-  usage
-  exit 0
-fi
 
 ###########################
 # perform non help steps
 ###########################
 
-#
-# read parameters from config file
-#
-
 # read parameters from cfg file
+function generic.load_persisted_arguments() {
 for cfg_param in $(echo $script_args_persist | tr , ' ' | tr -d :); do
   if [ -z "${!cfg_param}" ]; then
     eval $cfg_param="$(config.getcfg $script_cfg $cfg_param)"
   fi
 done
+}
 
 #
 # validate. validate params even from config file, as it's possible thet it was edited manually
 #
-
-if [ "$validate_params" == yes ]; then
-  for param in $(echo "$script_args_persist,$script_args_system,$script_args" | tr , ' ' | tr -d :); do
-      if [ ! -z "${!param}" ]; then
-        validators_validate $param
-        if [ $? -ne 0 ]; then
-          validator_debug_value=$validator_debug
-          validator_debug=yes
+function generic.validate_arguments() {
+  if [ "$validate_params" == yes ]; then
+    for param in $(echo "$script_args_persist,$script_args_system,$script_args" | tr , ' ' | tr -d :); do
+        if [ ! -z "${!param}" ]; then
           validators_validate $param
-          validator_debug=$validator_debug_value
-          named_exit "Parameter validation failed."
-        fi 
-      fi
-  done
-fi
+          if [ $? -ne 0 ]; then
+            validator_debug_value=$validator_debug
+            validator_debug=yes
+            validators_validate $param
+            validator_debug=$validator_debug_value
+            named_exit "Parameter validation failed."
+          fi 
+        fi
+    done
+  fi
+}
 
 #
 # persist parameters. All data is already validated.
 #
-
-for cfg_param in $(echo $script_args_persist | tr , ' ' | tr -d :); do
-  value=$(config.getcfg $script_cfg $cfg_param)
-  if [ -z "$value" ]; then
-    if [ ! -z "${!cfg_param}" ]; then
-      config.setcfg $script_cfg $cfg_param "${!cfg_param}" force
+function generic.persist_arguments() {
+  for cfg_param in $(echo $script_args_persist | tr , ' ' | tr -d :); do
+    value=$(config.getcfg $script_cfg $cfg_param)
+    if [ -z "$value" ]; then
+      if [ ! -z "${!cfg_param}" ]; then
+        config.setcfg $script_cfg $cfg_param "${!cfg_param}" force
+      fi
     fi
-  fi
-done
+  done
+}
 
 ###########################
 # check mandatory arguments
