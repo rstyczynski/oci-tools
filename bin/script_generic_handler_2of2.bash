@@ -232,35 +232,37 @@ if [ "$validate_params" == yes ]; then
 fi
 
 #
-# persist parameters
+# persist parameters. All data is already validated.
 #
 
-# Persistable configurables are stored in config files. When variable is not specified on cmd level, it is loaded from file. 
-# If it's not provided in cmd line, and not available in cfg file, then operator is asked for value. 
-# Finally if value is set at cmd line, and is not in config file - it will be persisted.
-#
-# config file identifier may be specified in cmd line. When not set default name of the script is used.
-
-# set parameters when not set
-for cfg_param in $(echo $script_args_persist | tr , ' ' | tr -d :); do
-  if [ -z "${!cfg_param}" ]; then
-    echo
-    echo "Info. Required configurable $cfg_param unknown."
-    read -p "Enter value for $cfg_param:" $cfg_param
-    
-    validators_validate "$cfg_param"
-    if [ $? -ne 0 ]; then
-      named_exit "Parameter validation failed." $cfg_param
-    fi 
-
-    config.setcfg $script_cfg $cfg_param "${!cfg_param}" force
-  fi
-done
-
-# persist when not persisted. All data is already validated.
 for cfg_param in $(echo $script_args_persist | tr , ' ' | tr -d :); do
   value=$(config.getcfg $script_cfg $cfg_param)
   if [ -z "$value" ]; then
     config.setcfg $script_cfg $cfg_param "${!cfg_param}" force
   fi
 done
+
+
+###########################
+# check mandatory arguments
+###########################
+
+function generic.check_mandatory_arguments() {
+  local mandatory_missing=''
+  for cfg_param in $(echo $script_args_mandatory | tr , ' ' | tr -d :); do
+    if [ -z "${!cfg_param}" ]; then
+      echo
+      echo "Required argument $cfg_param missing."
+      if [ -z "$mandatory_missing" ]; then
+        mandatory_missing=$cfg_param
+      else
+        mandatory_missing=$mandatory_missing,cfg_param
+      fi
+    fi
+  done
+
+  if [ ! -z "$mandatory_missing" ]; then
+    named_exit "Mandatory arguments missing." $mandatory_missing
+  fi
+}
+

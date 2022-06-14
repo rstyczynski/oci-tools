@@ -7,7 +7,6 @@
 #
 # TODO
 #
-# CRITICAL check if OS is linux-gnu
 
 #
 # PROGRESS
@@ -16,6 +15,7 @@
 #
 # DONE
 #
+# CRITICAL check if OS is linux-gnu
 # fix argument - list with spaces to list with commas
 # SYSTEM add generic Trap with default Quit
 # temp dir with script name
@@ -40,7 +40,9 @@ source $(dirname "$0")/named_exit.sh
 set_exit_code_variable "Script bin directory unknown." 1
 set_exit_code_variable "Required library not found in script path." 2
 set_exit_code_variable "Required tools not available." 3
-set_exit_code_variable "Parameter validation failed."  4
+set_exit_code_variable "Mandatory arguments missing." 4
+set_exit_code_variable "Parameter validation failed."  5
+
 
 # discover script directory
 unset script_bin
