@@ -15,6 +15,7 @@
 #
 # DONE
 #
+# fix # change integer to number
 # fix # NORMAL add mandatory parameters handler
 # NORMAL change script_generic_handler* to generic_handler*
 # fix harcoded tag name ENV change to variable tag_env
@@ -90,11 +91,11 @@ source $(dirname "$0" 2>/dev/null)/generic_handler_1of2.bash || echo "Required l
 
 # arguments - validators
 script_args_validator[progress_spinner]=yesno
-script_args_validator[cache_ttl_oci_region]=integer
-script_args_validator[cache_ttl_oci_search_instances]=integer
-script_args_validator[cache_ttl_oci_ocid2vnics]=integer
-script_args_validator[cache_ttl_oci_ip2instance]=integer
-script_args_validator[cache_ttl_oci_compute_instance]=integer
+script_args_validator[cache_ttl_oci_region]=number
+script_args_validator[cache_ttl_oci_search_instances]=number
+script_args_validator[cache_ttl_oci_ocid2vnics]=number
+script_args_validator[cache_ttl_oci_ip2instance]=number
+script_args_validator[cache_ttl_oci_compute_instance]=number
 script_args_validator[tag_ns]=word
 script_args_validator[tag_env]=word
 script_args_validator[list]=flag

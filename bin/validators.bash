@@ -13,6 +13,7 @@
 #
 # DONE
 #
+# change integer to number
 # list validator - words with comma as a separator
 # Mark function level variables as local
 # NORMAL add cahce for on-line services
@@ -55,7 +56,7 @@ unset validator_info
 declare -A validator_info
 
 validator_info[yesno]='yes|no'
-validator_info[integer]='integer'
+validator_info[number]='number'
 #TODO extend this list
 
 #
@@ -72,7 +73,7 @@ function validator_yesno() {
   esac
 }
 
-function validator_integer() {
+function validator_number() {
   local value=$1
 
   # https://stackoverflow.com/questions/806906/how-do-i-test-if-a-variable-is-a-number-in-bash
