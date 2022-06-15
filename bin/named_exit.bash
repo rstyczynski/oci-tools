@@ -36,15 +36,15 @@ function set_exit_code_variable() {
   local code=$2
 
   desc_id=$(echo "$desc" | sha256sum | cut -f1 -d' ')
-  named_exit_exit_label[desc_id]="$desc"
-  named_exit_exit_code[desc_id]=$code
+  named_exit_exit_label[$desc_id]="$desc"
+  named_exit_exit_code[$desc_id]=$code
 }
 
 function get_exit_code_variable() {
   local desc=$1
 
   desc_id=$(echo "$desc" | sha256sum | cut -f1 -d' ')
-  echo ${named_exit_exit_code[desc_id]}
+  echo ${named_exit_exit_code[$desc_id]}
 }
 
 function named_exit() {
