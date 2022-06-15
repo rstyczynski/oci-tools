@@ -16,6 +16,7 @@
 #
 # DONE
 #
+# No action requested. Invoke script with --help.
 # NORMAL script_desc shortly describes script purpose.
 # NORMAL script_cfg takes script name w/o extension
 # fix general support to enable library spinner
@@ -109,10 +110,11 @@ script_args_default[cache_ttl_oci_ip2instance]=5184000        # 10 years
 script_args_default[cache_ttl_oci_compute_instance]=5184000   # 10 years
 
 # exit codes - use above 10 for custom purposes.
-set_exit_code_variable "Instance selector not recognised." 10
-set_exit_code_variable "Wrong invocation of setconfig." 11
-set_exit_code_variable "Generated inventory JSON parsing failed" 12
-set_exit_code_variable "Tag with list of environments must be ENUM type." 13
+set_exit_code_variable "No action requested. Invoke script with --help." 10
+set_exit_code_variable "Instance selector not recognised." 11
+set_exit_code_variable "Wrong invocation of setconfig." 12
+set_exit_code_variable "Generated inventory JSON parsing failed" 13
+set_exit_code_variable "Tag with list of environments must be ENUM type." 14
 
 set_exit_code_variable "Configuration saved."  0
 set_exit_code_variable "Ansible list completed." 0
@@ -407,5 +409,4 @@ if [ ! -z "$host" ]; then
   named_exit "Ansible host completed."
 fi
 
-# nothing requested? Present how to use the script.
-usage
+named_exit "No action requested. Invoke script with --help."

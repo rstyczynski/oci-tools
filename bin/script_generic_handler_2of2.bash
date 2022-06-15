@@ -125,11 +125,11 @@ function generic.load_cli_arguments() {
   about >&2
 
   if [ "$help" == yes ]; then
-    usage
+    usage >&2
     exit 0
   fi
 
-  
+
   #
   # debug handler
   #
