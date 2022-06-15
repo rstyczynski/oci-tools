@@ -16,6 +16,7 @@
 #
 # DONE
 #
+# NORMAL script_desc shortly describes script purpose.
 # NORMAL script_cfg takes script name w/o extension
 # fix general support to enable libary spinner
 # NORMAL convert generic code into functions
@@ -56,6 +57,7 @@
 script_name='oci2ansible_inventory'
 script_version='1.0'
 script_by='ryszard.styczynski@oracle.com'
+script_desc='Builds Ansible inventory JSON out of OCI compute instanes using defined tags to carry environment name, and instane properties.'
 script_repo=https://github.com/rstyczynski/oci-tools.git
 script_docs=
 

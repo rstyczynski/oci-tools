@@ -15,6 +15,7 @@
 #
 # DONE
 #
+# NORMAL script_desc shortly describes script purpose.
 # NORMAL script_cfg takes script name w/o extension
 # fix general support to enable libary spinner
 # fix sort arguments in help 

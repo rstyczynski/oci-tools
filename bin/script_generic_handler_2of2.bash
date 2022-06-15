@@ -169,6 +169,7 @@ function WARN() {
 #
 function about() {
   echo "$script_name, $script_version by $script_by" 
+  echo "$script_desc"
 }
 
 function usage() {
