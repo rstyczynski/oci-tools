@@ -234,9 +234,11 @@ function usage() {
     fi
   done
 
-  echo "Sucess messages:"
+  echo
+  echo "Success messages:"
   cat $temp_dir/ok_codes | sort -k2
 
+  echo
   echo "Error codes and messages:"
   cat $temp_dir/error_codes | sort -n
 
