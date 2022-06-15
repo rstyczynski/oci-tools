@@ -57,7 +57,7 @@
 script_name='oci2ansible_inventory'
 script_version='1.0'
 script_by='ryszard.styczynski@oracle.com'
-script_desc='Builds Ansible inventory JSON out of OCI compute instanes using defined tags to carry environment name, and instane properties.'
+script_desc='Builds Ansible inventory JSON out of OCI compute instanes using defined tags to carry environment name, and instance properties.'
 script_repo=https://github.com/rstyczynski/oci-tools.git
 script_docs=
 

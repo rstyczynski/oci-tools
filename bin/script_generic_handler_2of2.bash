@@ -169,10 +169,10 @@ function WARN() {
 #
 function about() {
   echo "$script_name, $script_version by $script_by" 
-  echo "$script_desc"
 }
 
 function usage() {
+  echo "$script_desc"
   echo
   echo -n "Usage: $script_name" 
   for param in $(echo "$script_args_persist,$script_args_system,$script_args" | tr , ' ' | tr -d :); do
