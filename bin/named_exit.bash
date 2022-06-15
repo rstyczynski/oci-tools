@@ -1,18 +1,50 @@
 #!/bin/bash
 
+#
+# TODO
+#
+
+#
+# PROGRESS
+#
+
+#
+# DONE
+#
+# store labels and code in associative array
+
+#
+# lib information
+#
+
+lib_name='named_exit.bash'
+lib_version='1.0'
+lib_by='ryszard.styczynski@oracle.com'
+
+lib_tools=''
+lib_cfg=''
+
+#
+# lib code
+#
+
+declare -A named_exit.exit_label
+declare -A named_exit.exit_code
+
 function set_exit_code_variable() {
   desc=$1
   code=$2
 
-  desc_var=$(echo $desc | sed -e 's/[^A-Za-z0-9_-]/_/g')
-  eval "script_exit_codes_$desc_var=$code"
+  desc_id=$(echo $desc | sha256sum | cut -f1 -d' ')
+  named_exit.exit_label[desc_id]=$desc
+  named_exit.exit_code[desc_id]=$code
 }
 
 function get_exit_code_variable() {
   desc=$1
 
-  desc_var=$(echo $desc | sed -e 's/[^A-Za-z0-9_-]/_/g')
-  eval "echo \$script_exit_codes_$desc_var"
+  desc_id=$(echo $desc | sha256sum | cut -f1 -d' ')
+  echo ${named_exit.exit_code[desc_id]}
 }
 
 function named_exit() {
