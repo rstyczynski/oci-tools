@@ -220,8 +220,6 @@ function usage() {
     fi
   fi
 
-  echo 
-  echo "Exit codes and messages:"
   unset ok_code
   unset error_code
   for exit_code_id in ${!named_exit_exit_code[@]}; do
@@ -240,7 +238,7 @@ function usage() {
 
   echo
   echo "Error codes and messages:"
-  cat $temp_dir/error_codes | sort -n -t '-'
+  cat $temp_dir/error_codes | sort -n -t '-' -k2
 
   rm -rf $temp_dir/ok_codes $temp_dir/error_codes
 
