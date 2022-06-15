@@ -3,9 +3,8 @@
 #
 # TODO
 #
-# CRITICAL Check if generic script_* varaibles are filled. Phase 1 of generic steps
+# HIGH Check if generic script_* varaibles are filled. Phase 1 of generic steps
 # LOW cache_ttl as one global parameter
-# NICE TODO script information
 # NICE named_exit verification auto scan
 # EXPERIMENTAL Associate with jump host env level ansible user / key
 
