@@ -7,10 +7,13 @@
 #
 # TODO
 #
+# HIGH Check if generic script_* varaibles are filled. Phase 1 of generic steps
+# NICE named_exit verification auto scan
 
 #
 # PROGRESS
 #
+# NORMAL Add exit codes inforamtion to help
 
 #
 # DONE
@@ -51,11 +54,11 @@ source $(dirname "$0" 2>/dev/null)/named_exit.bash
 # system level exit codes
 set_exit_code_variable "Script bin directory unknown." 1
 set_exit_code_variable "Required library not found in script path." 2
-set_exit_code_variable "Required generic tools not available." 3
-set_exit_code_variable "Required tools not available." 3
-set_exit_code_variable "Mandatory arguments missing." 4
-set_exit_code_variable "Parameter validation failed."  5
-set_exit_code_variable "Operation interrupted." 6
+set_exit_code_variable "Required generic tools not available." 2
+set_exit_code_variable "Required tools not available." 2
+set_exit_code_variable "Mandatory arguments missing." 3
+set_exit_code_variable "Parameter validation failed." 4
+set_exit_code_variable "Operation interrupted." 5
 
 # discover script directory
 unset script_bin
