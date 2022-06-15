@@ -403,9 +403,9 @@ if [ "$list" == yes ]; then
 fi
 
 if [ ! -z "$host" ]; then
-  get_host_variables $host >/$temp_dir/variables.json
-  jq ".\"$host\"" /$temp_dir/variables.json || named_exit "Generated inventory JSON parsing failed"
-  rm /$temp_dir/variables.json
+  get_host_variables $host >$temp_dir/variables.json
+  jq ".\"$host\"" $temp_dir/variables.json || named_exit "Generated inventory JSON parsing failed"
+  rm $temp_dir/variables.json
   named_exit "Ansible host completed."
 fi
 
