@@ -16,6 +16,7 @@
 #
 # DONE
 #
+# fix harcoded tag name ENV change to variable tag_env
 # No action requested. Invoke script with --help.
 # NORMAL script_desc shortly describes script purpose.
 # NORMAL script_cfg takes script name w/o extension
@@ -171,13 +172,13 @@ function populate_instances() {
 
         cache_ttl=$cache_ttl_oci_search_instances
         cache_group=oci_search_instances
-        cache_key=${region}_${tag_ns}_${env}
+        cache_key=${region}_${tag_ns}_${tag_env}_${env}
         oci_search=$(cache.invoke \
         " \
           oci search resource structured-search \
           --region $region \
           --query-text \"query all resources where \
-          (definedTags.namespace = '$tag_ns' && definedTags.key = 'ENV' && definedTags.value = '$env')\"
+          (definedTags.namespace = '$tag_ns' && definedTags.key = '$tag_env' && definedTags.value = '$env')\"
         ")
         
         # TIP: always quote response from cache
@@ -392,12 +393,12 @@ if [ "$list" == yes ]; then
   fi
 
   # check if variables have values
-  generic.check_mandatory_arguments envs regions
+  generic.check_mandatory_arguments envs regions tag_env tag_ns
 
   # actual list processing
-  get_ansible_inventory $envs >/$temp_dir/inventory.json
-  jq . /$temp_dir/inventory.json || named_exit "Generated inventory JSON parsing failed"
-  rm /$temp_dir/inventory.json
+  get_ansible_inventory $envs >$temp_dir/inventory.json
+  jq . $temp_dir/inventory.json || named_exit "Generated inventory JSON parsing failed"
+  rm $temp_dir/inventory.json
 
   named_exit "Ansible list completed."
 fi
