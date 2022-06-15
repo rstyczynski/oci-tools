@@ -15,6 +15,7 @@
 #
 # DONE
 #
+# NORMAL change script_generic_handler* to generic_handler*
 # fix move spinner activation after help
 # NORMAL script_desc shortly describes script purpose.
 # NORMAL script_cfg takes script name w/o extension

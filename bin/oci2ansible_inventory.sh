@@ -15,6 +15,7 @@
 #
 # DONE
 #
+# NORMAL change script_generic_handler* to generic_handler*
 # fix harcoded tag name ENV change to variable tag_env
 # No action requested. Invoke script with --help.
 # NORMAL script_desc shortly describes script purpose.
@@ -77,7 +78,7 @@ script_tools='oci,jq,cat,cut,tr,grep'
 ########################################
 # run genercic steps for the script 1of2
 #  --- do not change this section ---
-source $(dirname "$0" 2>/dev/null)/script_generic_handler_1of2.bash || echo "Required library not found in script path. Info: script_generic_handler_1of2.bash " >&2 || exit 1
+source $(dirname "$0" 2>/dev/null)/generic_handler_1of2.bash || echo "Required library not found in script path. Info: generic_handler_1of2.bash " >&2 || exit 1
 #  --- do not change this section ---
 ########################################
 
@@ -133,7 +134,7 @@ function quit() {
 ########################################
 # run genercic steps for the script 2of2
 #  --- do not change this section ---
-source $script_bin/script_generic_handler_2of2.bash || named_exit "Required library not found in script path." script_generichandler_2of2.bash 
+source $script_bin/generic_handler_2of2.bash || named_exit "Required library not found in script path." script_generichandler_2of2.bash 
 
 generic.check_required_tools
 generic.load_libraries
