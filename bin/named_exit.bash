@@ -35,15 +35,15 @@ function set_exit_code_variable() {
   desc=$1
   code=$2
 
-  desc_id=$(echo $desc | sha256sum | cut -f1 -d' ')
-  named_exit.exit_label[desc_id]=$desc
+  desc_id=$(echo "$desc" | sha256sum | cut -f1 -d' ')
+  named_exit.exit_label[desc_id]="$desc"
   named_exit.exit_code[desc_id]=$code
 }
 
 function get_exit_code_variable() {
   desc=$1
 
-  desc_id=$(echo $desc | sha256sum | cut -f1 -d' ')
+  desc_id=$(echo "$desc" | sha256sum | cut -f1 -d' ')
   echo ${named_exit.exit_code[desc_id]}
 }
 
