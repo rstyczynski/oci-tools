@@ -15,6 +15,7 @@
 #
 # DONE
 #
+# fix # NORMAL add mandatory parameters handler
 # NORMAL change script_generic_handler* to generic_handler*
 # fix harcoded tag name ENV change to variable tag_env
 # No action requested. Invoke script with --help.
@@ -65,12 +66,12 @@ script_docs=
 
 script_args='list,host:'
 script_args_mandatory=''
-script_args_persist="$script_args_mandatory,regions:,envs:,tag_ns:,tag_env:"
+script_args_persist="regions:,envs:,tag_ns:,tag_env:"
 script_args_persist="$script_args_persist,cache_ttl_oci_tag:,cache_ttl_oci_search_instances:,\
 cache_ttl_oci_ocid2vnics:,cache_ttl_oci_ip2instance:,cache_ttl_oci_compute_instance:,cache_ttl_oci_region:"
 script_args_system=''
 
-script_cfg=''
+script_cfg=$script_name
 
 script_libs='cache.bash,JSON.bash'
 script_tools='oci,jq,cat,cut,tr,grep'

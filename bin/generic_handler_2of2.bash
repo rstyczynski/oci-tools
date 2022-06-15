@@ -86,7 +86,7 @@ function generic.set_default_arguments() {
 # read command line arguments
 #
 function generic.load_cli_arguments() {
-  valid_opts=$(getopt --longoptions "$script_args,$script_args_persist,$script_args_system" --options "" --name "$script_name" -- $@)
+  valid_opts=$(getopt --longoptions "$script_args,$script_args_mandatory,$script_args_persist,$script_args_system" --options "" --name "$script_name" -- $@)
   eval set --"$valid_opts"
 
   while [[ $# -gt 0 ]]; do
@@ -102,7 +102,7 @@ function generic.load_cli_arguments() {
   done
 
   # change set flag to yes|no
-  for param in $(echo "$script_args_persist,$script_args_system,$script_args" | tr , '\n' | grep -v :); do
+  for param in $(echo "$script_args,$script_args_mandatory,$script_args_persist,$script_args_system" | tr , '\n' | grep -v :); do
     if [ "${!param}" == set ]; then
       eval $param=yes
     else
@@ -179,7 +179,7 @@ function usage() {
   echo "$script_desc"
   echo
   echo -n "Usage: $script_name" 
-  for param in $(echo "$script_args_persist,$script_args_system,$script_args" | tr , ' ' | tr -d :); do
+  for param in $(echo "$script_args,$script_args_mandatory,$script_args_persist,$script_args_system" | tr , ' ' | tr -d :); do
     echo -n " --$param"
   done
   echo
@@ -240,7 +240,7 @@ done
 #
 function generic.validate_arguments() {
   if [ "$validate_params" == yes ]; then
-    for param in $(echo "$script_args_persist,$script_args_system,$script_args" | tr , ' ' | tr -d :); do
+    for param in $(echo "$script_args,$script_args_mandatory,$script_args_persist,$script_args_system" | tr , ' ' | tr -d :); do
         if [ ! -z "${!param}" ]; then
           validators_validate $param
           if [ $? -ne 0 ]; then
