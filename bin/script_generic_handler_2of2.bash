@@ -120,6 +120,17 @@ function generic.load_cli_arguments() {
   fi
 
   #
+  # start
+  #
+  about >&2
+
+  if [ "$help" == yes ]; then
+    usage
+    exit 0
+  fi
+
+  
+  #
   # debug handler
   #
   if [ "$debug" == yes ]; then
@@ -136,21 +147,12 @@ function generic.load_cli_arguments() {
     script_cfg=$config_id
   fi
 
-  #
-  # start
-  #
-  about >&2
-
-  if [ "$help" == yes ]; then
-    usage
-    exit 0
-  fi
-
   # cache spinner
   for script_lib in $script_libs; do
     lib_name=$(echo $script_lib | cut -f1 -d.)
     eval ${lib_name}_progress=$progress_spinner
   done
+
 }
 
 

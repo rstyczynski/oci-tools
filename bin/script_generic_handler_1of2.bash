@@ -18,7 +18,7 @@
 # fix move spinner activation after help
 # NORMAL script_desc shortly describes script purpose.
 # NORMAL script_cfg takes script name w/o extension
-# fix general support to enable libary spinner
+# fix general support to enable library spinner
 # fix sort arguments in help 
 # NORMAL set local persist as default
 # NORMAL convert generic code into functions

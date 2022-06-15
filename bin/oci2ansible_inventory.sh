@@ -18,7 +18,7 @@
 #
 # NORMAL script_desc shortly describes script purpose.
 # NORMAL script_cfg takes script name w/o extension
-# fix general support to enable libary spinner
+# fix general support to enable library spinner
 # NORMAL convert generic code into functions
 # NORMAL add mandatory parameters handler
 # fix envs parameters is a list with comma as a separator
