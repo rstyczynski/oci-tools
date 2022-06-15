@@ -226,7 +226,7 @@ function usage() {
     exit_label=${named_exit_exit_label[$exit_code_id]}
     exit_code=${named_exit_exit_code[$exit_code_id]}
     if [ $exit_code -eq 0 ]; then
-      echo " \-$exit_code: $exit_label" >> $temp_dir/ok_codes
+      echo " \-$exit_label" >> $temp_dir/ok_codes
     else
       echo " \-$exit_code: $exit_label" >> $temp_dir/error_codes
     fi
