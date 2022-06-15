@@ -15,6 +15,7 @@
 #
 # DONE
 #
+# NORMAL script_cfg takes script name w/o extension
 # fix general support to enable libary spinner
 # fix sort arguments in help 
 # NORMAL set local persist as default
@@ -58,14 +59,17 @@ script_path=$0
 test $script_path != '-bash' && script_bin=$(dirname "$0" 2>/dev/null)
 test -z "$script_bin" && named_exit "Script bin directory unknown."
 
-# extend script libs by config validator, as used by generic code
-script_libs="$script_libs,config.bash,validators.bash"
-
 # extend system argument by generic ones
 script_args_system="$script_args_system,config_id:,temp_dir:,debug,trace,warning:,help,setconfig:,progress_spinner:,validate_params:"
 
+# extend script libs by config validator, as used by generic code
+script_libs="$script_libs,config.bash,validators.bash"
+
 # extend script tools
 script_tools="$script_tools,getopt,sed,cut,tr,grep,sort,which"
+
+# script_cfg takes script name w/o extension
+: ${script_cfg:=$(basename "$0" | cut -f1 -d.)}
 
 # arguments - validators
 unset script_args_validator

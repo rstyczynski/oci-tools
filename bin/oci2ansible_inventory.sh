@@ -16,6 +16,7 @@
 #
 # DONE
 #
+# NORMAL script_cfg takes script name w/o extension
 # fix general support to enable libary spinner
 # NORMAL convert generic code into functions
 # NORMAL add mandatory parameters handler
@@ -56,6 +57,7 @@ script_name='oci2ansible_inventory'
 script_version='1.0'
 script_by='ryszard.styczynski@oracle.com'
 script_repo=https://github.com/rstyczynski/oci-tools.git
+script_docs=
 
 script_args='list,host:'
 script_args_mandatory=''
@@ -64,7 +66,7 @@ script_args_persist="$script_args_persist,cache_ttl_oci_tag:,cache_ttl_oci_searc
 cache_ttl_oci_ocid2vnics:,cache_ttl_oci_ip2instance:,cache_ttl_oci_compute_instance:,cache_ttl_oci_region:"
 script_args_system=''
 
-script_cfg='oci2ansible_inventory'
+script_cfg=''
 
 script_libs='cache.bash,JSON.bash'
 script_tools='oci,jq,cat,cut,tr,grep'
@@ -111,17 +113,18 @@ set_exit_code_variable "Generated inventory JSON parsing failed" 12
 set_exit_code_variable "Tag with list of environments must be ENUM type." 13
 
 set_exit_code_variable "Configuration saved."  0
-set_exit_code_variable "Ansible list completed" 0
-set_exit_code_variable "Ansible host completed" 0
+set_exit_code_variable "Ansible list completed." 0
+set_exit_code_variable "Ansible host completed." 0
 
-#
+#########################################
 # define quit
-#
+#########################################
 function quit() {
   # temp dir is deleted by generic code
   # put other quit actions here
   : # colon added as null operation
 }
+
 
 ########################################
 # run genercic steps for the script 2of2
@@ -246,7 +249,6 @@ function populate_instance_variables() {
   jq ".data.\"defined-tags\".$tag_ns" | 
   tr -d '{}" ,' > $temp_dir/oci_instance.tags
 
-
   tags=$(cat $temp_dir/oci_instance.tags | cut -f1 -d:)
   for tag in $tags; do
     instance_variables[$tag]=$(cat $temp_dir/oci_instance.tags | grep "^$tag:"| cut -f2 -d:)
@@ -351,26 +353,24 @@ fi
 # script start control logic
 ########################################
 
-
 #
 # execute ansible required tasks
 #
 
 if [ "$list" == yes ]; then
 
-  # convert comma separated to space separated to buse regular IFS in the script
+  # convert comma separated to space separated to use regular IFS in the script
   regions=$(echo $regions | tr , ' ')
 
-  #
   # discover envs if not provided
-  #
   test "$envs" == discover && unset envs
   if [ ! -z "$envs" ]; then
-    # convert comma separated to space separated to buse regular IFS in the script
+    # convert comma separated to space separated to use regular IFS in the script
     envs=$(echo $envs | tr ',' ' ')
   else
     WARN "envs parameter not specified. Discovering list of environments from tag."
 
+    # check if variables have values
     generic.check_mandatory_arguments tag_env tag_ns
 
     # discover ENV names via OCI ENUM tag 
@@ -387,20 +387,22 @@ if [ "$list" == yes ]; then
     envs=$(echo $oci_tag | jq .data.validator.values | tr -d '[]" ,' | grep -v '^$')
   fi
 
+  # check if variables have values
   generic.check_mandatory_arguments envs regions
 
+  # actual list processing
   get_ansible_inventory $envs >/$temp_dir/inventory.json
   jq . /$temp_dir/inventory.json || named_exit "Generated inventory JSON parsing failed"
   rm /$temp_dir/inventory.json
 
-  named_exit "Ansible list completed"
+  named_exit "Ansible list completed."
 fi
 
 if [ ! -z "$host" ]; then
   get_host_variables $host >/$temp_dir/variables.json
   jq ".\"$host\"" /$temp_dir/variables.json || named_exit "Generated inventory JSON parsing failed"
   rm /$temp_dir/variables.json
-  named_exit "Ansible host completed"
+  named_exit "Ansible host completed."
 fi
 
 # nothing requested? Present how to use the script.
