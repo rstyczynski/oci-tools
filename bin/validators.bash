@@ -87,7 +87,7 @@ function validator_number() {
 function validator_keyvalue() {
   local value=$1
 
-  re='^\w+=[\w-]+$'
+  re='^[a-zA-Z0-9_]+=[a-zA-Z0-9_-]+$'
   if ! [[ $value =~ $re ]] ; then
     return 1
   fi
