@@ -8,11 +8,12 @@
 #
 # PROGRESS
 #
-# CRITICAL unset IFS in loops
 
 #
 # DONE
 #
+# NORMAL Added keyvalue validator
+# CRITICAL unset IFS in loops
 # change integer to number
 # list validator - words with comma as a separator
 # Mark function level variables as local
@@ -78,6 +79,15 @@ function validator_number() {
 
   # https://stackoverflow.com/questions/806906/how-do-i-test-if-a-variable-is-a-number-in-bash
   re='^[0-9]+$'
+  if ! [[ $value =~ $re ]] ; then
+    return 1
+  fi
+}
+
+function validator_keyvalue() {
+  local value=$1
+
+  re='^\w+=[\w-]+$'
   if ! [[ $value =~ $re ]] ; then
     return 1
   fi

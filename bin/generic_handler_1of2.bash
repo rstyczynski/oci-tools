@@ -96,7 +96,7 @@ script_args_help[trace]='Turn on trace.'
 script_args_help[warning]='Control warning messages presentation.'
 script_args_help[help]='Display script help.'
 script_args_help[validate_params]='Control validation of paramters. By defult all validation is performed. You may disable it when needed in the particular situation.'
-script_args_help[setconfig]='Persists requested ergument value in config.'
+script_args_help[setconfig]='Persists requested argument value in config.'
 
 # arguments - validators
 unset script_args_validator
@@ -110,6 +110,7 @@ script_args_validator[trace]=flag
 script_args_validator[warning]=flag
 script_args_validator[help]=flag
 script_args_validator[validate_params]=yesno
+script_args_validator[setconfig]=keyvalue
 
 # arguments - default values
 unset script_args_default
