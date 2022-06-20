@@ -69,7 +69,7 @@ function generic.check_required_tools() {
 function generic.load_libraries() {
   script_libs=$(echo $script_libs | tr , ' ')
   for script_lib in $script_libs; do
-    source $script_bin/$script_lib 2>/dev/null
+    source $script_bin/$script_lib #2>/dev/null
   done
 }
 
