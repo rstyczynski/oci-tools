@@ -49,7 +49,7 @@ function cache.ensure_environment() {
 
   # check required tools
   unset missing_tools
-  unset cache_environment_faulure_cause
+  unset cache_environment_failure_cause
 
   if [ ! -z "$lib_cfg" ]; then
     test ! -f $lib_bin/config.sh && missing_tools="config.sh,$missing_tools"
@@ -69,8 +69,8 @@ function cache.ensure_environment() {
   # TODO: how to exit using generic way?
   if [ ! -z "$missing_tools" ]; then
 
-    cache_environment_faulure_cause="Required tools not available. Missing tools:$missing_tools"
-    echo $cache_environment_faulure_cause >&2
+    cache_environment_failure_cause="Required tools not available. Missing tools:$missing_tools"
+    echo $cache_environment_failure_cause >&2
     cache_environment=failed
     result=1
   else 
@@ -305,5 +305,5 @@ cache.ensure_environment 2>/dev/null
 if [ $? -eq 0 ]; then
   echo "Bash cache library loaded. Invoke cache.help to learn more." >&2
 else
-  echo "Bash cache library loaded with errors: $cache_environment_faulure_cause. Invoke cache.help to learn more." >&2
+  echo "Bash cache library loaded with errors: $cache_environment_failure_cause. Invoke cache.help to learn more." >&2
 fi

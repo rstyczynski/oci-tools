@@ -481,3 +481,6 @@ function validators_test() {
   echo ${validator_oci_format_ocid_error[@]}
 
 }
+
+
+echo "Validator library loaded." >&2
