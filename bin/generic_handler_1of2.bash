@@ -15,11 +15,11 @@
 #
 # PROGRESS
 #
-# NORMAL Move setconfig code to generic
 
 #
 # DONE
 #
+# NORMAL Move setconfig code to generic
 # NORMAL add support for documentaton of parameters 
 # NORMAL Add exit codes inforamtion to help
 # fix # NORMAL add mandatory parameters handler

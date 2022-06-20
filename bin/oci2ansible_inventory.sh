@@ -9,11 +9,11 @@
 #
 # PROGRESS
 #
-# NORMAL Move setconfig code to generic
 
 #
 # DONE
 #
+# NORMAL Move setconfig code to generic
 # NORMAL add support for documentaton of parameters 
 # fix # change integer to number
 # fix # NORMAL add mandatory parameters handler
