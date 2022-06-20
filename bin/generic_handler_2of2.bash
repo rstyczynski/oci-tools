@@ -213,6 +213,10 @@ function usage() {
 
   echo 
   echo 'Argument formats:'
+  echo "${validator_info[@]}"
+  echo "${!validator_info[@]}"
+  declare -p validator_info
+
   if [ ${#script_args_validator[@]} -gt 0 ]; then
     for variable in $(echo ${!script_args_validator[@]} | tr ' ' '\n' | sort); do
       for validator in $(echo ${script_args_validator[$variable]} | tr , ' '); do

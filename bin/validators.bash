@@ -43,8 +43,6 @@ function validator_WARN() {
 : ${validator_warining:=yes}
 : ${validator_usecache:=yes}
 
-cache_ttl_oci_region=xxx
-
 if [ "$validator_usecache" == yes ]; then
   cache.invoke >/dev/null 2>/dev/null
   if [ $? -eq 127 ]; then
