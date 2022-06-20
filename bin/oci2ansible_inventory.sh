@@ -9,11 +9,12 @@
 #
 # PROGRESS
 #
-# NORMAL Add info to validators
+
 
 #
 # DONE
 #
+# NORMAL Add info to validators
 # NORMAL Move setconfig code to generic
 # NORMAL add support for documentaton of parameters 
 # fix # change integer to number

@@ -482,5 +482,4 @@ function validators_test() {
 
 }
 
-
 echo "Validator library loaded." >&2

@@ -69,7 +69,7 @@ function generic.check_required_tools() {
 function generic.load_libraries() {
   script_libs=$(echo $script_libs | tr , ' ')
   for script_lib in $script_libs; do
-    source $script_bin/$script_lib #2>/dev/null
+    source $script_bin/$script_lib 2>/dev/null
   done
 }
 
@@ -213,10 +213,6 @@ function usage() {
 
   echo 
   echo 'Argument formats:'
-  echo "${validator_info[@]}"
-  echo "${!validator_info[@]}"
-  declare -p validator_info
-
   if [ ${#script_args_validator[@]} -gt 0 ]; then
     for variable in $(echo ${!script_args_validator[@]} | tr ' ' '\n' | sort); do
       for validator in $(echo ${script_args_validator[$variable]} | tr , ' '); do
