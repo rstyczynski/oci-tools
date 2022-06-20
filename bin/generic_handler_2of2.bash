@@ -184,11 +184,11 @@ function usage() {
   done
   echo
 
+  echo
   echo 'Notes about arguments:'
   for param in $(echo "$script_args,$script_args_mandatory,$script_args_persist,$script_args_system" | tr , ' ' | tr -d :); do
     echo " * $param: ${script_args_help[$param]}"
   done
-  echo
 
   echo 
   echo 'Argument formats:'
