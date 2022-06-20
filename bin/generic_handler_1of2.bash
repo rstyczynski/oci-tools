@@ -7,7 +7,7 @@
 #
 # TODO
 #
-# NORMAL Add inforation about used tools and libs by the script
+# NORMAL Add information about used tools and libs by the script
 # NORMAL generate documentaton in markup format
 # HIGH Check if generic script_* varaibles are filled. Phase 1 of generic steps
 # NICE named_exit verification auto scan
@@ -15,6 +15,7 @@
 #
 # PROGRESS
 #
+# NORMAL Move setconfig code to generic
 
 #
 # DONE

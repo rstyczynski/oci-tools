@@ -3,13 +3,13 @@
 #
 # TODO
 #
-# NORMAL Move setconfig code to generic
 # LOW cache_ttl as one global parameter
 # EXPERIMENTAL Associate with jump host env level ansible user / key
 
 #
 # PROGRESS
 #
+# NORMAL Move setconfig code to generic
 
 #
 # DONE
@@ -158,10 +158,12 @@ generic.check_required_tools
 generic.load_libraries
 generic.set_default_arguments
 generic.load_cli_arguments $@
+generic.handle_setconfig
 generic.load_persisted_arguments
 generic.validate_arguments
 generic.persist_arguments
 generic.check_mandatory_arguments
+
 #  --- do not change this section ---
 ########################################
 
@@ -351,26 +353,6 @@ function get_host_variables() {
 
   JSON.close
 }
-
-
-########################################
-# execute configuration tasks
-########################################
-if [ ! -z "$setconfig" ]; then
-  echo $setconfig | grep '=' >/dev/null
-  if [ $? -eq 1 ]; then
-    named_exit "Wrong invocation of setconfig." $setcfg
-  else
-    key=$(echo $setconfig | cut -f1 -d=)
-    value=$(echo $setconfig | cut -f2 -d=)
-    if [ -z "$key" ] || [ -z "$value" ]; then
-      named_exit "Wrong invocation of setconfig." $setcfg
-    else
-      config.setcfg $script_cfg $key $value force
-      named_exit "Configuration saved." $script_cfg
-    fi
-  fi
-fi
 
 ########################################
 # script start control logic

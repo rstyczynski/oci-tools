@@ -129,7 +129,6 @@ function generic.load_cli_arguments() {
     exit 0
   fi
 
-
   #
   # debug handler
   #
@@ -155,6 +154,28 @@ function generic.load_cli_arguments() {
 
 }
 
+function generic.handle_setconfig() {
+
+  ########################################
+  # execute configuration tasks
+  ########################################
+  if [ ! -z "$setconfig" ]; then
+    echo $setconfig | grep '=' >/dev/null
+    if [ $? -eq 1 ]; then
+      named_exit "Wrong invocation of setconfig." $setcfg
+    else
+      key=$(echo $setconfig | cut -f1 -d=)
+      value=$(echo $setconfig | cut -f2 -d=)
+      if [ -z "$key" ] || [ -z "$value" ]; then
+        named_exit "Wrong invocation of setconfig." $setcfg
+      else
+        config.setcfg $script_cfg $key $value force
+        named_exit "Configuration saved." $script_cfg
+      fi
+    fi
+  fi
+
+}
 
 function DEBUG() {
   if [ "$debug" == yes ]; then
