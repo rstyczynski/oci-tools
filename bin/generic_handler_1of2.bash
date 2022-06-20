@@ -15,11 +15,11 @@
 #
 # PROGRESS
 #
-# NORMAL add support for documentaton of parameters 
 
 #
 # DONE
 #
+# NORMAL add support for documentaton of parameters 
 # NORMAL Add exit codes inforamtion to help
 # fix # NORMAL add mandatory parameters handler
 # NORMAL change script_generic_handler* to generic_handler*
