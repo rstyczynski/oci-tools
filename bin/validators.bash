@@ -8,6 +8,7 @@
 #
 # PROGRESS
 #
+# NORMAL Add info to validators
 
 #
 # DONE
@@ -18,6 +19,7 @@
 # list validator - words with comma as a separator
 # Mark function level variables as local
 # NORMAL add cahce for on-line services
+
 
 #
 # debug handler
@@ -41,11 +43,13 @@ function validator_WARN() {
 : ${validator_warining:=yes}
 : ${validator_usecache:=yes}
 
+cache_ttl_oci_region=xxx
+
 if [ "$validator_usecache" == yes ]; then
   cache.invoke >/dev/null 2>/dev/null
   if [ $? -eq 127 ]; then
     validator_usecache=no
-    WARN "cache.bash not available. To use cache source cache.bash firs."
+    WARN "cache.bash not available. To use cache, source cache.bash first."
   fi
 fi
 
@@ -55,15 +59,13 @@ fi
 
 unset validator_info
 declare -A validator_info
-
-validator_info[yesno]='yes|no'
-validator_info[number]='number'
-#TODO extend this list
+# Note: validators info is added next to exach function.
 
 #
 # validators
 #
 
+validator_info[yesno]='Checks if an argument is yes or no. Case insensitive.'
 function validator_yesno() {
   local value=$(echo $1 | tr '[A-Z]' '[a-z]')
 
@@ -74,6 +76,7 @@ function validator_yesno() {
   esac
 }
 
+validator_info[number]='Checks if an argument is a number.'
 function validator_number() {
   local value=$1
 
@@ -84,6 +87,7 @@ function validator_number() {
   fi
 }
 
+validator_info[keyvalue]='Checks if an argument is key=value. Key is a word with optional underscore, value may have dash.'
 function validator_keyvalue() {
   local value=$1
 
@@ -93,6 +97,7 @@ function validator_keyvalue() {
   fi
 }
 
+validator_info[word]='Checks if an argument is a word with optional underscore.'
 function validator_word() {
   local value=$1
 
@@ -102,16 +107,8 @@ function validator_word() {
   fi
 }
 
+validator_info[words]='Checks if an argument is a comma separated list of words with optional underscore.'
 function validator_words() {
-  local value=$1
-
-  re='^[ a-zA-Z0-9_]+$'
-  if ! [[ $value =~ $re ]] ; then
-    return 1
-  fi
-}
-
-function validator_list() {
   local value=$1
 
   re='^[,a-zA-Z0-9_]+$'
@@ -120,6 +117,7 @@ function validator_list() {
   fi
 }
 
+validator_info[label]='Checks if an argument is a word with optional underscore and dashes.'
 function validator_label() {
   local value=$1
 
@@ -129,16 +127,18 @@ function validator_label() {
   fi
 }
 
+validator_info[labels]='Checks if an argument is a comma separated list of words with optional underscore and dashes.'
 function validator_labels() {
   local value=$1
 
   # hyphen at the end: https://stackoverflow.com/questions/55377810/bash-regex-with-hyphen-and-dot
-  re='^[ a-zA-Z0-9_-]+$'
+  re='^[,a-zA-Z0-9_-]+$'
   if ! [[ $value =~ $re ]] ; then
     return 1
   fi
 }
 
+validator_info[flag]='Check if an argument is set, yes, no, or empty.'
 function validator_flag() {
   local value=$1
 
@@ -149,6 +149,7 @@ function validator_flag() {
   return 1
 }
 
+validator_info[writable]='Checks if a directory is writable.'
 function validator_directory_writable() {
   local dir=$1
 
@@ -158,7 +159,7 @@ function validator_directory_writable() {
   rm -f $dir/marker
 }
 
-
+validator_info[ip_address]='Check if an argument is IP address.'
 function validator_ip_address() {
   local ip_address=$1
 
@@ -175,6 +176,7 @@ EOF
 }
 
 # on-line
+validator_info[tcp_service_reachable]='Check if it is possible to open socket to TCP Service.'
 function validator_tcp_service_reachable() {
   local ip_address=$(echo $1 | cut -d: -f1)
   local ip_address_port=$(echo $1 | cut -d: -f2)
@@ -198,6 +200,7 @@ EOF
 }
 
 # on-line
+validator_info[ip_address_reachable]='Check if it is possible to ping IP address.'
 function validator_ip_address_reachable() {
   local ip_address=$1
 
@@ -210,14 +213,15 @@ function validator_ip_address_reachable() {
   return $ping_status
 }
 
+validator_info[ip_network]='Check if an arguet is a IP network.'
 function validator_ip_network() {
-  local ip_address=$1
+  local ip_network=$1
 
   >&2 python3 <<EOF
 import ipaddress
 
 try:
-  ipaddress.ip_network(unicode("$ip_address"))
+  ipaddress.ip_network(unicode("$ip_network"))
 except Exception as ex:
   print(ex)
   exit(1)
@@ -225,7 +229,7 @@ EOF
   return $?
 }
 
-function validator_oci_format_ocid() {
+function _validator_oci_format_ocid() {
   local resource_ocid=$1
   local resource_type=$2
 
@@ -260,17 +264,20 @@ function validator_oci_format_ocid() {
   return $exit_code
 }
 
+validator_info[oci_format_ocid_compartment]='Checks if an argument is a proper OCI compartment OCID.'
 function validator_oci_format_ocid_compartment() {
-  validator_oci_format_ocid $1 compartment
+  _validator_oci_format_ocid $1 compartment
   return $?
 }
 
+validator_info[oci_format_ocid_tenancy]='Checks if an argument is a proper OCI tenancy OCID.'
 function validator_oci_format_ocid_tenancy() {
-  validator_oci_format_ocid $1 tenancy
+  _validator_oci_format_ocid $1 tenancy
   return $?
 }
 
 # on-line
+validator_info[oci_lookup_ocid]='Verifies if given OCID is known at OCI. Uses OCI CLI call with cache. Cache TTL is controlled by cache_ttl_oci_ocid_search.'
 function validator_oci_lookup_ocid() {
   ocid=$1
 
@@ -295,6 +302,7 @@ function validator_oci_lookup_ocid() {
 }
 
 # on-line
+validator_info[oci_lookup_regions]='Verifies if given region is on list of OCI regions. Uses OCI CLI call with cache. Cache TTL is controlled by cache_ttl_oci_region.'
 function validator_oci_lookup_region() {
   local region=$1
 
@@ -316,6 +324,7 @@ function validator_oci_lookup_region() {
 }
 
 # on-line
+validator_info[oci_lookup_regions]='Comma separated list of OCI regions.'
 function validator_oci_lookup_regions() {
   local regions=$@
 

@@ -7,6 +7,7 @@
 #
 # TODO
 #
+# HIGH Add OSX support by using brew install gnu-getopt  
 # NORMAL Add information about used tools and libs by the script
 # NORMAL generate documentaton in markup format
 # HIGH Check if generic script_* varaibles are filled. Phase 1 of generic steps
@@ -15,6 +16,7 @@
 #
 # PROGRESS
 #
+# NORMAL Add info to validators
 
 #
 # DONE

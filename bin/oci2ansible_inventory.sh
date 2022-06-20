@@ -9,6 +9,7 @@
 #
 # PROGRESS
 #
+# NORMAL Add info to validators
 
 #
 # DONE
@@ -107,8 +108,8 @@ script_args_help[cache_ttl_oci_compute_instance]='Cache lifetime in minutes for 
 # arguments - validators
 script_args_validator[list]=flag
 script_args_validator[host]=ip_address
-script_args_validator[envs]=list
-script_args_validator[tag_ns]=word
+script_args_validator[envs]=labels
+script_args_validator[tag_ns]=word,words
 script_args_validator[tag_env]=word
 script_args_validator[regions]=oci_lookup_regions
 script_args_validator[progress_spinner]=yesno
