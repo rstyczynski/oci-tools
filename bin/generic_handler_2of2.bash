@@ -170,7 +170,7 @@ function generic.handle_setconfig() {
         named_exit "Wrong invocation of setconfig." $setcfg
       else
         config.setcfg $script_cfg $key $value force
-        named_exit "Configuration saved." $script_cfg
+        named_exit "Configuration saved." "$script_cfg: $key/$(config.getcfg $script_cfg $key)"
       fi
     fi
   fi
