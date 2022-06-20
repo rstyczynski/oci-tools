@@ -158,9 +158,9 @@ generic.check_required_tools
 generic.load_libraries
 generic.set_default_arguments
 generic.load_cli_arguments $@
-generic.handle_setconfig
 generic.load_persisted_arguments
 generic.validate_arguments
+generic.handle_setconfig
 generic.persist_arguments
 generic.check_mandatory_arguments
 
