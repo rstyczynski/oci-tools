@@ -55,9 +55,11 @@ fi
 # validators info
 #
 
+set -x
 unset validator_info
 declare -A validator_info
 # Note: validators info is added next to exach function.
+set +x
 
 #
 # validators
@@ -484,3 +486,4 @@ function validators_test() {
 
 
 echo "Validator library loaded." >&2
+declare -p validator_info
