@@ -5,10 +5,10 @@
 #
 
 # execute quit function on exit
-trap script_generic_handler._exit exit int
-trap script_generic_handler._interrupt int
+trap generic._exit exit int
+trap generic._interrupt int
 
-function script_generic_handler._exit(){
+function generic._exit(){
 
   if [ -d $temp_dir ]; then
     rm -rf $temp_dir
@@ -18,9 +18,9 @@ function script_generic_handler._exit(){
   [[ $(type -t quit) == function ]] && quit
 }
 
-function script_generic_handler._interrupt(){
+function generic._interrupt(){
 
-  script_generic_handler._exit
+  generic._exit
   named_exit "Operation interrupted."
 }
 
@@ -181,6 +181,12 @@ function usage() {
   echo -n "Usage: $script_name" 
   for param in $(echo "$script_args,$script_args_mandatory,$script_args_persist,$script_args_system" | tr , ' ' | tr -d :); do
     echo -n " --$param"
+  done
+  echo
+
+  echo 'Notes about arguments:'
+  for param in $(echo "$script_args,$script_args_mandatory,$script_args_persist,$script_args_system" | tr , ' ' | tr -d :); do
+    echo " * $param: ${script_args_help[$param]}"
   done
   echo
 

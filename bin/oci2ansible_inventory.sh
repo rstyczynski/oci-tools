@@ -3,12 +3,14 @@
 #
 # TODO
 #
+# NORMAL Move setconfig code to generic
 # LOW cache_ttl as one global parameter
 # EXPERIMENTAL Associate with jump host env level ansible user / key
 
 #
 # PROGRESS
 #
+# NORMAL add support for documentaton of parameters 
 
 #
 # DONE
@@ -59,7 +61,7 @@
 script_name='oci2ansible_inventory'
 script_version='1.0'
 script_by='ryszard.styczynski@oracle.com'
-script_desc='Builds Ansible inventory JSON out of OCI compute instanes using defined tags to carry environment name, and instance properties.'
+script_desc='Builds Ansible inventory JSON out of OCI compute instances using defined tags to carry environment name, and instance properties.'
 script_repo=https://github.com/rstyczynski/oci-tools.git
 script_docs=
 
@@ -87,19 +89,35 @@ source $(dirname "$0" 2>/dev/null)/generic_handler_1of2.bash || echo "Required l
 # configure custom arguments & exit codes
 #########################################
 
+# arguments - help
+script_args_help[list]='Ansible level argument triggerig dump of whole inventory in JSON format.'
+script_args_help[host]='Ansible level argument triggerig dump of host variables in JSON format.'
+script_args_help[envs]='Comma separated list of environments to build inventry file. When not provided auto discovery is triggered usng enum defined tag provided by tag_env argument.'
+script_args_help[tag_ns]='OCI tag namespace used to collect tag keys and values.'
+script_args_help[tag_env]='OCI defined tag name used to filter by environment name. This tag must be ENUM type, what makes it possible to use this tag to disover fll list of environments.'
+script_args_help[regions]='OCI regions where search for insances is performed.'
+script_args_help[progress_spinner]='Show spinner indicating cache activity.'
+script_args_help[cache_ttl_oci_region]='Cache lifetime in minutes for OCI regions.'
+script_args_help[cache_ttl_oci_tag]='Cache lifetime in minutes for OCI tag. Used during discovery of environmnt names.'
+script_args_help[cache_ttl_oci_search_instances]='Cache lifetime in minutes for insane search.'
+script_args_help[cache_ttl_oci_ocid2vnics]='Cache lifetime in minutes for OCI instance virtual netowrk card.'
+script_args_help[cache_ttl_oci_ip2instance]='Cache lifetime in minutes for OCI instance to private ip.'
+script_args_help[cache_ttl_oci_compute_instance]='Cache lifetime in minutes for OCI compute instance.'
+
 # arguments - validators
+script_args_validator[list]=flag
+script_args_validator[host]=ip_address
+script_args_validator[envs]=list
+script_args_validator[tag_ns]=word
+script_args_validator[tag_env]=word
+script_args_validator[regions]=oci_lookup_regions
 script_args_validator[progress_spinner]=yesno
 script_args_validator[cache_ttl_oci_region]=number
+script_args_validator[cache_ttl_oci_tag]=number
 script_args_validator[cache_ttl_oci_search_instances]=number
 script_args_validator[cache_ttl_oci_ocid2vnics]=number
 script_args_validator[cache_ttl_oci_ip2instance]=number
 script_args_validator[cache_ttl_oci_compute_instance]=number
-script_args_validator[tag_ns]=word
-script_args_validator[tag_env]=word
-script_args_validator[list]=flag
-script_args_validator[host]=ip_address
-script_args_validator[regions]=oci_lookup_regions
-script_args_validator[envs]=list
 
 # arguments - default values
 script_args_default[progress_spinner]=yes
@@ -245,7 +263,7 @@ function populate_instance_variables() {
 
   # TIP: react on empty answer when such answer is not possible
   if [ -z "$compute_instance" ]; then
-    WARN "Cache returned emty answer. Clearing cache and retries." $instance_ocid
+    WARN "Cache returned empty answer. Clearing cache and retries." $instance_ocid
     cache.flush oci compute instance get --region "$search_region" --instance-id "$instance_ocid"
     compute_instance=$(cache.invoke oci compute instance get --region "$search_region" --instance-id "$instance_ocid")
   fi
