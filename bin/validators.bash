@@ -8,11 +8,11 @@
 #
 # PROGRESS
 #
-# NORMAL Add info to validators
 
 #
 # DONE
 #
+# NORMAL Add info to validators
 # NORMAL Added keyvalue validator
 # CRITICAL unset IFS in loops
 # change integer to number
@@ -63,7 +63,7 @@ declare -A -g validator_info
 # validators
 #
 
-validator_info[yesno]='Checks if an argument is yes or no. Case insensitive.'
+validator_info[yesno]='yes or no. Case insensitive.'
 function validator_yesno() {
   local value=$(echo $1 | tr '[A-Z]' '[a-z]')
 
@@ -74,7 +74,7 @@ function validator_yesno() {
   esac
 }
 
-validator_info[number]='Checks if an argument is a number.'
+validator_info[number]='Just a number.'
 function validator_number() {
   local value=$1
 
@@ -85,7 +85,7 @@ function validator_number() {
   fi
 }
 
-validator_info[keyvalue]='Checks if an argument is key=value. Key is a word with optional underscore, value may have dash.'
+validator_info[keyvalue]='key=value. Key is a word with optional underscore, value may have dash.'
 function validator_keyvalue() {
   local value=$1
 
@@ -95,7 +95,7 @@ function validator_keyvalue() {
   fi
 }
 
-validator_info[word]='Checks if an argument is a word with optional underscore.'
+validator_info[word]='Word with optional underscore.'
 function validator_word() {
   local value=$1
 
@@ -105,7 +105,7 @@ function validator_word() {
   fi
 }
 
-validator_info[words]='Checks if an argument is a comma separated list of words with optional underscore.'
+validator_info[words]='Comma separated list of words with optional underscore.'
 function validator_words() {
   local value=$1
 
@@ -115,7 +115,7 @@ function validator_words() {
   fi
 }
 
-validator_info[label]='Checks if an argument is a word with optional underscore and dashes.'
+validator_info[label]='Word with optional underscore and dashes.'
 function validator_label() {
   local value=$1
 
@@ -136,7 +136,7 @@ function validator_labels() {
   fi
 }
 
-validator_info[flag]='Check if an argument is set, yes, no, or empty.'
+validator_info[flag]='set, yes, no, or empty.'
 function validator_flag() {
   local value=$1
 
@@ -147,7 +147,7 @@ function validator_flag() {
   return 1
 }
 
-validator_info[directory_writable]='Checks if a directory is writable.'
+validator_info[directory_writable]='Is a directory writable?'
 function validator_directory_writable() {
   local dir=$1
 
@@ -157,7 +157,7 @@ function validator_directory_writable() {
   rm -f $dir/marker
 }
 
-validator_info[ip_address]='Check if an argument is IP address.'
+validator_info[ip_address]='Valid IP address.'
 function validator_ip_address() {
   local ip_address=$1
 
@@ -174,7 +174,7 @@ EOF
 }
 
 # on-line
-validator_info[tcp_service_reachable]='Check if it is possible to open socket to TCP Service.'
+validator_info[tcp_service_reachable]='TCP Service responds to socket open request.'
 function validator_tcp_service_reachable() {
   local ip_address=$(echo $1 | cut -d: -f1)
   local ip_address_port=$(echo $1 | cut -d: -f2)
@@ -198,7 +198,7 @@ EOF
 }
 
 # on-line
-validator_info[ip_address_reachable]='Check if it is possible to ping IP address.'
+validator_info[ip_address_reachable]='IP address responds to ICMP (ping) request.'
 function validator_ip_address_reachable() {
   local ip_address=$1
 
@@ -211,7 +211,7 @@ function validator_ip_address_reachable() {
   return $ping_status
 }
 
-validator_info[ip_network]='Check if an arguet is a IP network.'
+validator_info[ip_network]='Valid IP network.'
 function validator_ip_network() {
   local ip_network=$1
 
@@ -262,20 +262,20 @@ function _validator_oci_format_ocid() {
   return $exit_code
 }
 
-validator_info[oci_format_ocid_compartment]='Checks if an argument is a proper OCI compartment OCID.'
+validator_info[oci_format_ocid_compartment]='Pproper OCI compartment OCID.'
 function validator_oci_format_ocid_compartment() {
   _validator_oci_format_ocid $1 compartment
   return $?
 }
 
-validator_info[oci_format_ocid_tenancy]='Checks if an argument is a proper OCI tenancy OCID.'
+validator_info[oci_format_ocid_tenancy]='Proper OCI tenancy OCID.'
 function validator_oci_format_ocid_tenancy() {
   _validator_oci_format_ocid $1 tenancy
   return $?
 }
 
 # on-line
-validator_info[oci_lookup_ocid]='Verifies if given OCID is known at OCI. Uses OCI CLI call with cache. Cache TTL is controlled by cache_ttl_oci_ocid_search.'
+validator_info[oci_lookup_ocid]='Known at OCI OCID. Uses OCI CLI call with cache. Cache TTL is controlled by cache_ttl_oci_ocid_search.'
 function validator_oci_lookup_ocid() {
   ocid=$1
 

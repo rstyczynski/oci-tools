@@ -16,11 +16,11 @@
 #
 # PROGRESS
 #
-# NORMAL Add info to validators
 
 #
 # DONE
 #
+# NORMAL Add info to validators
 # NORMAL Move setconfig code to generic
 # NORMAL add support for documentaton of parameters 
 # NORMAL Add exit codes inforamtion to help
