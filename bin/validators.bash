@@ -149,7 +149,7 @@ function validator_flag() {
   return 1
 }
 
-validator_info[writable]='Checks if a directory is writable.'
+validator_info[directory_writable]='Checks if a directory is writable.'
 function validator_directory_writable() {
   local dir=$1
 
