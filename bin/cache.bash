@@ -506,12 +506,10 @@ function cache.test() {
 
 if [[ $0 == "$BASH_SOURCE" ]] ; then
   cat <<_info_EOF 
-Do not run this bash library. It's is intended to be used by source cache.bash"
+Do not run this bash library. It's is intended to be used by source cache.bash. Use cache.help to learn how to use the library."
 As you started - executing exemplary test to let you know how to use the library.
-Use cache.help to learn how to use the library.
 
 _info_EOF
 
   cache.test
 fi
-
