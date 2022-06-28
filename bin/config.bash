@@ -176,6 +176,7 @@ function config.test_group1_init() {
   rm -f ~/.config/test_group1
   rm -f ~/.test_group1/config
 }
+
 function config.test_group1_results() {
   echo "Global /etc/test_group1.config:"
   cat /etc/test_group1.config
