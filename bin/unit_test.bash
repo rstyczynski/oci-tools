@@ -34,28 +34,30 @@ function test._verify() {
 
   : ${expected_result_exit:=0}
   
-  code_id=$(echo "$name $code" | sha1sum | cut -f1 -d' ' )
-  test_name[$code_id]="$name"
-  test_code[$code_id]="$cmd"
+  code_id=id_$(echo "$name $code" | sha1sum | cut -f1 -d' ' )
+  test_name[id_$code_id]="$name"
+  test_code[id_$code_id]="$cmd"
 
   echo -n "$name "
   # eval must be used to handle params with space properly
-  (eval $code) >$temp_dir/$code_id.stdout 2>$temp_dir/$code_id.sterr
+  (eval $code) >$temp_dir/id_$code_id.stdout 2>$temp_dir/id_$code_id.sterr
   exit_code=$?
 
-  if [ "$(cat $temp_dir/$code_id.stdout)" != "$expected_result_stdout" ]; then
+  if [ "$(cat $temp_dir/id_$code_id.stdout)" != "$expected_result_stdout" ]; then
     echo Error
-    test_result[$code_id]=error
+    test_result[id_$code_id]=error
     echo 
 
-    echo '!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
-    cat $temp_dir/$code_id.stdout
-    cat $temp_dir/$code_id.sterr
-    echo '!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
+    echo '!!!!! expected !!!!!!!!'
+    echo expected: $expected_result_stdout
+    echo '!!!!! received !!!!!!!!'
+    cat $temp_dir/id_$code_id.stdout
+    cat $temp_dir/id_$code_id.sterr
+    echo '!!!!!!!!!!!!!!!!!!!!!!!'
 
   else
     echo OK
-    test_result[$code_id]=ok
+    test_result[id_$code_id]=ok
   fi
 }
 
@@ -90,7 +92,7 @@ function test.verify() {
 
 function test.results(){
   for code_id in ${!test_name[@]}; do
-    echo "${test_name[$code_id]}: ${test_result[$code_id]}"
+    echo "${test_name[id_$code_id]}: ${test_result[id_$code_id]}"
   done
 }
 
