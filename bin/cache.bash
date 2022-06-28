@@ -169,7 +169,8 @@ function cache._invoke() {
     cache._progress
 
     # EXPERIMENTAL
-    if [ ! -z "$cache_crypto_cipher" ] || [ ! -z "$cache_crypto_key" ]; then
+    if [ ! -z "$cache_crypto_key" ]; then
+      : ${cache_crypto_cipher:=aes-256-cbc}
       cache_invoke_filter="openssl $cache_crypto_cipher -a -pass file:$cache_crypto_key"
       cache_response_filter="openssl $cache_crypto_cipher -d -a -pass file:$cache_crypto_key"
     fi
@@ -271,7 +272,7 @@ function cache.invoke() {
   if [ -d $cache_dir/$cache_group ] && [ -f $cmd_stdout ]; then
     
     # EXPERIMENTAL
-    : ${cache_response_filter:=$(cat $cache_dir/$cache_group/$cache_key.info | grep "^cache_response_filter=" | cut -f2-999 -d=)}
+    cache_response_filter=$(cat $cache_dir/$cache_group/$cache_key.info | grep "^cache_response_filter=" | cut -f2-999 -d=)
 
     cat $cmd_stdout | $cache_response_filter
     # EXPERIMENTAL
@@ -434,26 +435,65 @@ EOF
   unset cache_invoke_filter
   unset cache_response_filter
 
-  crypto_key=$HOME/.ssh/id_rsa
-  crypto_cipher=aes-256-cbc
-  cache_invoke_filter="openssl $crypto_cipher -a -pass file:$crypto_key"
-  cache_response_filter="openssl $crypto_cipher -d -a -pass file:$crypto_key"
+  cache_crypto_key=$HOME/.ssh/id_rsa
+  cache_crypto_cipher=aes-256-cbc
+  cache_invoke_filter="openssl $cache_crypto_cipher -a -pass file:$cache_crypto_key"
+  cache_response_filter="openssl $cache_crypto_cipher -d -a -pass file:$cache_crypto_key"
   test.verify "cache8 - cache cipher" "cache_group=echo cache_key=hello8 cache.invoke echo hello" hello
   test.verify "cache8 - cache cipher" "cache_group=echo cache_key=hello8 cache.invoke :" hello
-  unset cache_invoke_filter
   unset cache_response_filter
+  unset cache_invoke_filter
   unset crypto_key
   unset crypto_cipher
 
-  crypto_key=$HOME/.ssh/id_rsa
-  crypto_cipher=aes-256-cbc
+  cache_crypto_key=$HOME/.ssh/id_rsa
+  cache_crypto_cipher=aes-256-cbc
   test.verify "cache9 - cache cipher" "cache_group=echo cache_key=hello9 cache.invoke echo hello" hello
   test.verify "cache9 - cache cipher" "cache_group=echo cache_key=hello9 cache.invoke :" hello
-  unset crypto_key
-  unset crypto_cipher
+  unset cache_crypto_key
+  unset cache_crypto_cipher
+
+  cache_crypto_key=$HOME/.ssh/id_rsa
+  test.verify "cache9a - cache cipher" "cache_group=echo cache_key=hello9a cache.invoke echo hello9a" hello9a
+  test.verify "cache9a - cache cipher" "cache_group=echo cache_key=hello9a cache.invoke :" hello9a
+  unset cache_crypto_key
+
+  # big files
+  rm -rf $cache_dir/download
+  mkdir -p $cache_dir/download
+  url='curl https://freetestdata.com/wp-content/uploads/2022/02/Free_Test_Data_5MB_AVI.avi'
+  cache_group=download cache_key=file10 cache.invoke $url > $cache_dir/download/file10.stream
+  test.verify "cache10 - 5MB file" "cache_group=download cache_key=file10 cache.invoke $url | sha1sum" "$(cat $cache_dir/download/file10.stream | sha1sum)"
+
+  rm -rf $cache_dir/download
+  mkdir -p $cache_dir/download
+  cache_crypto_key=$HOME/.ssh/id_rsa
+  cache_crypto_cipher=aes-256-cbc
+  url='curl https://freetestdata.com/wp-content/uploads/2022/02/Free_Test_Data_5MB_AVI.avi'
+  cache_group=download cache_key=file11 cache.invoke $url > $cache_dir/download/file11.stream
+  test.verify "cache10 - 5MB file" "cache_group=download cache_key=file11 cache.invoke $url | sha1sum" "$(cat $cache_dir/download/file11.stream | sha1sum)"
+  unset cache_crypto_key
+  unset cache_crypto_cipher
+
+  filter=$(cat $cache_dir/download/file11.info | grep "^cache_response_filter=" | cut -f2-999 -d=)
+  test.verify "cache10 - 5MB file - apply filter check" "cat $cache_dir/download/file11 | $filter | sha1sum" "$(cat $cache_dir/download/file11.stream | sha1sum)"
+  test.verify "cache10 - 5MB file - openssl decrypt check" "cat $cache_dir/download/file11 | openssl aes-256-cbc -d -a -pass file:/home/pmaker/.ssh/id_rsa | sha1sum" "$(cat $cache_dir/download/file11.stream | sha1sum)"
+
+
 }
 
 function cache.test() {
+
+  script_bin=$(dirname "$0" 2>/dev/null)
+
+  if [ ! -f $script_bin/unit_test.bash ]; then
+    echo
+    echo "$script_name: Critical error. Required unit_test.bash library not found in script path. Test will not be executed."
+    exit 1
+  fi
+
+  source $script_bin/unit_test.bash
+
   cache.test_group1_init
   cache.test_group1
   cache.test_group1_results
@@ -471,16 +511,6 @@ As you started - executing exemplary test to let you know how to use the library
 Use cache.help to learn how to use the library.
 
 _info_EOF
-
-  script_bin=$(dirname "$0" 2>/dev/null)
-
-  if [ ! -f $script_bin/unit_test.bash ]; then
-    echo
-    echo "$script_name: Critical error. Required unit_test.bash library not found in script path. Test will not be executed."
-    exit 1
-  fi
-
-  source $script_bin/unit_test.bash
 
   cache.test
 fi
