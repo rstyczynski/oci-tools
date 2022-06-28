@@ -49,10 +49,10 @@ function test._verify() {
     echo 
 
     echo '!!!!! expected !!!!!!!!'
-    echo expected: $expected_result_stdout
+    echo expected: $(echo $expected_result_stdout | head | cut -b1-999)
     echo '!!!!! received !!!!!!!!'
-    cat $temp_dir/id_$code_id.stdout
-    cat $temp_dir/id_$code_id.sterr
+    cat $temp_dir/id_$code_id.stdout | head | cut -b1-999
+    cat $temp_dir/id_$code_id.sterr | head | cut -b1-999
     echo '!!!!!!!!!!!!!!!!!!!!!!!'
 
   else
