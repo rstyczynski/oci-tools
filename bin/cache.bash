@@ -13,7 +13,7 @@
 #
 # DONE
 #
-# fix: BASH_SOURCE to be used to discover source_bin directory
+# fix: BASH_SOURCE to be used to discover bin dir
 # TIP: react on empty answer when not possible
 # add encrypted cache instance storage
 # add test section
@@ -24,12 +24,12 @@
 # script information
 #
 
-lib_name='cache.bash'
-lib_version='1.1'
-lib_by='ryszard.styczynski@oracle.com'
+cache_lib_name='cache.bash'
+cache_lib_version='1.1'
+cache_lib_by='ryszard.styczynski@oracle.com'
 
-lib_tools=''
-lib_cfg=''
+cache_lib_tools='openssl,cut,tr,grep,cat,sha1sum'
+cache_lib_cfg=''
 
 # cache init 
 export cache_ttl
@@ -67,11 +67,14 @@ function cache.ensure_environment() {
   unset missing_tools
   unset cache_environment_failure_cause
 
-  if [ ! -z "$lib_cfg" ]; then
+  local missing_tools
+  local cache_environment_failure_cause
+
+  if [ ! -z "$cache_lib_cfg" ]; then
     test ! -f $lib_bin/config.sh && missing_tools="config.sh,$missing_tools"
   fi
 
-  for cli_tool in $lib_tools; do
+  for cli_tool in $cache_lib_tools; do
     which $cli_tool > /dev/null 2>/dev/null
     if [ $? -eq 1 ]; then
       if [ -z "$missing_tools" ]; then
@@ -203,8 +206,8 @@ function cache._invoke() {
     cat > $cache_dir/$cache_group/$cache_key.info <<EOF
 datetime=$(date +%Y-%m-%dT%H:%M:%S%z)
 timestamp=$(date +%s)
-lib_name=$lib_name
-lib_version=$lib_version
+cache_lib_name=$cache_lib_name
+cache_lib_version=$cache_lib_version
 hostname=$(hostname)
 whoami=$(whoami)
 cmd=$cmd
@@ -299,7 +302,7 @@ function cache.invoke() {
 
 function cache.help() {
   cat <<EOF
-Bash cache library $lib_version
+Bash cache library $cache_lib_version
 
 cache.invoke cmd              - use to invoke command cmd. Exit code comes from cmd
 cache.evict_group cmd               - remove old respose; controled by ttl
