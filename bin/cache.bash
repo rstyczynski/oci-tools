@@ -484,7 +484,7 @@ EOF
 
 function cache.test() {
 
-  script_bin=$(dirname "$0" 2>/dev/null)
+  script_bin=$(dirname "$BASH_SOURCE" 2>/dev/null)
 
   if [ ! -f $script_bin/unit_test.bash ]; then
     echo
