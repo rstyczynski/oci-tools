@@ -352,6 +352,8 @@ ls -la ~/greetings/echo
 cache_group=echo cache.evict_group
 ls -la ~/greetings/echo
 
+rm -rf ~/greetings
+
 EOF
 }
 
