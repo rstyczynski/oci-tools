@@ -13,6 +13,7 @@
 #
 # DONE
 #
+# fix: BASH_SOURCE to be used to discover source_bin directory
 # TIP: react on empty answer when not possible
 # add encrypted cache instance storage
 # add test section
