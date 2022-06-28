@@ -8,6 +8,7 @@
 #
 # PROGRESS
 #
+# email address
 
 #
 # DONE
@@ -62,6 +63,18 @@ declare -A -g validator_info
 #
 # validators
 #
+
+
+validator_info[email]='email address.'
+function validator_email() {
+  local value=$1
+
+  # Source: https://gist.github.com/guessi/82a73ee7eb2b1216eb9db17bb8d65dd1
+  re="^(([A-Za-z0-9]+((\.|\-|\_|\+)?[A-Za-z0-9]?)*[A-Za-z0-9]+)|[A-Za-z0-9]+)@(([A-Za-z0-9]+)+((\.|\-|\_)?([A-Za-z0-9]+)+)*)+\.([A-Za-z]{2,})+$"
+  if ! [[ $value =~ $re ]] ; then
+    return 1
+  fi
+}
 
 validator_info[yesno]='yes or no. Case insensitive.'
 function validator_yesno() {
