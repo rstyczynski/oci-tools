@@ -179,6 +179,7 @@ os_user=$(getWLSjvmAttr ${wls_managed[0]} os_user)
 : ${os_user:=$(ps aux | grep weblogic.nodemanager | grep -v grep | cut -f1 -d' ')}
 
 mkdir -p $backup_dir/$(hostname)
+#XXX
 
 rm -rf $backup_dir/$(hostname)/diagnose-*
 
