@@ -3,22 +3,28 @@
 #
 # TODO
 #
+# add exit trap to clean cache_invoke_filter etc.
 
 #
 # PROGRESS
 #
 
+
 #
 # DONE
 #
 # TIP: react on empty answer when not possible
+# add encrypted cache instance storage
+# add test section
+# moved cache stdut answer to key
+# moved cahce sterr answer to key.err
 
 #
 # script information
 #
 
 lib_name='cache.bash'
-lib_version='1.0'
+lib_version='1.1'
 lib_by='ryszard.styczynski@oracle.com'
 
 lib_tools=''
@@ -28,14 +34,23 @@ lib_cfg=''
 export cache_ttl
 export cache_group
 export cache_key
+export cache_invoke_filter
+export cache_response_filter
+export cache_cipher
+export cache_key
 
-cache_group=
-cache_key=
-cache_ttl=
-cache_dir=
-cache_debug=
+unset cache_group
+unset cache_key
+unset cache_ttl
+unset cache_invoke_filter
+unset cache_response_filter
+unset cache_crypto_cipher
+unset cache_crypto_key
+
+unset cache_dir
+unset cache_debug
+
 cache_warning=yes
-
 cache_progress=no
 cache_spinner_cnt=1
 cache_spinner="/-\|"
@@ -153,7 +168,28 @@ function cache._invoke() {
 
     cache._progress
 
-    eval $cmd > $cmd_stdout 2>$cmd_stderr
+    # EXPERIMENTAL
+    if [ ! -z "$cache_crypto_cipher" ] || [ ! -z "$cache_crypto_key" ]; then
+      cache_invoke_filter="openssl $cache_crypto_cipher -a -pass file:$cache_crypto_key"
+      cache_response_filter="openssl $cache_crypto_cipher -d -a -pass file:$cache_crypto_key"
+    fi
+    : ${cache_invoke_filter:=cat}
+    : ${cache_response_filter:=cat}
+
+    rm -f $cmd_stdout.fifo; mkfifo $cmd_stdout.fifo
+    rm -f $cmd_stderr.fifo; mkfifo $cmd_stderr.fifo
+
+    (cat $cmd_stdout.fifo | $cache_invoke_filter  > $cmd_stdout &)
+    (cat $cmd_stderr.fifo | $cache_invoke_filter  > $cmd_stderr &)
+    
+    eval $cmd > $cmd_stdout.fifo 2>$cmd_stderr.fifo
+
+    rm -f $cmd_stdout.fifo
+    rm -f $cmd_stderr.fifo
+    # EXPERIMENTAL
+
+    # eval $cmd > $cmd_stdout 2>$cmd_stderr
+
     cmd_exit_code=$?
     if [ $cmd_exit_code -ne 0 ]; then
       mv $cmd_stdout $cmd_stdout.err
@@ -173,6 +209,10 @@ cmd=$cmd
 cmd_exit_code=$cmd_exit_code
 cmd_stdout=$cmd_stdout_data
 cmd_stderr=$cmd_stderr
+cache_invoke_filter=$cache_invoke_filter
+cache_response_filter=$cache_response_filter
+cache_crypto_key=$cache_crypto_key
+cache_crypto_cipher=$cache_crypto_cipher
 cache_ttl=$cache_ttl
 cache_key=$cache_key
 cache_group=$cache_group
@@ -199,13 +239,13 @@ function cache.invoke() {
 
   # command fingerprint
   : ${cache_key:=$(echo $cmd | sha512sum | cut -f1 -d' ')}
-  
+
   # data group
   : ${cache_group:=$(echo $cache_key | cut -b1-4)}
 
   # fles with reponse data
-  cmd_stdout=$cache_dir/$cache_group/$cache_key.stdout
-  cmd_stderr=$cache_dir/$cache_group/$cache_key.stderr
+  cmd_stdout=$cache_dir/$cache_group/$cache_key
+  cmd_stderr=$cache_dir/$cache_group/$cache_key.err
 
   # store ttl information
   mkdir -p $cache_dir/$cache_group
@@ -222,15 +262,20 @@ function cache.invoke() {
   cache.debug "info=$cache_dir/$cache_group/$cache_key.info"
 
   # check if cached data exist
-  if [ ! -f $cache_dir/$cache_group/$cache_key.stdout ]; then
+  if [ ! -f $cache_dir/$cache_group/$cache_key ]; then
     cache.debug "No previous answer. Executing $cmd"
     cache._invoke
-
   fi
 
   # return answer from cache
   if [ -d $cache_dir/$cache_group ] && [ -f $cmd_stdout ]; then
-    cat $cmd_stdout
+    
+    # EXPERIMENTAL
+    : ${cache_response_filter:=$(cat $cache_dir/$cache_group/$cache_key.info | grep "^cache_response_filter=" | cut -f2-999 -d=)}
+
+    cat $cmd_stdout | $cache_response_filter
+    # EXPERIMENTAL
+  
   else
     # it's possible that between "check if cached data exist" and "return answer from cache"  
     # another process flushed cache. No worries. Just execute cmd again
@@ -242,6 +287,11 @@ function cache.invoke() {
   # unsetting cache_group, cache_ky not to infuence next invocations of cache.invoke
   unset cache_group
   unset cache_key
+  unset cache_invoke_filter
+  unset cache_response_filter
+  unset cache_crypto_key
+  unset cache_crypto_cipher
+
   return $cmd_exit_code
 }
 
@@ -260,14 +310,17 @@ cache is controlled by belowenv variables:
 cache_ttl=minutes              - response ttl in minutes; defaults to 60 minutes
 cache_group=                   - response group name; computed from cmd f not provided
 cache_key=                     - response key name; computed from cmd f not provided
+cache_crypto_key=              - key used to encrypt/decryopt stored answer using opens ssl
+cache_crypto_cipher=           - cipher used to encrypt/decryopt stored answer using opens ssl
+cache_invoke_filter=           - command used to filter answer before storage
+cache_response_filter=         - command used to filter answer before receiving from storage
 cache_dir=~.cache/cache_answer - cache directory
 cache_debug=no|yes             - debug flag
 cache_warning=yes|no           - warning flag
 
 Few facts:
-1. Bash cache uses flock to serialise data eviction. If not available cache.evict_group should be executed manually.
-2. Cached respone is stored with info file having inforation about kept data. 
-3. Cache TTL is specific for cache group, and stored in cache directory in info file.
+1. Cached respone is stored with info file having inforation about kept data. 
+1. Cache TTL i.e. time to live in minutes is specific for cache group, and stored in cache directory in info file.
 
 Special use. If you want to keep response data in well known path/file, you need to specify group and key name before invocation. 
 
@@ -307,3 +360,128 @@ if [ $? -eq 0 ]; then
 else
   echo "Bash cache library loaded with errors: $cache_environment_failure_cause. Invoke cache.help to learn more." >&2
 fi
+
+#
+# test
+#
+
+
+#source $script_bin/unit_test.bash
+#source $script_bin/cache.bash
+
+function cache.test_group1_init() {
+  cache_dir=~/cache.test
+  rm -rf ~/cache.test # by intention not to delte real cache_dir
+}
+
+function cache.test_group1_results() {
+  :
+}
+
+function cache.test_group1_clean() {
+  rm -rf ~/cache.test # by intention not to delte real cache_dir
+}
+
+function cache.test_group1() {
+  test_group=test_group1
+
+  cat > $test_group <<EOF
+"smoke test1" "echo OK1" OK1
+EOF
+  test.verify $test_group
+
+  #tested separetly due to read fron stdin
+  test.verify "smoke test2" "echo OK2" OK2
+  test.verify "cache1 - slow operation" "cache.invoke 'sleep 1; echo hello'" hello
+  test.verify "cache1 - slow operation now is fast" "cache.invoke 'sleep 1; echo hello'" hello
+
+  test.verify "cache2 - cache group/key with command" "cache_group=echo cache_key=hello cache.invoke echo hello" hello
+  test.verify "cache2 - cache group/key w/o command" "cache_group=echo cache_key=hello cache.invoke :" hello
+  test.verify "cache2 - read directly from cache directory" "cat $cache_dir/echo/hello" hello
+
+  dynamic='$(date)'
+  expected=$(cache_group=dynamic cache_key=date cache.invoke "sleep 1; eval echo \$dynamic")
+  sleep 1
+  test.verify "cache3 - dynamic answer" "cache_group=dynamic cache_key=date cache.invoke \"sleep 1; eval echo \$dynamic\"" "$expected"
+  sleep 1
+  test.verify "cache3 - dynamic answer" "cache_group=dynamic cache_key=date cache.invoke \"sleep 1; eval echo \$dynamic\"" "$expected"
+
+  dynamic='$(date)'
+  expected=$(cache.invoke "sleep 1; echo; eval echo $dynamic")
+  sleep 1
+  test.verify "cache4 - dynamic answer" "cache.invoke \"sleep 1; echo; eval echo \$dynamic\"" "$expected"
+  sleep 1
+  test.verify "cache4 - dynamic answer" "cache.invoke \"sleep 1; echo; eval echo \$dynamic\"" "$expected"
+
+  dynamic='$(curl http://worldclockapi.com/api/json/utc/now)'
+  expected=$(cache.invoke "sleep 1; echo; eval echo $dynamic")
+  sleep 1
+  test.verify "cache5 - dynamic answer" "cache.invoke \"sleep 1; echo; eval echo \$dynamic\"" "$expected"
+  sleep 1
+  test.verify "cache5 - dynamic answer" "cache.invoke \"sleep 1; echo; eval echo \$dynamic\"" "$expected"
+
+  cache_invoke_filter="tr '[a-z]' '[A-Z]'"
+  test.verify "cache6 - cache filter" "cache_group=echo cache_key=hello6 cache.invoke echo hello" HELLO
+  test.verify "cache6 - cache filter" "cache_group=echo cache_key=hello6 cache.invoke :" HELLO
+  test.verify "cache6 - read directly from cache directory" "cat $cache_dir/echo/hello6" HELLO
+  unset cache_invoke_filter
+
+  cache_invoke_filter="tr '[a-z]' '[A-Z]'"
+  cache_response_filter="tr '[A-Z]' '[a-z]'"
+  test.verify "cache7 - cache filter" "cache_group=echo cache_key=hello7 cache.invoke echo hello" hello
+  test.verify "cache7 - cache filter" "cache_group=echo cache_key=hello7 cache.invoke :" hello
+  test.verify "cache7 - read directly from cache directory" "cat $cache_dir/echo/hello7" HELLO
+  unset cache_invoke_filter
+  unset cache_response_filter
+
+  crypto_key=$HOME/.ssh/id_rsa
+  crypto_cipher=aes-256-cbc
+  cache_invoke_filter="openssl $crypto_cipher -a -pass file:$crypto_key"
+  cache_response_filter="openssl $crypto_cipher -d -a -pass file:$crypto_key"
+  test.verify "cache8 - cache cipher" "cache_group=echo cache_key=hello8 cache.invoke echo hello" hello
+  test.verify "cache8 - cache cipher" "cache_group=echo cache_key=hello8 cache.invoke :" hello
+  unset cache_invoke_filter
+  unset cache_response_filter
+  unset crypto_key
+  unset crypto_cipher
+
+  crypto_key=$HOME/.ssh/id_rsa
+  crypto_cipher=aes-256-cbc
+  test.verify "cache9 - cache cipher" "cache_group=echo cache_key=hello9 cache.invoke echo hello" hello
+  test.verify "cache9 - cache cipher" "cache_group=echo cache_key=hello9 cache.invoke :" hello
+  unset crypto_key
+  unset crypto_cipher
+}
+
+function cache.test() {
+  cache.test_group1_init
+  cache.test_group1
+  cache.test_group1_results
+  cache.test_group1_clean
+}
+
+#
+# default run
+#
+
+if [[ $0 == "$BASH_SOURCE" ]] ; then
+  cat <<_info_EOF 
+Do not run this bash library. It's is intended to be used by source cache.bash"
+As you started - executing exemplary test to let you know how to use the library.
+Use cache.help to learn how to use the library.
+
+_info_EOF
+
+  script_bin=$(dirname "$0" 2>/dev/null)
+
+  if [ ! -f $script_bin/unit_test.bash ]; then
+    echo
+    echo "$script_name: Critical error. Required unit_test.bash library not found in script path. Test will not be executed."
+    exit 1
+  fi
+
+  source $script_bin/unit_test.bash
+
+  cache.test
+fi
+
