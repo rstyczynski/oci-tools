@@ -359,11 +359,23 @@ EOF
 : ${cache_dir:=$HOME/.cache/cache_answer}
 : ${cache_ttl:=60}
 
+cache_lib_name='cache.bash'
+cache_lib_version='1.1'
+cache_lib_by='ryszard.styczynski@oracle.com'
+
+
 cache.ensure_environment 2>/dev/null
 if [ $? -eq 0 ]; then
-  echo "Bash cache library loaded. Invoke cache.help to learn more. Invoke cache.test to verify that all is ok." >&2
+  cat >&2 <<_hello1_EOF
+Library $cache_lib_name $cache_lib_version by $cache_lib_by loaded.
+Invoke cache.help to learn more. Invoke cache.test to verify that all is ok.
+_hello1_EOF
+
 else
-  echo "Bash cache library loaded with errors: $cache_environment_failure_cause. Invoke cache.help to learn more." >&2
+  cat >&2 <<_hello2_EOF
+Library $cache_lib_name $cache_lib_version by $cache_lib_by loaded with errors: $cache_environment_failure_cause. 
+Invoke cache.help to learn more.
+_hello2_EOF
 fi
 
 #
