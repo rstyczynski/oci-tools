@@ -94,6 +94,10 @@ ls -la ~/greetings/echo
 rm -rf ~/greetings
 ```
 
+Tests
+======
+Look into cache.test to see list of test invocations. Test suite uses unit_test.bash from oci-tools.
+
 -
 ==========
 cache.bash 1.1 by ryszard.styczynski@oracle.com is part of oci-tools, available at https://github.com/rstyczynski/oci-tools
