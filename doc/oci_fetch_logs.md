@@ -11,7 +11,7 @@ oci_fetch_logs.sh works in one-shot manner, providing chain mode exporting logs 
 oci_fetch_logs.sh is part of oci-tools, and uses some of tools as config.sh to persist static parameters.
 
 ## Prerequisites
-To use oci_fetch_logs.sh you need to configure OCI CLI, own OCI access credentials with configured API KEY, and deploy necessary OCI policies. oci_fetch_logs.sh must be used with oci-tools, as it uses soe of shared libraries (named_exit, config.sh). The best is to use it from directory with complete oci-tols package. Having this you can export logs from CLI. 
+To use oci_fetch_logs.sh you need to configure OCI CLI, own OCI access credentials with configured API KEY, and deploy necessary OCI policies. oci_fetch_logs.sh must be used with oci-tools, as it uses some of shared libraries (named_exit, config.sh). The best is to use it from directory with complete oci-tools package. Having this you can export logs from CLI. 
 
 ## Configuration
 First time use requires to provide three parameters which identifies target log: 
