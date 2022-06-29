@@ -502,7 +502,7 @@ EOF
   unset cache_crypto_key
   unset cache_crypto_cipher
 
-  cache_crypto_key=$HOME/.ssh/id_rsa
+  cache_crypto_key=$HOME/.ssh/test_key.pem
   test.verify "cache9a - cache cipher" "cache_group=echo cache_key=hello9a cache.invoke echo hello9a" hello9a
   test.verify "cache9a - cache cipher" "cache_group=echo cache_key=hello9a cache.invoke :" hello9a
   unset cache_crypto_key
