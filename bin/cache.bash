@@ -4,6 +4,8 @@
 # TODO
 #
 # add exit trap to clean cache_invoke_filter etc.
+# add global configuration to define cache parameters per command. It will always put some command in the certain group, certain key, and define encryption.
+# modify check of existing cache data to look for info file
 
 #
 # PROGRESS
@@ -13,6 +15,7 @@
 #
 # DONE
 #
+# fix: cache.flush removed instance data.
 # fix: do not unset filters, and key. let it be valid for other cache invocations.
 # fix: BASH_SOURCE to be used to discover bin dir
 # TIP: react on empty answer when not possible
@@ -166,7 +169,8 @@ function cache.flush() {
   : ${cache_group:=$(echo $cache_key | cut -b1-4)}
 
   cache.debug "Flushing $cache_group/$cache_key."
-  rm -rf $cache_dir/$cache_group/$cache_key.*
+  rm -f $cache_dir/$cache_group/$cache_key
+  rm -f $cache_dir/$cache_group/$cache_key.*
 }
 
 function cache._invoke() {
