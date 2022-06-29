@@ -15,6 +15,7 @@
 #
 # DONE
 #
+# fix: do not unset cache_group, let it survive subsequent calls
 # fix: help improved
 # fix: cache.flush removed instance data.
 # fix: do not unset filters, and key. let it be valid for other cache invocations.
@@ -295,9 +296,10 @@ function cache.invoke() {
     cache._invoke
   fi
   
-  # unsetting cache_group, cache_ky not to infuence next invocations of cache.invoke
-  unset cache_group
+  # unsetting ccache_key not to infuence next invocations of cache.invoke
   unset cache_key
+  # fix: do not unset cache_group, let it survive subsequent calls
+  # unset cache_group
 
   # fix: do not unset filters, and key. let it be valid for other cache invocations.
   # unset cache_invoke_filter
@@ -310,32 +312,35 @@ function cache.invoke() {
 
 function cache.help() {
   cat <<EOF
-Bash cache library $cache_lib_version
+Library $cache_lib_name $cache_lib_version by $cache_lib_by.
 
+Usage:
 cache.invoke cmd                    - use to invoke command cmd. Exit code comes from cmd
 cache.evict_group cmd               - remove old respose; controled by ttl
 cache_group=group cache.evict_group - remove all old data of given group
 cache.evict_group                   - remove all old data
 
 Response data is kept in cache_dir/cache_group/cache_key file. Files are deleted after cache_ttl minutes.
-cache is controlled by belowenv variables:
 
-cache_ttl=minutes               - response ttl in minutes. You may use fraction to set seconds; defaults to 60 minutes
+Cache is controlled by environment variables:
+cache_ttl=                      - response ttl in minutes. You may use fraction to set seconds; default: 60
 cache_group=                    - response group name; derived from cmd when not provided
 cache_key=                      - response key name; derived from cmd when not provided
 cache_crypto_key=               - key used to encrypt/decryopt stored answer using opens ssl
 cache_crypto_cipher=            - cipher used to encrypt/decryopt stored answer using opens ssl
 cache_invoke_filter=            - command used to filter answer before storage
 cache_response_filter=          - command used to filter answer before receiving from storage
-cache_dir=~/.cache/cache_answer - cache directory
-cache_debug=no|yes              - debug flag
-cache_warning=yes|no            - warning flag
+cache_dir=                      - cache directory; default: ~/.cache/cache_answer
+cache_debug=no|yes              - debug flag; default: no
+cache_warning=yes|no            - warning flag; default: yes
 
 Few facts:
-1. Cached respone is stored with info file having inforation about kept data. 
+1. Cached respone is stored with info file having inforation about cached data. 
 2. Cache TTL i.e. time to live in minutes is specific for cache group, and stored in cache directory in .info file.
 
 Special use. If you want to keep response data in well known path/file, you need to specify group and key name before invocation. 
+
+Exemplary usage:
 
 cache_ttl=0.08
 cache_dir=~/greetings
