@@ -16,7 +16,7 @@
 # DONE
 #
 # fix: cache_evict suppports all groups now
-# fix: do not unset cache_group, let it survive subsequent calls
+# fix: do not unset cache_group, let it survive subsequent calls. unset only automatically generated
 # fix: help improved
 # fix: cache.flush removed instance data.
 # fix: do not unset filters, and key. let it be valid for other cache invocations.
@@ -255,7 +255,12 @@ function cache.invoke() {
   : ${cache_key:=$(echo $cmd | sha512sum | cut -f1 -d' ')}
 
   # data group
-  : ${cache_group:=$(echo $cache_key | cut -b1-4)}
+  if [ -z "$cache_group" ]; then
+    cache_group:=$(echo $cache_key | cut -b1-4)
+    cache_group_auto=yes
+  else
+    cache_group_auto=no
+  fi
 
   # fles with reponse data
   cmd_stdout=$cache_dir/$cache_group/$cache_key
@@ -300,8 +305,10 @@ function cache.invoke() {
   
   # unsetting ccache_key not to infuence next invocations of cache.invoke
   unset cache_key
-  # fix: do not unset cache_group, let it survive subsequent calls
-  # unset cache_group
+  # fix: do not unset cache_group, let it survive subsequent calls. unset only automatically generated
+  if [ "$cache_group_auto" == yes ]; then
+    unset cache_group
+  fi
 
   # fix: do not unset filters, and key. let it be valid for other cache invocations.
   # unset cache_invoke_filter
