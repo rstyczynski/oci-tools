@@ -15,6 +15,7 @@
 #
 # DONE
 #
+# fix: test code generates ssh key now
 # fix: cache_evict suppports all groups now
 # fix: do not unset cache_group, let it survive subsequent calls. unset only automatically generated
 # fix: help improved
@@ -479,7 +480,11 @@ EOF
   unset cache_invoke_filter
   unset cache_response_filter
 
-  cache_crypto_key=$HOME/.ssh/id_rsa
+  mkdir -p $HOME/.ssh
+  chmod 700 $HOME/.ssh
+  openssl genrsa -out $HOME/.ssh/test_key.pem 2048
+
+  cache_crypto_key=$HOME/.ssh/test_key.pem
   cache_crypto_cipher=aes-256-cbc
   cache_invoke_filter="openssl $cache_crypto_cipher -a -pass file:$cache_crypto_key"
   cache_response_filter="openssl $cache_crypto_cipher -d -a -pass file:$cache_crypto_key"
@@ -490,7 +495,7 @@ EOF
   unset crypto_key
   unset crypto_cipher
 
-  cache_crypto_key=$HOME/.ssh/id_rsa
+  cache_crypto_key=$HOME/.ssh/test_key.pem
   cache_crypto_cipher=aes-256-cbc
   test.verify "cache9 - cache cipher" "cache_group=echo cache_key=hello9 cache.invoke echo hello" hello
   test.verify "cache9 - cache cipher" "cache_group=echo cache_key=hello9 cache.invoke :" hello
@@ -511,7 +516,7 @@ EOF
 
   rm -rf $cache_dir/download
   mkdir -p $cache_dir/download
-  cache_crypto_key=$HOME/.ssh/id_rsa
+  cache_crypto_key=$HOME/.ssh/test_key.pem
   cache_crypto_cipher=aes-256-cbc
   url='curl https://freetestdata.com/wp-content/uploads/2022/02/Free_Test_Data_5MB_AVI.avi'
   cache_group=download cache_key=file11 cache.invoke $url > $cache_dir/download/file11.stream
