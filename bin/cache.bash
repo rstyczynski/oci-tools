@@ -526,7 +526,7 @@ EOF
 
   filter=$(cat $cache_dir/download/file11.info | grep "^cache_response_filter=" | cut -f2-999 -d=)
   test.verify "cache10 - 5MB file - apply filter check" "cat $cache_dir/download/file11 | $filter | sha1sum" "$(cat $cache_dir/download/file11.stream | sha1sum)"
-  test.verify "cache10 - 5MB file - openssl decrypt check" "cat $cache_dir/download/file11 | openssl aes-256-cbc -d -a -pass file:/home/pmaker/.ssh/id_rsa | sha1sum" "$(cat $cache_dir/download/file11.stream | sha1sum)"
+  test.verify "cache10 - 5MB file - openssl decrypt check" "cat $cache_dir/download/file11 | openssl aes-256-cbc -d -a -pass file:$HOME/.ssh/test_key.pem | sha1sum" "$(cat $cache_dir/download/file11.stream | sha1sum)"
 
 
 }
