@@ -13,6 +13,7 @@
 #
 # DONE
 #
+# fix: do not unset filters, and key. let it be valid for other cache invocations.
 # fix: BASH_SOURCE to be used to discover bin dir
 # TIP: react on empty answer when not possible
 # add encrypted cache instance storage
@@ -292,10 +293,12 @@ function cache.invoke() {
   # unsetting cache_group, cache_ky not to infuence next invocations of cache.invoke
   unset cache_group
   unset cache_key
-  unset cache_invoke_filter
-  unset cache_response_filter
-  unset cache_crypto_key
-  unset cache_crypto_cipher
+
+  # fix: do not unset filters, and key. let it be valid for other cache invocations.
+  # unset cache_invoke_filter
+  # unset cache_response_filter
+  # unset cache_crypto_key
+  # unset cache_crypto_cipher
 
   return $cmd_exit_code
 }
@@ -325,7 +328,7 @@ cache_warning=yes|no           - warning flag
 
 Few facts:
 1. Cached respone is stored with info file having inforation about kept data. 
-1. Cache TTL i.e. time to live in minutes is specific for cache group, and stored in cache directory in info file.
+2. Cache TTL i.e. time to live in minutes is specific for cache group, and stored in cache directory in .info file.
 
 Special use. If you want to keep response data in well known path/file, you need to specify group and key name before invocation. 
 
