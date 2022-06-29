@@ -15,6 +15,7 @@
 #
 # DONE
 #
+# fix: cache_evict suppports all groups now
 # fix: do not unset cache_group, let it survive subsequent calls
 # fix: help improved
 # fix: cache.flush removed instance data.
@@ -132,24 +133,25 @@ function cache.evict_group() {
   cache._progress
 
   if [ -z "$cmd" ]; then
-    : ${cache_group:=.}
+    cache_groups=$(ls $cache_dir/*/.info | sed "s|$cache_dir||g" | cut -d/ -f2)
+  else
+    if [ ! -z "$cache_group" ]; then
+      cache_groups=$cache_group
+    else
+      : ${cache_key:=$(echo $cmd | sha512sum | cut -f1 -d' ')}
+      cache_groups:=$(echo $cache_key | cut -b1-4)
+    fi
   fi
 
-  : ${cache_dir:=$HOME/.cache/cache_answer}
+  for cache_group in $cache_groups; do
+    cache_ttl=$(cat $cache_dir/$cache_group/.info 2>/dev/null | grep '^cache_ttl=' | cut -f2 -d=)
+    : ${cache_ttl:=60}
 
-  # command fingerprint
-  : ${cache_key:=$(echo $cmd | sha512sum | cut -f1 -d' ')}
-  
-  # data group
-  : ${cache_group:=$(echo $cache_key | cut -b1-4)}
-
-  cache_ttl=$(cat $cache_dir/$cache_group/.info 2>/dev/null | grep '^cache_ttl=' | cut -f2 -d=)
-  : ${cache_ttl:=60}
-
-  cache.debug "Deleting responses older than $cache_ttl minute(s)."
-  find $cache_dir/$cache_group -type f -mmin +$cache_ttl -delete 2>/dev/null
-  # delete dirs if empty
-  find $cache_dir -type d -empty -delete 2>/dev/null
+    cache.debug "Deleting responses older than $cache_ttl minute(s)."
+    find $cache_dir/$cache_group -type f -mmin +$cache_ttl -delete 2>/dev/null
+    # delete dirs if empty
+    find $cache_dir -type d -empty -delete 2>/dev/null
+  done
 }
 
 
