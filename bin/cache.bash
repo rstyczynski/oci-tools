@@ -256,7 +256,7 @@ function cache.invoke() {
 
   # data group
   if [ -z "$cache_group" ]; then
-    cache_group:=$(echo $cache_key | cut -b1-4)
+    cache_group=$(echo $cache_key | cut -b1-4)
     cache_group_auto=yes
   else
     cache_group_auto=no
