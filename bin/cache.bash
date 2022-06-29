@@ -15,6 +15,7 @@
 #
 # DONE
 #
+# added readme markdown
 # fix: test code generates ssh key now
 # fix: cache_evict suppports all groups now
 # fix: do not unset cache_group, let it survive subsequent calls. unset only automatically generated
@@ -325,10 +326,8 @@ function cache.help() {
 Library $cache_lib_name $cache_lib_version by $cache_lib_by.
 
 Usage:
-cache.invoke cmd                    - use to invoke command cmd. Exit code comes from cmd
-cache.evict_group cmd               - remove old respose; controled by ttl
-cache_group=group cache.evict_group - remove all old data of given group
-cache.evict_group                   - remove all old data
+cache.invoke cmd                - use to invoke command cmd. Exit code comes from cmd
+cache.flush cmd                 - removes respone cache for cmd
 
 Response data is kept in cache_dir/cache_group/cache_key file. Files are deleted after cache_ttl minutes.
 
@@ -527,7 +526,7 @@ EOF
   filter=$(cat $cache_dir/download/file11.info | grep "^cache_response_filter=" | cut -f2-999 -d=)
   test.verify "cache10 - 5MB file - apply filter check" "cat $cache_dir/download/file11 | $filter | sha1sum" "$(cat $cache_dir/download/file11.stream | sha1sum)"
   test.verify "cache10 - 5MB file - openssl decrypt check" "cat $cache_dir/download/file11 | openssl aes-256-cbc -d -a -pass file:$cache_dir/.ssh/test_key.pem | sha1sum" "$(cat $cache_dir/download/file11.stream | sha1sum)"
-  
+
 }
 
 function cache.test() {
