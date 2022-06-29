@@ -356,8 +356,8 @@ cache_ttl=0.08
 cache_dir=~/greetings
 cache_group=echo cache_key=hello cache.invoke echo hello
 
-openssl genrsa -out $HOME/.ssh/test_key.pem 2048
-cache_crypto_key=$HOME/.ssh/test_key.pem
+openssl genrsa -out $cache_dir/.ssh/test_key.pem 2048
+cache_crypto_key=$cache_dir/.ssh/test_key.pem
 cache_group=echo cache_key=world cache.invoke echo world
 
 ls -l ~/greetings
@@ -480,11 +480,11 @@ EOF
   unset cache_invoke_filter
   unset cache_response_filter
 
-  mkdir -p $HOME/.ssh
-  chmod 700 $HOME/.ssh
-  openssl genrsa -out $HOME/.ssh/test_key.pem 2048
+  mkdir -p $cache_dir/.ssh
+  chmod 700 $cache_dir/.ssh
+  openssl genrsa -out $cache_dir/.ssh/test_key.pem 2048
 
-  cache_crypto_key=$HOME/.ssh/test_key.pem
+  cache_crypto_key=$cache_dir/.ssh/test_key.pem
   cache_crypto_cipher=aes-256-cbc
   cache_invoke_filter="openssl $cache_crypto_cipher -a -pass file:$cache_crypto_key"
   cache_response_filter="openssl $cache_crypto_cipher -d -a -pass file:$cache_crypto_key"
@@ -495,14 +495,14 @@ EOF
   unset crypto_key
   unset crypto_cipher
 
-  cache_crypto_key=$HOME/.ssh/test_key.pem
+  cache_crypto_key=$cache_dir/.ssh/test_key.pem
   cache_crypto_cipher=aes-256-cbc
   test.verify "cache9 - cache cipher" "cache_group=echo cache_key=hello9 cache.invoke echo hello" hello
   test.verify "cache9 - cache cipher" "cache_group=echo cache_key=hello9 cache.invoke :" hello
   unset cache_crypto_key
   unset cache_crypto_cipher
 
-  cache_crypto_key=$HOME/.ssh/test_key.pem
+  cache_crypto_key=$cache_dir/.ssh/test_key.pem
   test.verify "cache9a - cache cipher" "cache_group=echo cache_key=hello9a cache.invoke echo hello9a" hello9a
   test.verify "cache9a - cache cipher" "cache_group=echo cache_key=hello9a cache.invoke :" hello9a
   unset cache_crypto_key
@@ -516,7 +516,7 @@ EOF
 
   rm -rf $cache_dir/download
   mkdir -p $cache_dir/download
-  cache_crypto_key=$HOME/.ssh/test_key.pem
+  cache_crypto_key=$cache_dir/.ssh/test_key.pem
   cache_crypto_cipher=aes-256-cbc
   url='curl https://freetestdata.com/wp-content/uploads/2022/02/Free_Test_Data_5MB_AVI.avi'
   cache_group=download cache_key=file11 cache.invoke $url > $cache_dir/download/file11.stream
@@ -526,9 +526,8 @@ EOF
 
   filter=$(cat $cache_dir/download/file11.info | grep "^cache_response_filter=" | cut -f2-999 -d=)
   test.verify "cache10 - 5MB file - apply filter check" "cat $cache_dir/download/file11 | $filter | sha1sum" "$(cat $cache_dir/download/file11.stream | sha1sum)"
-  test.verify "cache10 - 5MB file - openssl decrypt check" "cat $cache_dir/download/file11 | openssl aes-256-cbc -d -a -pass file:$HOME/.ssh/test_key.pem | sha1sum" "$(cat $cache_dir/download/file11.stream | sha1sum)"
-
-
+  test.verify "cache10 - 5MB file - openssl decrypt check" "cat $cache_dir/download/file11 | openssl aes-256-cbc -d -a -pass file:$cache_dir/.ssh/test_key.pem | sha1sum" "$(cat $cache_dir/download/file11.stream | sha1sum)"
+  
 }
 
 function cache.test() {
