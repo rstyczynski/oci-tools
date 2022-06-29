@@ -15,6 +15,7 @@
 #
 # DONE
 #
+# fix: help improved
 # fix: cache.flush removed instance data.
 # fix: do not unset filters, and key. let it be valid for other cache invocations.
 # fix: BASH_SOURCE to be used to discover bin dir
@@ -311,7 +312,7 @@ function cache.help() {
   cat <<EOF
 Bash cache library $cache_lib_version
 
-cache.invoke cmd              - use to invoke command cmd. Exit code comes from cmd
+cache.invoke cmd                    - use to invoke command cmd. Exit code comes from cmd
 cache.evict_group cmd               - remove old respose; controled by ttl
 cache_group=group cache.evict_group - remove all old data of given group
 cache.evict_group                   - remove all old data
@@ -319,16 +320,16 @@ cache.evict_group                   - remove all old data
 Response data is kept in cache_dir/cache_group/cache_key file. Files are deleted after cache_ttl minutes.
 cache is controlled by belowenv variables:
 
-cache_ttl=minutes              - response ttl in minutes; defaults to 60 minutes
-cache_group=                   - response group name; computed from cmd f not provided
-cache_key=                     - response key name; computed from cmd f not provided
-cache_crypto_key=              - key used to encrypt/decryopt stored answer using opens ssl
-cache_crypto_cipher=           - cipher used to encrypt/decryopt stored answer using opens ssl
-cache_invoke_filter=           - command used to filter answer before storage
-cache_response_filter=         - command used to filter answer before receiving from storage
-cache_dir=~.cache/cache_answer - cache directory
-cache_debug=no|yes             - debug flag
-cache_warning=yes|no           - warning flag
+cache_ttl=minutes               - response ttl in minutes. You may use fraction to set seconds; defaults to 60 minutes
+cache_group=                    - response group name; derived from cmd when not provided
+cache_key=                      - response key name; derived from cmd when not provided
+cache_crypto_key=               - key used to encrypt/decryopt stored answer using opens ssl
+cache_crypto_cipher=            - cipher used to encrypt/decryopt stored answer using opens ssl
+cache_invoke_filter=            - command used to filter answer before storage
+cache_response_filter=          - command used to filter answer before receiving from storage
+cache_dir=~/.cache/cache_answer - cache directory
+cache_debug=no|yes              - debug flag
+cache_warning=yes|no            - warning flag
 
 Few facts:
 1. Cached respone is stored with info file having inforation about kept data. 
@@ -336,9 +337,12 @@ Few facts:
 
 Special use. If you want to keep response data in well known path/file, you need to specify group and key name before invocation. 
 
-cache_ttl=1
+cache_ttl=0.08
 cache_dir=~/greetings
 cache_group=echo cache_key=hello cache.invoke echo hello
+
+openssl genrsa -out $HOME/.ssh/test_key.pem 2048
+cache_crypto_key=$HOME/.ssh/test_key.pem
 cache_group=echo cache_key=world cache.invoke echo world
 
 ls -l ~/greetings
@@ -350,8 +354,9 @@ cat ~/greetings/echo/hello
 cat ~/greetings/echo/hello.info
 
 cat ~/greetings/echo/world
+cat ~/greetings/echo/world.info
 
-sleep 61
+sleep 6
 cache_dir=~/greetings
 cat ~/greetings/echo/.info
 
